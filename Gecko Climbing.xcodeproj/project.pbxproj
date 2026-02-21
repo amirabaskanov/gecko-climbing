@@ -1,0 +1,1135 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A1000001 /* GeckoClimbingApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001 /* GeckoClimbingApp.swift */; };
+		A1000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000002 /* ContentView.swift */; };
+		A1000003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000003 /* Assets.xcassets */; };
+		A1000004 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A2000005 /* GoogleService-Info.plist */; };
+		A1000010 /* GeckoClimbingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000010 /* GeckoClimbingTests.swift */; };
+		A1000020 /* GeckoClimbingUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000020 /* GeckoClimbingUITests.swift */; };
+		AA000201 /* TabRoutes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000101 /* TabRoutes.swift */; };
+		AA000202 /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000102 /* AppRouter.swift */; };
+		AA000203 /* SessionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000103 /* SessionModel.swift */; };
+		AA000204 /* ClimbModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000104 /* ClimbModel.swift */; };
+		AA000205 /* UserModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000105 /* UserModel.swift */; };
+		AA000206 /* PostModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000106 /* PostModel.swift */; };
+		AA000207 /* SessionDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000107 /* SessionDTO.swift */; };
+		AA000208 /* ClimbDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000108 /* ClimbDTO.swift */; };
+		AA000209 /* UserDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000109 /* UserDTO.swift */; };
+		AA000210 /* PostDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000110 /* PostDTO.swift */; };
+		AA000211 /* Color+Brand.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000111 /* Color+Brand.swift */; };
+		AA000212 /* View+ErrorAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000112 /* View+ErrorAlert.swift */; };
+		AA000213 /* Date+Formatted.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000113 /* Date+Formatted.swift */; };
+		AA000214 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000114 /* AppEnvironment.swift */; };
+		AA000215 /* AuthRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000115 /* AuthRepository.swift */; };
+		AA000216 /* SessionRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000116 /* SessionRepository.swift */; };
+		AA000217 /* ClimbRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000117 /* ClimbRepository.swift */; };
+		AA000218 /* UserRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000118 /* UserRepository.swift */; };
+		AA000219 /* PostRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000119 /* PostRepository.swift */; };
+		AA000220 /* StorageRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000120 /* StorageRepository.swift */; };
+		AA000221 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000121 /* MainTabView.swift */; };
+		AA000222 /* GradePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000122 /* GradePickerView.swift */; };
+		AA000223 /* AsyncImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000123 /* AsyncImageView.swift */; };
+		AA000224 /* PhotoPickerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000124 /* PhotoPickerButton.swift */; };
+		AA000225 /* LoadingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000125 /* LoadingOverlay.swift */; };
+		AA000226 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000126 /* EmptyStateView.swift */; };
+		AA000227 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000127 /* AuthViewModel.swift */; };
+		AA000228 /* AuthRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000128 /* AuthRootView.swift */; };
+		AA000229 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000129 /* SignInView.swift */; };
+		AA000230 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000130 /* SignUpView.swift */; };
+		AA000231 /* SessionListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000131 /* SessionListViewModel.swift */; };
+		AA000232 /* NewSessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000132 /* NewSessionViewModel.swift */; };
+		AA000233 /* SessionDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000133 /* SessionDetailViewModel.swift */; };
+		AA000234 /* ClimbRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000134 /* ClimbRowView.swift */; };
+		AA000235 /* SessionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000135 /* SessionDetailView.swift */; };
+		AA000236 /* NewSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000136 /* NewSessionView.swift */; };
+		AA000237 /* AddClimbView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000137 /* AddClimbView.swift */; };
+		AA000238 /* SessionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000138 /* SessionListView.swift */; };
+		AA000239 /* CelebrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000139 /* CelebrationView.swift */; };
+		AA000240 /* StatsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000140 /* StatsViewModel.swift */; };
+		AA000241 /* GradePyramidView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000141 /* GradePyramidView.swift */; };
+		AA000242 /* ProgressChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000142 /* ProgressChartView.swift */; };
+		AA000243 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000143 /* StatsView.swift */; };
+		AA000244 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000144 /* HomeViewModel.swift */; };
+		AA000245 /* FeedCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000145 /* FeedCardView.swift */; };
+		AA000246 /* PostDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000146 /* PostDetailView.swift */; };
+		AA000247 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000147 /* HomeView.swift */; };
+		AA000248 /* SocialViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000148 /* SocialViewModel.swift */; };
+		AA000249 /* FriendProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000149 /* FriendProfileViewModel.swift */; };
+		AA000250 /* FriendProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000150 /* FriendProfileView.swift */; };
+		AA000251 /* FollowersListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000151 /* FollowersListView.swift */; };
+		AA000252 /* UserSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000152 /* UserSearchView.swift */; };
+		AA000253 /* SocialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000153 /* SocialView.swift */; };
+		AA000254 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000154 /* ProfileViewModel.swift */; };
+		AA000255 /* EditProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000155 /* EditProfileView.swift */; };
+		AA000256 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000156 /* SettingsView.swift */; };
+		AA000257 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000157 /* ProfileView.swift */; };
+		AA000258 /* WallAnalysisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000158 /* WallAnalysisView.swift */; };
+		AA000260 /* FirebaseAuthRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000160 /* FirebaseAuthRepository.swift */; };
+		AA000261 /* AppleSignInHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000161 /* AppleSignInHelper.swift */; };
+		AA00F111 /* ClimbOutcome.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00F101 /* ClimbOutcome.swift */; };
+		AA00F112 /* QuickAddClimbSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00F102 /* QuickAddClimbSheet.swift */; };
+		AA00F113 /* CustomTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00F103 /* CustomTabBar.swift */; };
+		BB000010 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = CC000001 /* FirebaseCore */; };
+		BB000011 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CC000002 /* FirebaseAuth */; };
+		BB000012 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = CC000003 /* GoogleSignIn */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A4000020 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A7000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A4000000;
+			remoteInfo = "Gecko Climbing";
+		};
+		A4000021 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A7000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A4000000;
+			remoteInfo = "Gecko Climbing";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		A2000000 /* Gecko Climbing.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Gecko Climbing.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A2000001 /* GeckoClimbingApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeckoClimbingApp.swift; sourceTree = "<group>"; };
+		A2000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A2000003 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A2000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A2000005 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		A2000009 /* Gecko ClimbingTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Gecko ClimbingTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A2000010 /* GeckoClimbingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeckoClimbingTests.swift; sourceTree = "<group>"; };
+		A2000019 /* Gecko ClimbingUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Gecko ClimbingUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A2000020 /* GeckoClimbingUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeckoClimbingUITests.swift; sourceTree = "<group>"; };
+		AA000101 /* TabRoutes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabRoutes.swift; sourceTree = "<group>"; };
+		AA000102 /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
+		AA000103 /* SessionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionModel.swift; sourceTree = "<group>"; };
+		AA000104 /* ClimbModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClimbModel.swift; sourceTree = "<group>"; };
+		AA000105 /* UserModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModel.swift; sourceTree = "<group>"; };
+		AA000106 /* PostModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostModel.swift; sourceTree = "<group>"; };
+		AA000107 /* SessionDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDTO.swift; sourceTree = "<group>"; };
+		AA000108 /* ClimbDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClimbDTO.swift; sourceTree = "<group>"; };
+		AA000109 /* UserDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDTO.swift; sourceTree = "<group>"; };
+		AA000110 /* PostDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostDTO.swift; sourceTree = "<group>"; };
+		AA000111 /* Color+Brand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Brand.swift"; sourceTree = "<group>"; };
+		AA000112 /* View+ErrorAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+ErrorAlert.swift"; sourceTree = "<group>"; };
+		AA000113 /* Date+Formatted.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Formatted.swift"; sourceTree = "<group>"; };
+		AA000114 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
+		AA000115 /* AuthRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRepository.swift; sourceTree = "<group>"; };
+		AA000116 /* SessionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRepository.swift; sourceTree = "<group>"; };
+		AA000117 /* ClimbRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClimbRepository.swift; sourceTree = "<group>"; };
+		AA000118 /* UserRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRepository.swift; sourceTree = "<group>"; };
+		AA000119 /* PostRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostRepository.swift; sourceTree = "<group>"; };
+		AA000120 /* StorageRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageRepository.swift; sourceTree = "<group>"; };
+		AA000121 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		AA000122 /* GradePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradePickerView.swift; sourceTree = "<group>"; };
+		AA000123 /* AsyncImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncImageView.swift; sourceTree = "<group>"; };
+		AA000124 /* PhotoPickerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoPickerButton.swift; sourceTree = "<group>"; };
+		AA000125 /* LoadingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingOverlay.swift; sourceTree = "<group>"; };
+		AA000126 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
+		AA000127 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
+		AA000128 /* AuthRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRootView.swift; sourceTree = "<group>"; };
+		AA000129 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
+		AA000130 /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
+		AA000131 /* SessionListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionListViewModel.swift; sourceTree = "<group>"; };
+		AA000132 /* NewSessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewSessionViewModel.swift; sourceTree = "<group>"; };
+		AA000133 /* SessionDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailViewModel.swift; sourceTree = "<group>"; };
+		AA000134 /* ClimbRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClimbRowView.swift; sourceTree = "<group>"; };
+		AA000135 /* SessionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailView.swift; sourceTree = "<group>"; };
+		AA000136 /* NewSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewSessionView.swift; sourceTree = "<group>"; };
+		AA000137 /* AddClimbView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddClimbView.swift; sourceTree = "<group>"; };
+		AA000138 /* SessionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionListView.swift; sourceTree = "<group>"; };
+		AA000139 /* CelebrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CelebrationView.swift; sourceTree = "<group>"; };
+		AA000140 /* StatsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsViewModel.swift; sourceTree = "<group>"; };
+		AA000141 /* GradePyramidView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradePyramidView.swift; sourceTree = "<group>"; };
+		AA000142 /* ProgressChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressChartView.swift; sourceTree = "<group>"; };
+		AA000143 /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
+		AA000144 /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
+		AA000145 /* FeedCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedCardView.swift; sourceTree = "<group>"; };
+		AA000146 /* PostDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostDetailView.swift; sourceTree = "<group>"; };
+		AA000147 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		AA000148 /* SocialViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialViewModel.swift; sourceTree = "<group>"; };
+		AA000149 /* FriendProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendProfileViewModel.swift; sourceTree = "<group>"; };
+		AA000150 /* FriendProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendProfileView.swift; sourceTree = "<group>"; };
+		AA000151 /* FollowersListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowersListView.swift; sourceTree = "<group>"; };
+		AA000152 /* UserSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSearchView.swift; sourceTree = "<group>"; };
+		AA000153 /* SocialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialView.swift; sourceTree = "<group>"; };
+		AA000154 /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
+		AA000155 /* EditProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileView.swift; sourceTree = "<group>"; };
+		AA000156 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		AA000157 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		AA000158 /* WallAnalysisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallAnalysisView.swift; sourceTree = "<group>"; };
+		AA000160 /* FirebaseAuthRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseAuthRepository.swift; sourceTree = "<group>"; };
+		AA000161 /* AppleSignInHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInHelper.swift; sourceTree = "<group>"; };
+		AA00F101 /* ClimbOutcome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClimbOutcome.swift; sourceTree = "<group>"; };
+		AA00F102 /* QuickAddClimbSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddClimbSheet.swift; sourceTree = "<group>"; };
+		AA00F103 /* CustomTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabBar.swift; sourceTree = "<group>"; };
+		AA00F200 /* Gecko Climbing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Gecko Climbing.entitlements"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A5000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BB000010 /* FirebaseCore in Frameworks */,
+				BB000011 /* FirebaseAuth in Frameworks */,
+				BB000012 /* GoogleSignIn in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A5000012 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A5000022 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A3000000 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A2000000 /* Gecko Climbing.app */,
+				A2000009 /* Gecko ClimbingTests.xctest */,
+				A2000019 /* Gecko ClimbingUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A3000001 /* Gecko Climbing */ = {
+			isa = PBXGroup;
+			children = (
+				AA00F200 /* Gecko Climbing.entitlements */,
+				A3000010 /* App */,
+				A3000020 /* Core */,
+				A3000030 /* Features */,
+				A3000080 /* Shared */,
+			);
+			path = "Gecko Climbing";
+			sourceTree = "<group>";
+		};
+		A3000010 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				A2000001 /* GeckoClimbingApp.swift */,
+				A2000002 /* ContentView.swift */,
+				AA000101 /* TabRoutes.swift */,
+				AA000102 /* AppRouter.swift */,
+				A2000003 /* Assets.xcassets */,
+				A2000004 /* Info.plist */,
+				A2000005 /* GoogleService-Info.plist */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		A3000020 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				A3000021 /* Models */,
+				A3000022 /* DTOs */,
+				A3000023 /* Repositories */,
+				A3000024 /* Services */,
+				A3000025 /* Extensions */,
+				AA000161 /* AppleSignInHelper.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		A3000021 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				AA000103 /* SessionModel.swift */,
+				AA000104 /* ClimbModel.swift */,
+				AA000105 /* UserModel.swift */,
+				AA000106 /* PostModel.swift */,
+				AA00F101 /* ClimbOutcome.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		A3000022 /* DTOs */ = {
+			isa = PBXGroup;
+			children = (
+				AA000107 /* SessionDTO.swift */,
+				AA000108 /* ClimbDTO.swift */,
+				AA000109 /* UserDTO.swift */,
+				AA000110 /* PostDTO.swift */,
+			);
+			path = DTOs;
+			sourceTree = "<group>";
+		};
+		A3000023 /* Repositories */ = {
+			isa = PBXGroup;
+			children = (
+				AA000114 /* AppEnvironment.swift */,
+				AA000115 /* AuthRepository.swift */,
+				AA000116 /* SessionRepository.swift */,
+				AA000117 /* ClimbRepository.swift */,
+				AA000118 /* UserRepository.swift */,
+				AA000119 /* PostRepository.swift */,
+				AA000120 /* StorageRepository.swift */,
+				AA000160 /* FirebaseAuthRepository.swift */,
+			);
+			path = Repositories;
+			sourceTree = "<group>";
+		};
+		A3000024 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		A3000025 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				AA000111 /* Color+Brand.swift */,
+				AA000112 /* View+ErrorAlert.swift */,
+				AA000113 /* Date+Formatted.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		A3000030 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				A3000031 /* Auth */,
+				A3000034 /* Home */,
+				A3000037 /* Session */,
+				A3000040 /* WallAnalysis */,
+				A3000043 /* Social */,
+				A3000046 /* Stats */,
+				A3000049 /* Profile */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		A3000031 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				A3000032 /* Views */,
+				A3000033 /* ViewModels */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		A3000032 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AA000128 /* AuthRootView.swift */,
+				AA000129 /* SignInView.swift */,
+				AA000130 /* SignUpView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A3000033 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				AA000127 /* AuthViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		A3000034 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				A3000035 /* Views */,
+				A3000036 /* ViewModels */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		A3000035 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AA000145 /* FeedCardView.swift */,
+				AA000146 /* PostDetailView.swift */,
+				AA000147 /* HomeView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A3000036 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				AA000144 /* HomeViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		A3000037 /* Session */ = {
+			isa = PBXGroup;
+			children = (
+				A3000038 /* Views */,
+				A3000039 /* ViewModels */,
+			);
+			path = Session;
+			sourceTree = "<group>";
+		};
+		A3000038 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AA000134 /* ClimbRowView.swift */,
+				AA000135 /* SessionDetailView.swift */,
+				AA000136 /* NewSessionView.swift */,
+				AA000137 /* AddClimbView.swift */,
+				AA000138 /* SessionListView.swift */,
+				AA000139 /* CelebrationView.swift */,
+				AA00F102 /* QuickAddClimbSheet.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A3000039 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				AA000131 /* SessionListViewModel.swift */,
+				AA000132 /* NewSessionViewModel.swift */,
+				AA000133 /* SessionDetailViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		A3000040 /* WallAnalysis */ = {
+			isa = PBXGroup;
+			children = (
+				A3000041 /* Views */,
+				A3000042 /* ViewModels */,
+			);
+			path = WallAnalysis;
+			sourceTree = "<group>";
+		};
+		A3000041 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AA000158 /* WallAnalysisView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A3000042 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		A3000043 /* Social */ = {
+			isa = PBXGroup;
+			children = (
+				A3000044 /* Views */,
+				A3000045 /* ViewModels */,
+			);
+			path = Social;
+			sourceTree = "<group>";
+		};
+		A3000044 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AA000150 /* FriendProfileView.swift */,
+				AA000151 /* FollowersListView.swift */,
+				AA000152 /* UserSearchView.swift */,
+				AA000153 /* SocialView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A3000045 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				AA000148 /* SocialViewModel.swift */,
+				AA000149 /* FriendProfileViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		A3000046 /* Stats */ = {
+			isa = PBXGroup;
+			children = (
+				A3000047 /* Views */,
+				A3000048 /* ViewModels */,
+			);
+			path = Stats;
+			sourceTree = "<group>";
+		};
+		A3000047 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AA000141 /* GradePyramidView.swift */,
+				AA000142 /* ProgressChartView.swift */,
+				AA000143 /* StatsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A3000048 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				AA000140 /* StatsViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		A3000049 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				A3000050 /* Views */,
+				A3000051 /* ViewModels */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
+		A3000050 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AA000155 /* EditProfileView.swift */,
+				AA000156 /* SettingsView.swift */,
+				AA000157 /* ProfileView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A3000051 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				AA000154 /* ProfileViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		A3000080 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				A3000081 /* Components */,
+				A3000082 /* Layout */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		A3000081 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				AA000122 /* GradePickerView.swift */,
+				AA000123 /* AsyncImageView.swift */,
+				AA000124 /* PhotoPickerButton.swift */,
+				AA000125 /* LoadingOverlay.swift */,
+				AA000126 /* EmptyStateView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		A3000082 /* Layout */ = {
+			isa = PBXGroup;
+			children = (
+				AA000121 /* MainTabView.swift */,
+				AA00F103 /* CustomTabBar.swift */,
+			);
+			path = Layout;
+			sourceTree = "<group>";
+		};
+		A3000090 /* Gecko ClimbingTests */ = {
+			isa = PBXGroup;
+			children = (
+				A2000010 /* GeckoClimbingTests.swift */,
+			);
+			path = "Gecko ClimbingTests";
+			sourceTree = "<group>";
+		};
+		A3000091 /* Gecko ClimbingUITests */ = {
+			isa = PBXGroup;
+			children = (
+				A2000020 /* GeckoClimbingUITests.swift */,
+			);
+			path = "Gecko ClimbingUITests";
+			sourceTree = "<group>";
+		};
+		A3FFFFFF = {
+			isa = PBXGroup;
+			children = (
+				A3000001 /* Gecko Climbing */,
+				A3000090 /* Gecko ClimbingTests */,
+				A3000091 /* Gecko ClimbingUITests */,
+				A3000000 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A4000000 /* Gecko Climbing */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A6000000 /* Build configuration list for PBXNativeTarget "Gecko Climbing" */;
+			buildPhases = (
+				A5000000 /* Sources */,
+				A5000001 /* Resources */,
+				A5000002 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Gecko Climbing";
+			packageProductDependencies = (
+				CC000001 /* FirebaseCore */,
+				CC000002 /* FirebaseAuth */,
+				CC000003 /* GoogleSignIn */,
+			);
+			productName = "Gecko Climbing";
+			productReference = A2000000 /* Gecko Climbing.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A4000001 /* Gecko ClimbingTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A6000002 /* Build configuration list for PBXNativeTarget "Gecko ClimbingTests" */;
+			buildPhases = (
+				A5000010 /* Sources */,
+				A5000011 /* Resources */,
+				A5000012 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A4000010 /* PBXTargetDependency */,
+			);
+			name = "Gecko ClimbingTests";
+			productName = "Gecko ClimbingTests";
+			productReference = A2000009 /* Gecko ClimbingTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		A4000002 /* Gecko ClimbingUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A6000004 /* Build configuration list for PBXNativeTarget "Gecko ClimbingUITests" */;
+			buildPhases = (
+				A5000020 /* Sources */,
+				A5000021 /* Resources */,
+				A5000022 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A4000011 /* PBXTargetDependency */,
+			);
+			name = "Gecko ClimbingUITests";
+			productName = "Gecko ClimbingUITests";
+			productReference = A2000019 /* Gecko ClimbingUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A7000000 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 2620;
+				TargetAttributes = {
+					A4000000 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+					A4000001 = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = A4000000;
+					};
+					A4000002 = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = A4000000;
+					};
+				};
+			};
+			buildConfigurationList = A6000006 /* Build configuration list for PBXProject "Gecko Climbing" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A3FFFFFF;
+			packageReferences = (
+				BB000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				BB000002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+			);
+			productRefGroup = A3000000 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A4000000 /* Gecko Climbing */,
+				A4000001 /* Gecko ClimbingTests */,
+				A4000002 /* Gecko ClimbingUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A5000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000003 /* Assets.xcassets in Resources */,
+				A1000004 /* GoogleService-Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A5000011 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A5000021 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A5000000 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000001 /* GeckoClimbingApp.swift in Sources */,
+				A1000002 /* ContentView.swift in Sources */,
+				AA000201 /* TabRoutes.swift in Sources */,
+				AA000202 /* AppRouter.swift in Sources */,
+				AA000203 /* SessionModel.swift in Sources */,
+				AA000204 /* ClimbModel.swift in Sources */,
+				AA000205 /* UserModel.swift in Sources */,
+				AA000206 /* PostModel.swift in Sources */,
+				AA000207 /* SessionDTO.swift in Sources */,
+				AA000208 /* ClimbDTO.swift in Sources */,
+				AA000209 /* UserDTO.swift in Sources */,
+				AA000210 /* PostDTO.swift in Sources */,
+				AA000211 /* Color+Brand.swift in Sources */,
+				AA000212 /* View+ErrorAlert.swift in Sources */,
+				AA000213 /* Date+Formatted.swift in Sources */,
+				AA000214 /* AppEnvironment.swift in Sources */,
+				AA000215 /* AuthRepository.swift in Sources */,
+				AA000216 /* SessionRepository.swift in Sources */,
+				AA000217 /* ClimbRepository.swift in Sources */,
+				AA000218 /* UserRepository.swift in Sources */,
+				AA000219 /* PostRepository.swift in Sources */,
+				AA000220 /* StorageRepository.swift in Sources */,
+				AA000221 /* MainTabView.swift in Sources */,
+				AA000222 /* GradePickerView.swift in Sources */,
+				AA000223 /* AsyncImageView.swift in Sources */,
+				AA000224 /* PhotoPickerButton.swift in Sources */,
+				AA000225 /* LoadingOverlay.swift in Sources */,
+				AA000226 /* EmptyStateView.swift in Sources */,
+				AA000227 /* AuthViewModel.swift in Sources */,
+				AA000228 /* AuthRootView.swift in Sources */,
+				AA000229 /* SignInView.swift in Sources */,
+				AA000230 /* SignUpView.swift in Sources */,
+				AA000231 /* SessionListViewModel.swift in Sources */,
+				AA000232 /* NewSessionViewModel.swift in Sources */,
+				AA000233 /* SessionDetailViewModel.swift in Sources */,
+				AA000234 /* ClimbRowView.swift in Sources */,
+				AA000235 /* SessionDetailView.swift in Sources */,
+				AA000236 /* NewSessionView.swift in Sources */,
+				AA000237 /* AddClimbView.swift in Sources */,
+				AA000238 /* SessionListView.swift in Sources */,
+				AA000239 /* CelebrationView.swift in Sources */,
+				AA000240 /* StatsViewModel.swift in Sources */,
+				AA000241 /* GradePyramidView.swift in Sources */,
+				AA000242 /* ProgressChartView.swift in Sources */,
+				AA000243 /* StatsView.swift in Sources */,
+				AA000244 /* HomeViewModel.swift in Sources */,
+				AA000245 /* FeedCardView.swift in Sources */,
+				AA000246 /* PostDetailView.swift in Sources */,
+				AA000247 /* HomeView.swift in Sources */,
+				AA000248 /* SocialViewModel.swift in Sources */,
+				AA000249 /* FriendProfileViewModel.swift in Sources */,
+				AA000250 /* FriendProfileView.swift in Sources */,
+				AA000251 /* FollowersListView.swift in Sources */,
+				AA000252 /* UserSearchView.swift in Sources */,
+				AA000253 /* SocialView.swift in Sources */,
+				AA000254 /* ProfileViewModel.swift in Sources */,
+				AA000255 /* EditProfileView.swift in Sources */,
+				AA000256 /* SettingsView.swift in Sources */,
+				AA000257 /* ProfileView.swift in Sources */,
+				AA000258 /* WallAnalysisView.swift in Sources */,
+				AA000260 /* FirebaseAuthRepository.swift in Sources */,
+				AA000261 /* AppleSignInHelper.swift in Sources */,
+				AA00F111 /* ClimbOutcome.swift in Sources */,
+				AA00F112 /* QuickAddClimbSheet.swift in Sources */,
+				AA00F113 /* CustomTabBar.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A5000010 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000010 /* GeckoClimbingTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A5000020 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000020 /* GeckoClimbingUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A4000010 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A4000000 /* Gecko Climbing */;
+			targetProxy = A4000020 /* PBXContainerItemProxy */;
+		};
+		A4000011 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A4000000 /* Gecko Climbing */;
+			targetProxy = A4000021 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		A6000000BIS /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		A6000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		A6000100 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Gecko Climbing/Gecko Climbing.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Gecko Climbing/App/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.geckoapp.geckoClimbing;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A6000101 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Gecko Climbing/Gecko Climbing.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Gecko Climbing/App/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.geckoapp.geckoClimbing;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		A6000200 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.geckoapp.geckoClimbingTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Gecko Climbing.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Gecko Climbing";
+			};
+			name = Debug;
+		};
+		A6000201 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.geckoapp.geckoClimbingTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Gecko Climbing.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Gecko Climbing";
+			};
+			name = Release;
+		};
+		A6000300 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.geckoapp.geckoClimbingUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "Gecko Climbing";
+			};
+			name = Debug;
+		};
+		A6000301 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.geckoapp.geckoClimbingUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "Gecko Climbing";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A6000000 /* Build configuration list for PBXNativeTarget "Gecko Climbing" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A6000100 /* Debug */,
+				A6000101 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A6000002 /* Build configuration list for PBXNativeTarget "Gecko ClimbingTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A6000200 /* Debug */,
+				A6000201 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A6000004 /* Build configuration list for PBXNativeTarget "Gecko ClimbingUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A6000300 /* Debug */,
+				A6000301 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A6000006 /* Build configuration list for PBXProject "Gecko Climbing" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A6000001 /* Debug */,
+				A6000000BIS /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BB000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.0.0;
+			};
+		};
+		BB000002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CC000001 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BB000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		CC000002 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BB000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		CC000003 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BB000002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = A7000000 /* Project object */;
+}
