@@ -3,8 +3,8 @@ import SwiftUI
 struct ConfettiView: View {
     @Binding var isActive: Bool
     var colors: [Color] = [
-        .geckoGreen, .geckoFlashGold, .geckoProjectBlue,
-        .geckoOrange, .geckoGreenLight, Color(hex: "#FFC107"),
+        .geckoPrimary, .geckoFlashGold, .geckoProjectBlue,
+        .geckoOrange, .geckoPink, Color(hex: "#FFC107"),
         Color(hex: "#9C27B0"), Color(hex: "#FF9800")
     ]
     var particleCount: Int = 60
@@ -82,7 +82,7 @@ struct ConfettiView: View {
                 wobbleAmount: CGFloat.random(in: 15...40),
                 rotationSpeed: Double.random(in: 60...300),
                 size: CGFloat.random(in: 5...10),
-                color: colors.randomElement() ?? .geckoGreen,
+                color: colors.randomElement() ?? .geckoPrimary,
                 isCircle: Bool.random(),
                 opacity: Double.random(in: 0.7...1.0),
                 delay: Double.random(in: 0...0.5)

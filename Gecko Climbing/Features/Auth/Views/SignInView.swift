@@ -16,16 +16,15 @@ struct SignInView: View {
             ScrollView {
                 VStack(spacing: 28) {
                     // Logo + tagline
-                    VStack(spacing: 12) {
-                        Image(systemName: "figure.climbing")
-                            .font(.system(size: 56))
-                            .foregroundColor(Color.geckoGreen)
-                        Text("Gecko Climbing")
-                            .font(.system(size: 32, weight: .black, design: .rounded))
-                            .foregroundColor(.primary)
-                        Text("Track every send.")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+                    VStack(spacing: 14) {
+                        GeckoLogoView(size: 56, color: .geckoPrimary)
+
+                        Text("gecko")
+                            .font(.system(size: 36, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.primary)
+                        Text("Train smarter, climb higher.")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.secondary)
                     }
                     .padding(.top, 60)
 

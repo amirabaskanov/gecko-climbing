@@ -153,7 +153,7 @@ struct SessionRowView: View {
                     if session.flashCount > 0 {
                         statPill(icon: "bolt.fill", text: "\(session.flashCount)", color: .geckoFlashGold)
                     }
-                    statPill(icon: "checkmark.circle.fill", text: "\(session.completedClimbs) sends", color: .geckoGreen)
+                    statPill(icon: "checkmark.circle.fill", text: "\(session.completedClimbs) sends", color: .geckoSentGreen)
                     if session.attemptCount > 0 {
                         statPill(icon: "arrow.trianglehead.counterclockwise", text: "\(session.attemptCount)", color: .geckoAttemptBlue)
                     }

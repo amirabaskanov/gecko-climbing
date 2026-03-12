@@ -21,15 +21,14 @@ struct SignUpView: View {
             ScrollView {
                 VStack(spacing: 28) {
                     // Header
-                    VStack(spacing: 8) {
-                        Image(systemName: "figure.climbing")
-                            .font(.system(size: 44))
-                            .foregroundColor(Color.geckoGreen)
+                    VStack(spacing: 10) {
+                        GeckoLogoView(size: 44, color: .geckoPrimary)
+
                         Text("Create Account")
                             .font(.system(size: 28, weight: .black, design: .rounded))
                         Text("Join the climbing community")
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                     .padding(.top, 50)
 

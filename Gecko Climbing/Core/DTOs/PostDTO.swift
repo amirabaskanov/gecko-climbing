@@ -19,6 +19,28 @@ struct PostDTO: Codable, Identifiable {
     let gradeCounts: [String: Int]
     let visibility: String
 
+    func asDictionary() -> [String: Any] {
+        var dict: [String: Any] = [
+            "userId": userId,
+            "userDisplayName": userDisplayName,
+            "userProfileImageURL": userProfileImageURL,
+            "sessionId": sessionId,
+            "gymName": gymName,
+            "type": type,
+            "caption": caption,
+            "likesCount": likesCount,
+            "commentsCount": commentsCount,
+            "createdAt": createdAt,
+            "topGrade": topGrade,
+            "topGradeNumeric": topGradeNumeric,
+            "totalClimbs": totalClimbs,
+            "gradeCounts": gradeCounts,
+            "visibility": visibility
+        ]
+        if let imageURL { dict["imageURL"] = imageURL }
+        return dict
+    }
+
     func toModel() -> PostModel {
         PostModel(
             postId: id ?? UUID().uuidString,

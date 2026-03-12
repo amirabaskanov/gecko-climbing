@@ -15,6 +15,7 @@ final class AppEnvironment {
     let storageRepository: any StorageRepositoryProtocol
 
     init(modelContext: ModelContext) {
+        #if DEBUG
         if AppEnvironment.useMocks {
             let mockAuth = MockAuthRepository()
             authRepository = mockAuth
@@ -23,14 +24,16 @@ final class AppEnvironment {
             userRepository = MockUserRepository(currentUserId: mockAuth.currentUserId)
             postRepository = MockPostRepository()
             storageRepository = MockStorageRepository()
-        } else {
-            let firebaseAuth = FirebaseAuthRepository()
-            authRepository = firebaseAuth
-            sessionRepository = MockSessionRepository(currentUserId: firebaseAuth.currentUserId)
-            climbRepository = MockClimbRepository()
-            userRepository = MockUserRepository(currentUserId: firebaseAuth.currentUserId)
-            postRepository = MockPostRepository()
-            storageRepository = MockStorageRepository()
+            return
         }
+        #endif
+
+        let firebaseAuth = FirebaseAuthRepository()
+        authRepository = firebaseAuth
+        sessionRepository = FirestoreSessionRepository(authRepository: firebaseAuth)
+        climbRepository = FirestoreClimbRepository()
+        userRepository = FirestoreUserRepository(authRepository: firebaseAuth)
+        postRepository = FirestorePostRepository(authRepository: firebaseAuth)
+        storageRepository = FirebaseStorageRepository()
     }
 }

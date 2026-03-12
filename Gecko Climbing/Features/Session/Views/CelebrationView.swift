@@ -119,7 +119,7 @@ struct CelebrationView: View {
                     target: session.completedClimbs,
                     label: "Sends",
                     delay: 0.6,
-                    accentColor: .geckoGreenLight
+                    accentColor: .geckoSentGreenLight
                 )
                 celebrationStat(
                     target: session.totalClimbs,

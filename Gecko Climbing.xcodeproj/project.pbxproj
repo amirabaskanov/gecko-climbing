@@ -80,13 +80,22 @@
 		AA00F112 /* QuickAddClimbSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00F102 /* QuickAddClimbSheet.swift */; };
 		AA00F113 /* CustomTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00F103 /* CustomTabBar.swift */; };
 		BB00F101 /* GradeBarrelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F001 /* GradeBarrelView.swift */; };
+		DD00F101 /* GeckoLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD00F001 /* GeckoLogoView.swift */; };
 		BB00F102 /* AttemptBubbleSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F002 /* AttemptBubbleSelector.swift */; };
 		BB00F103 /* ClimbPillView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F003 /* ClimbPillView.swift */; };
 		BB00F104 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F004 /* FlowLayout.swift */; };
 		BB00F105 /* SessionDetailsForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F005 /* SessionDetailsForm.swift */; };
+		CC300002 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CC300001 /* PrivacyInfo.xcprivacy */; };
+		CC100001 /* FirestoreUserRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200001 /* FirestoreUserRepository.swift */; };
+		CC100002 /* FirestoreSessionRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200002 /* FirestoreSessionRepository.swift */; };
+		CC100003 /* FirestoreClimbRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200003 /* FirestoreClimbRepository.swift */; };
+		CC100004 /* FirestorePostRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200004 /* FirestorePostRepository.swift */; };
+		CC100005 /* FirebaseStorageRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200005 /* FirebaseStorageRepository.swift */; };
 		BB000010 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = CC000001 /* FirebaseCore */; };
 		BB000011 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CC000002 /* FirebaseAuth */; };
 		BB000012 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = CC000003 /* GoogleSignIn */; };
+		BB000013 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = CC000004 /* FirebaseFirestore */; };
+		BB000014 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = CC000005 /* FirebaseStorage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -178,13 +187,20 @@
 		AA000157 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		AA000158 /* WallAnalysisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallAnalysisView.swift; sourceTree = "<group>"; };
 		AA000160 /* FirebaseAuthRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseAuthRepository.swift; sourceTree = "<group>"; };
+		CC200001 /* FirestoreUserRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreUserRepository.swift; sourceTree = "<group>"; };
+		CC200002 /* FirestoreSessionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreSessionRepository.swift; sourceTree = "<group>"; };
+		CC200003 /* FirestoreClimbRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreClimbRepository.swift; sourceTree = "<group>"; };
+		CC200004 /* FirestorePostRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestorePostRepository.swift; sourceTree = "<group>"; };
+		CC200005 /* FirebaseStorageRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseStorageRepository.swift; sourceTree = "<group>"; };
 		AA000161 /* AppleSignInHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInHelper.swift; sourceTree = "<group>"; };
 		AA00F101 /* ClimbOutcome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClimbOutcome.swift; sourceTree = "<group>"; };
 		AA00F102 /* QuickAddClimbSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddClimbSheet.swift; sourceTree = "<group>"; };
 		AA00F103 /* CustomTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabBar.swift; sourceTree = "<group>"; };
 		AA00F200 /* Gecko Climbing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Gecko Climbing.entitlements"; sourceTree = "<group>"; };
+		CC300001 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		CF087C0C87D75CC545532A78 /* AnimatedCounter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AnimatedCounter.swift; sourceTree = "<group>"; };
 		BB00F001 /* GradeBarrelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradeBarrelView.swift; sourceTree = "<group>"; };
+		DD00F001 /* GeckoLogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeckoLogoView.swift; sourceTree = "<group>"; };
 		BB00F002 /* AttemptBubbleSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttemptBubbleSelector.swift; sourceTree = "<group>"; };
 		BB00F003 /* ClimbPillView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClimbPillView.swift; sourceTree = "<group>"; };
 		BB00F004 /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowLayout.swift; sourceTree = "<group>"; };
@@ -199,6 +215,8 @@
 				BB000010 /* FirebaseCore in Frameworks */,
 				BB000011 /* FirebaseAuth in Frameworks */,
 				BB000012 /* GoogleSignIn in Frameworks */,
+				BB000013 /* FirebaseFirestore in Frameworks */,
+				BB000014 /* FirebaseStorage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -233,6 +251,7 @@
 			isa = PBXGroup;
 			children = (
 				AA00F200 /* Gecko Climbing.entitlements */,
+				CC300001 /* PrivacyInfo.xcprivacy */,
 				A3000010 /* App */,
 				A3000020 /* Core */,
 				A3000030 /* Features */,
@@ -302,6 +321,11 @@
 				AA000119 /* PostRepository.swift */,
 				AA000120 /* StorageRepository.swift */,
 				AA000160 /* FirebaseAuthRepository.swift */,
+				CC200001 /* FirestoreUserRepository.swift */,
+				CC200002 /* FirestoreSessionRepository.swift */,
+				CC200003 /* FirestoreClimbRepository.swift */,
+				CC200004 /* FirestorePostRepository.swift */,
+				CC200005 /* FirebaseStorageRepository.swift */,
 			);
 			path = Repositories;
 			sourceTree = "<group>";
@@ -555,6 +579,7 @@
 				BB00F001 /* GradeBarrelView.swift */,
 				BB00F002 /* AttemptBubbleSelector.swift */,
 				BB00F003 /* ClimbPillView.swift */,
+				DD00F001 /* GeckoLogoView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -615,6 +640,8 @@
 				CC000001 /* FirebaseCore */,
 				CC000002 /* FirebaseAuth */,
 				CC000003 /* GoogleSignIn */,
+				CC000004 /* FirebaseFirestore */,
+				CC000005 /* FirebaseStorage */,
 			);
 			productName = "Gecko Climbing";
 			productReference = A2000000 /* Gecko Climbing.app */;
@@ -710,6 +737,7 @@
 			files = (
 				A1000003 /* Assets.xcassets in Resources */,
 				A1000004 /* GoogleService-Info.plist in Resources */,
+				CC300002 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -795,6 +823,11 @@
 				AA000257 /* ProfileView.swift in Sources */,
 				AA000258 /* WallAnalysisView.swift in Sources */,
 				AA000260 /* FirebaseAuthRepository.swift in Sources */,
+				CC100001 /* FirestoreUserRepository.swift in Sources */,
+				CC100002 /* FirestoreSessionRepository.swift in Sources */,
+				CC100003 /* FirestoreClimbRepository.swift in Sources */,
+				CC100004 /* FirestorePostRepository.swift in Sources */,
+				CC100005 /* FirebaseStorageRepository.swift in Sources */,
 				AA000261 /* AppleSignInHelper.swift in Sources */,
 				AA00F111 /* ClimbOutcome.swift in Sources */,
 				AA00F112 /* QuickAddClimbSheet.swift in Sources */,
@@ -807,6 +840,7 @@
 				BB00F103 /* ClimbPillView.swift in Sources */,
 				BB00F104 /* FlowLayout.swift in Sources */,
 				BB00F105 /* SessionDetailsForm.swift in Sources */,
+				DD00F101 /* GeckoLogoView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1160,6 +1194,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = BB000002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignIn;
+		};
+		CC000004 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BB000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		CC000005 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BB000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -43,7 +43,13 @@ final class AuthViewModel {
         isLoading = true
         error = nil
         do {
-            try await authRepository.signUp(email: email, password: password, username: "", displayName: displayName)
+            let base = displayName
+                .lowercased()
+                .replacingOccurrences(of: " ", with: "_")
+                .filter { $0.isLetter || $0.isNumber || $0 == "_" }
+            let suffix = String(UUID().uuidString.prefix(6).lowercased())
+            let username = "\(base)_\(suffix)"
+            try await authRepository.signUp(email: email, password: password, username: username, displayName: displayName)
         } catch {
             self.error = error
         }

@@ -39,7 +39,7 @@ enum ClimbOutcome: String, Codable, CaseIterable, Identifiable {
     var color: Color {
         switch self {
         case .flash:   return .geckoFlashGold
-        case .sent:    return .geckoGreen
+        case .sent:    return .geckoSentGreen
         case .project: return .geckoProjectBlue
         case .attempt: return .geckoAttemptBlue
         }
