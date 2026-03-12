@@ -4,6 +4,8 @@ import Charts
 struct GradePyramidView: View {
     let data: [GradeCount]
 
+    @State private var appeared = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Grade Pyramid")
@@ -19,10 +21,19 @@ struct GradePyramidView: View {
             } else {
                 Chart(data) { item in
                     BarMark(
-                        x: .value("Count", item.count),
+                        x: .value("Count", appeared ? item.count : 0),
                         y: .value("Grade", item.grade)
                     )
-                    .foregroundStyle(Color.gradeColor(for: item.numeric))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [
+                                Color.gradeColor(for: item.numeric).opacity(0.8),
+                                Color.gradeColor(for: item.numeric)
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
                     .cornerRadius(6)
                     .annotation(position: .trailing, alignment: .leading) {
                         Text("\(item.count)")
@@ -44,6 +55,11 @@ struct GradePyramidView: View {
                 .chartXAxis(.hidden)
                 .frame(height: CGFloat(max(data.count * 36, 120)))
                 .padding(.horizontal)
+                .onAppear {
+                    withAnimation(.geckoSpring.delay(0.2)) {
+                        appeared = true
+                    }
+                }
             }
         }
         .padding(.vertical)

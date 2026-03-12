@@ -3,12 +3,43 @@ import SwiftUI
 extension Color {
     // MARK: - Brand Colors
     static let geckoGreen = Color(hex: "#4CAF50")
+    static let geckoGreenLight = Color(hex: "#81C784")
+    static let geckoGreenDark = Color(hex: "#388E3C")
     static let geckoOrange = Color(hex: "#FF6B6B")
-    static let geckoBackground = Color(hex: "#F9F9F9")
+    static let geckoBackground = Color(hex: "#F5F5F0")
     static let geckoCard = Color.white
     static let geckoSecondaryText = Color(hex: "#9E9E9E")
     static let geckoFlashGold = Color(hex: "#FFD700")
     static let geckoProjectBlue = Color(hex: "#2196F3")
+    static let geckoAttemptBlue = Color(hex: "#42A5F5")
+
+    // MARK: - Surface System
+    static let surface = Color.white
+    static let surfaceElevated = Color(hex: "#FAFAF7")
+    static let surfaceBackground = Color(hex: "#F5F5F0")
+
+    // MARK: - Gradients
+    static var geckoGreenGradient: LinearGradient {
+        LinearGradient(colors: [geckoGreen, geckoGreenDark], startPoint: .top, endPoint: .bottom)
+    }
+
+    static var warmGlow: LinearGradient {
+        LinearGradient(colors: [geckoFlashGold, Color(hex: "#FF9800")], startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+
+    // MARK: - Outcome Gradients
+    static func outcomeGradient(for outcome: ClimbOutcome) -> LinearGradient {
+        switch outcome {
+        case .flash:
+            return LinearGradient(colors: [geckoFlashGold, Color(hex: "#FFA000")], startPoint: .top, endPoint: .bottom)
+        case .sent:
+            return LinearGradient(colors: [geckoGreen, geckoGreenDark], startPoint: .top, endPoint: .bottom)
+        case .project:
+            return LinearGradient(colors: [geckoProjectBlue, Color(hex: "#1565C0")], startPoint: .top, endPoint: .bottom)
+        case .attempt:
+            return LinearGradient(colors: [geckoAttemptBlue, Color(hex: "#1E88E5")], startPoint: .top, endPoint: .bottom)
+        }
+    }
 
     // MARK: - Grade Colors (difficulty gradient)
     static func gradeColor(for gradeNumeric: Int) -> Color {
@@ -25,6 +56,15 @@ extension Color {
     static func gradeColor(for grade: String) -> Color {
         let numeric = VGrade.numeric(for: grade)
         return gradeColor(for: numeric)
+    }
+
+    static func gradeGradient(for gradeNumeric: Int) -> LinearGradient {
+        let base = gradeColor(for: gradeNumeric)
+        return LinearGradient(
+            colors: [base.opacity(0.85), base],
+            startPoint: .top,
+            endPoint: .bottom
+        )
     }
 
     // MARK: - Hex initializer

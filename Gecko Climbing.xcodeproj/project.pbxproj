@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		106E9D7CB9DB43D12B4C497B /* ConfettiView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DFCE518CEAAC010499D7267 /* ConfettiView.swift */; };
+		55804C2FCF62956FC9CD0313 /* Animation+Gecko.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210A18FB1D170D1A318A5D9D /* Animation+Gecko.swift */; };
+		5F742BB5AECF9030F1A5B2D2 /* AnimatedCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF087C0C87D75CC545532A78 /* AnimatedCounter.swift */; };
 		A1000001 /* GeckoClimbingApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001 /* GeckoClimbingApp.swift */; };
 		A1000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000002 /* ContentView.swift */; };
 		A1000003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000003 /* Assets.xcassets */; };
@@ -76,6 +79,11 @@
 		AA00F111 /* ClimbOutcome.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00F101 /* ClimbOutcome.swift */; };
 		AA00F112 /* QuickAddClimbSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00F102 /* QuickAddClimbSheet.swift */; };
 		AA00F113 /* CustomTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00F103 /* CustomTabBar.swift */; };
+		BB00F101 /* GradeBarrelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F001 /* GradeBarrelView.swift */; };
+		BB00F102 /* AttemptBubbleSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F002 /* AttemptBubbleSelector.swift */; };
+		BB00F103 /* ClimbPillView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F003 /* ClimbPillView.swift */; };
+		BB00F104 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F004 /* FlowLayout.swift */; };
+		BB00F105 /* SessionDetailsForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F005 /* SessionDetailsForm.swift */; };
 		BB000010 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = CC000001 /* FirebaseCore */; };
 		BB000011 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CC000002 /* FirebaseAuth */; };
 		BB000012 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = CC000003 /* GoogleSignIn */; };
@@ -99,6 +107,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		210A18FB1D170D1A318A5D9D /* Animation+Gecko.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Animation+Gecko.swift"; sourceTree = "<group>"; };
+		5DFCE518CEAAC010499D7267 /* ConfettiView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConfettiView.swift; sourceTree = "<group>"; };
 		A2000000 /* Gecko Climbing.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Gecko Climbing.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2000001 /* GeckoClimbingApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeckoClimbingApp.swift; sourceTree = "<group>"; };
 		A2000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -173,6 +183,12 @@
 		AA00F102 /* QuickAddClimbSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddClimbSheet.swift; sourceTree = "<group>"; };
 		AA00F103 /* CustomTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabBar.swift; sourceTree = "<group>"; };
 		AA00F200 /* Gecko Climbing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Gecko Climbing.entitlements"; sourceTree = "<group>"; };
+		CF087C0C87D75CC545532A78 /* AnimatedCounter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AnimatedCounter.swift; sourceTree = "<group>"; };
+		BB00F001 /* GradeBarrelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradeBarrelView.swift; sourceTree = "<group>"; };
+		BB00F002 /* AttemptBubbleSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttemptBubbleSelector.swift; sourceTree = "<group>"; };
+		BB00F003 /* ClimbPillView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClimbPillView.swift; sourceTree = "<group>"; };
+		BB00F004 /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowLayout.swift; sourceTree = "<group>"; };
+		BB00F005 /* SessionDetailsForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailsForm.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -303,6 +319,7 @@
 				AA000111 /* Color+Brand.swift */,
 				AA000112 /* View+ErrorAlert.swift */,
 				AA000113 /* Date+Formatted.swift */,
+				210A18FB1D170D1A318A5D9D /* Animation+Gecko.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -394,6 +411,7 @@
 				AA000138 /* SessionListView.swift */,
 				AA000139 /* CelebrationView.swift */,
 				AA00F102 /* QuickAddClimbSheet.swift */,
+				BB00F005 /* SessionDetailsForm.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -532,6 +550,11 @@
 				AA000124 /* PhotoPickerButton.swift */,
 				AA000125 /* LoadingOverlay.swift */,
 				AA000126 /* EmptyStateView.swift */,
+				CF087C0C87D75CC545532A78 /* AnimatedCounter.swift */,
+				5DFCE518CEAAC010499D7267 /* ConfettiView.swift */,
+				BB00F001 /* GradeBarrelView.swift */,
+				BB00F002 /* AttemptBubbleSelector.swift */,
+				BB00F003 /* ClimbPillView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -541,6 +564,7 @@
 			children = (
 				AA000121 /* MainTabView.swift */,
 				AA00F103 /* CustomTabBar.swift */,
+				BB00F004 /* FlowLayout.swift */,
 			);
 			path = Layout;
 			sourceTree = "<group>";
@@ -775,6 +799,14 @@
 				AA00F111 /* ClimbOutcome.swift in Sources */,
 				AA00F112 /* QuickAddClimbSheet.swift in Sources */,
 				AA00F113 /* CustomTabBar.swift in Sources */,
+				55804C2FCF62956FC9CD0313 /* Animation+Gecko.swift in Sources */,
+				5F742BB5AECF9030F1A5B2D2 /* AnimatedCounter.swift in Sources */,
+				106E9D7CB9DB43D12B4C497B /* ConfettiView.swift in Sources */,
+				BB00F101 /* GradeBarrelView.swift in Sources */,
+				BB00F102 /* AttemptBubbleSelector.swift in Sources */,
+				BB00F103 /* ClimbPillView.swift in Sources */,
+				BB00F104 /* FlowLayout.swift in Sources */,
+				BB00F105 /* SessionDetailsForm.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

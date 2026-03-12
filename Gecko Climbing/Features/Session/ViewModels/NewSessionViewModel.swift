@@ -4,12 +4,15 @@ import SwiftData
 
 @Observable
 final class NewSessionViewModel {
-    // Form fields
+    // Form fields (deferred to post-save)
     var gymName = ""
     var notes = ""
     var date = Date()
     var durationHours = 1
     var durationMinutes = 30
+
+    // Auto-timer
+    var sessionStartedAt: Date = Date()
 
     // Climbs logged during session
     var climbs: [ClimbModel] = []
@@ -25,17 +28,39 @@ final class NewSessionViewModel {
         durationHours * 60 + durationMinutes
     }
 
+    /// Auto-calculated elapsed seconds since session started
+    var elapsedSeconds: Int {
+        Int(Date().timeIntervalSince(sessionStartedAt))
+    }
+
+    /// Auto-calculated elapsed minutes since session started
+    var elapsedMinutes: Int {
+        elapsedSeconds / 60
+    }
+
+    /// Formatted elapsed time string for nav bar display (m:ss or h:mm:ss)
+    var elapsedTimeFormatted: String {
+        let total = elapsedSeconds
+        let h = total / 3600
+        let m = (total % 3600) / 60
+        let s = total % 60
+        if h > 0 {
+            return String(format: "%d:%02d:%02d", h, m, s)
+        }
+        return String(format: "%d:%02d", m, s)
+    }
+
     var flashes: [ClimbModel] { climbs.filter { $0.climbOutcome == .flash } }
     var sends: [ClimbModel] { climbs.filter { $0.climbOutcome == .sent } }
     var projects: [ClimbModel] { climbs.filter { $0.climbOutcome == .project } }
-    var fails: [ClimbModel] { climbs.filter { $0.climbOutcome == .fail } }
+    var attempts: [ClimbModel] { climbs.filter { $0.climbOutcome == .attempt } }
 
     var climbSummaryText: String {
         var parts: [String] = []
         if !flashes.isEmpty { parts.append("\(flashes.count) flash\(flashes.count == 1 ? "" : "es")") }
         if !sends.isEmpty { parts.append("\(sends.count) send\(sends.count == 1 ? "" : "s")") }
         if !projects.isEmpty { parts.append("\(projects.count) project\(projects.count == 1 ? "" : "s")") }
-        if !fails.isEmpty { parts.append("\(fails.count) fail\(fails.count == 1 ? "" : "s")") }
+        if !attempts.isEmpty { parts.append("\(attempts.count) attempt\(attempts.count == 1 ? "" : "s")") }
         return parts.isEmpty ? "No climbs" : parts.joined(separator: ", ")
     }
 
@@ -56,6 +81,10 @@ final class NewSessionViewModel {
         climbs.insert(climb, at: 0)
     }
 
+    func moveClimb(from source: IndexSet, to destination: Int) {
+        climbs.move(fromOffsets: source, toOffset: destination)
+    }
+
     func removeClimb(at offsets: IndexSet) {
         climbs.remove(atOffsets: offsets)
     }
@@ -67,12 +96,15 @@ final class NewSessionViewModel {
         }
         isLoading = true
 
+        let finalDuration = elapsedMinutes > 0 ? elapsedMinutes : totalDurationMinutes
+
         let session = SessionModel(
             userId: userId,
             gymName: gymName,
             date: date,
-            durationMinutes: totalDurationMinutes,
-            notes: notes
+            durationMinutes: finalDuration,
+            notes: notes,
+            startedAt: sessionStartedAt
         )
 
         for climb in climbs {

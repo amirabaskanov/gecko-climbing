@@ -2,44 +2,62 @@ import SwiftUI
 
 struct ClimbRowView: View {
     let climb: ClimbModel
+    var index: Int = 0
 
     private var outcome: ClimbOutcome { climb.climbOutcome }
+    private var gradeColor: Color { Color.gradeColor(for: climb.gradeNumeric) }
 
     var body: some View {
-        HStack(spacing: 12) {
-            GradeBadge(grade: climb.grade, isCompleted: outcome.isCompleted)
+        HStack(spacing: 0) {
+            // Left accent bar
+            RoundedRectangle(cornerRadius: 2)
+                .fill(gradeColor)
+                .frame(width: 4)
+                .padding(.vertical, 4)
 
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 4) {
-                    Image(systemName: outcome.icon)
-                        .font(.caption)
-                        .foregroundColor(outcome.color)
-                    Text(outcome.label)
-                        .font(.subheadline.weight(.semibold))
-                    if outcome != .flash {
-                        Text("· \(climb.attempts) \(climb.attempts == 1 ? "try" : "tries")")
+            HStack(spacing: 12) {
+                // Grade badge
+                GradeBadge(grade: climb.grade, isCompleted: outcome.isCompleted)
+
+                // Center content
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 5) {
+                        Image(systemName: outcome.icon)
+                            .font(.caption.weight(.semibold))
+                            .foregroundColor(outcome.color)
+                        Text(outcome.label)
+                            .font(.subheadline.weight(.semibold))
+                        if outcome != .flash {
+                            Text("· \(climb.attempts) \(climb.attempts == 1 ? "try" : "tries")")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    if outcome == .flash {
+                        Text("First try!")
                             .font(.caption)
                             .foregroundColor(.secondary)
+                    } else if !climb.notes.isEmpty {
+                        Text(climb.notes)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
                     }
                 }
-                if !climb.notes.isEmpty {
-                    Text(climb.notes)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                }
+
+                Spacer()
+
+                // Timestamp
+                Text(climb.loggedAt.timeFormatted)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
             }
-
-            Spacer()
-
-            Image(systemName: outcome.icon)
-                .foregroundColor(outcome.color)
-                .font(.title3)
-
-            Text(climb.loggedAt.timeFormatted)
-                .font(.caption2)
-                .foregroundColor(.secondary)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
         }
-        .padding(.vertical, 4)
+        .background(Color.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .shadow(color: .black.opacity(0.03), radius: 1, x: 0, y: 1)
+        .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
     }
 }

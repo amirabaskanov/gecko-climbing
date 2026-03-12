@@ -17,7 +17,8 @@ struct ProfileView: View {
                 }
             }
             .navigationTitle("Profile")
-            .toolbarBackground(Color.geckoBackground, for: .navigationBar)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color.surfaceBackground, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
@@ -61,7 +62,7 @@ struct ProfileView: View {
     private func content(_ vm: ProfileViewModel) -> some View {
         ScrollView {
             VStack(spacing: 0) {
-                // Profile header
+                // Profile header with gradient
                 if let user = vm.user {
                     profileHeader(user)
                 }
@@ -70,7 +71,7 @@ struct ProfileView: View {
 
                 // Stats row
                 if let user = vm.user {
-                    statsRow(user)
+                    statsRow(vm, user: user)
                         .padding(.horizontal, 16)
                         .padding(.bottom, 8)
 
@@ -79,16 +80,18 @@ struct ProfileView: View {
                     } label: {
                         HStack {
                             Image(systemName: "chart.bar.fill")
-                                .foregroundColor(Color.geckoGreen)
+                                .foregroundColor(.white)
                             Text("View Full Stats")
                                 .font(.subheadline.weight(.semibold))
+                                .foregroundColor(.white)
                             Spacer()
                             Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                                .font(.caption.weight(.semibold))
+                                .foregroundColor(.white.opacity(0.7))
                         }
                         .padding()
-                        .cardStyle(cornerRadius: 14)
+                        .background(Color.geckoGreenGradient)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
                     .buttonStyle(.plain)
                     .padding(.horizontal, 16)
@@ -118,15 +121,28 @@ struct ProfileView: View {
                 .padding(.bottom, 32)
             }
         }
-        .background(Color.geckoBackground)
+        .background(Color.surfaceBackground)
         .refreshable { await vm.load() }
     }
 
     private func profileHeader(_ user: UserModel) -> some View {
         VStack(spacing: 12) {
-            AvatarView(url: user.profileImageURL, size: 88, name: user.displayName)
+            // Subtle gradient behind avatar
+            ZStack {
+                LinearGradient(
+                    colors: [Color.geckoGreen.opacity(0.08), Color.clear],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: 100)
+
+                AvatarView(url: user.profileImageURL, size: 88, name: user.displayName)
+                    .offset(y: 20)
+            }
+
             Text(user.displayName)
                 .font(.title2.weight(.bold))
+                .padding(.top, 12)
             Text("@\(user.username)")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
@@ -142,33 +158,71 @@ struct ProfileView: View {
                 statPill(value: "\(user.followingCount)", label: "Following")
             }
         }
-        .padding(.vertical, 20)
+        .padding(.bottom, 8)
     }
 
-    private func statsRow(_ user: UserModel) -> some View {
-        HStack(spacing: 0) {
-            statCard(value: "\(user.totalSessions)", label: "Sessions")
-            Divider().frame(height: 40)
-            statCard(value: user.highestGrade.isEmpty ? "—" : user.highestGrade,
-                     label: "Top Grade",
-                     valueColor: user.highestGrade.isEmpty ? .secondary : Color.gradeColor(for: user.highestGradeNumeric))
-            Divider().frame(height: 40)
-            statCard(value: "\(user.totalClimbs)", label: "Climbs")
+    private func statsRow(_ vm: ProfileViewModel, user: UserModel) -> some View {
+        let streak = vm.weeklyStreak
+        return VStack(spacing: 10) {
+            HStack(spacing: 10) {
+                statMiniCard(
+                    value: "\(user.totalSessions)",
+                    label: "Sessions",
+                    color: .geckoGreen
+                )
+                statMiniCard(
+                    value: user.highestGrade.isEmpty ? "—" : user.highestGrade,
+                    label: "Top Grade",
+                    color: user.highestGrade.isEmpty ? .secondary : Color.gradeColor(for: user.highestGradeNumeric)
+                )
+                statMiniCard(
+                    value: "\(user.totalClimbs)",
+                    label: "Climbs",
+                    color: .geckoProjectBlue
+                )
+            }
+
+            // Weekly streak
+            HStack(spacing: 8) {
+                Text("\u{1F525}")
+                    .font(.title3)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("\(streak) week streak")
+                        .font(.subheadline.weight(.bold))
+                    Text(streak > 0 ? "Keep it going!" : "Climb this week to start a streak")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background(Color.geckoFlashGold.opacity(streak > 0 ? 0.08 : 0.04))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Color.geckoFlashGold.opacity(streak > 0 ? 0.2 : 0.08), lineWidth: 1)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 14))
         }
-        .cardStyle(cornerRadius: 14)
     }
 
-    private func statCard(value: String, label: String, valueColor: Color = .primary) -> some View {
-        VStack(spacing: 2) {
+    private func statMiniCard(value: String, label: String, color: Color) -> some View {
+        VStack(spacing: 4) {
             Text(value)
                 .font(.system(size: 20, weight: .black, design: .rounded))
-                .foregroundColor(valueColor)
+                .foregroundColor(color)
             Text(label)
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
+        .padding(.vertical, 14)
+        .background(color.opacity(0.06))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(color.opacity(0.12), lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 
     private func statPill(value: String, label: String) -> some View {

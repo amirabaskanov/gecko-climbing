@@ -16,7 +16,7 @@ final class ClimbModel {
 
     var climbOutcome: ClimbOutcome {
         get {
-            ClimbOutcome(rawValue: outcome) ?? (isCompleted ? .sent : .fail)
+            ClimbOutcome.fromString(outcome)
         }
         set {
             outcome = newValue.rawValue

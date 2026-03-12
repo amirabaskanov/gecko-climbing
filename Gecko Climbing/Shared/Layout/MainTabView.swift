@@ -6,6 +6,8 @@ struct MainTabView: View {
     @State private var previousTab: AppTab = .feed
     @State private var sessionKey = UUID()
     @State private var sessionListRefreshToken = UUID()
+    @State private var logClimbCount = 0
+    @State private var finishTrigger = UUID()
 
     var body: some View {
         Group {
@@ -16,12 +18,16 @@ struct MainTabView: View {
                 SessionListView(refreshToken: sessionListRefreshToken)
             case .log:
                 NewSessionView(
+                    climbCount: $logClimbCount,
+                    finishTrigger: finishTrigger,
                     onSessionSaved: { _ in
                         sessionListRefreshToken = UUID()
+                        logClimbCount = 0
                         selectedTab = .sessions
                         sessionKey = UUID()
                     },
                     onCancel: {
+                        logClimbCount = 0
                         selectedTab = previousTab
                         sessionKey = UUID()
                     }
@@ -35,12 +41,26 @@ struct MainTabView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .safeAreaInset(edge: .bottom) {
-            CustomTabBar(selectedTab: $selectedTab) {
-                if selectedTab != .log {
-                    previousTab = selectedTab
+            CustomTabBar(
+                selectedTab: $selectedTab,
+                logClimbCount: logClimbCount,
+                onLogTap: {
+                    if selectedTab != .log {
+                        previousTab = selectedTab
+                    }
+                    selectedTab = .log
+                },
+                onFinishTap: {
+                    if logClimbCount > 0 {
+                        finishTrigger = UUID()
+                    } else {
+                        // No climbs — cancel back
+                        logClimbCount = 0
+                        selectedTab = previousTab
+                        sessionKey = UUID()
+                    }
                 }
-                selectedTab = .log
-            }
+            )
         }
     }
 }

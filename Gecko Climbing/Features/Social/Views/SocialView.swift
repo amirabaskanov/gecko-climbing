@@ -5,6 +5,7 @@ struct SocialView: View {
     @Environment(AuthViewModel.self) private var authViewModel
     @State private var viewModel: SocialViewModel?
     @State private var router = TabRouter<SocialRoute>()
+    @State private var appeared = false
 
     var body: some View {
         NavigationStack(path: $router.path) {
@@ -17,7 +18,8 @@ struct SocialView: View {
                 }
             }
             .navigationTitle("Friends")
-            .toolbarBackground(Color.geckoBackground, for: .navigationBar)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color.surfaceBackground, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .navigationDestination(for: SocialRoute.self) { route in
                 switch route {
@@ -62,7 +64,7 @@ struct SocialView: View {
                             .padding()
                             .listRowBackground(Color.clear)
                     } else {
-                        ForEach(vm.following) { user in
+                        ForEach(Array(vm.following.enumerated()), id: \.element.id) { index, user in
                             NavigationLink(value: SocialRoute.friendProfile(uid: user.uid)) {
                                 HStack(spacing: 12) {
                                     AvatarView(url: user.profileImageURL, size: 44, name: user.displayName)
@@ -77,6 +79,7 @@ struct SocialView: View {
                                 }
                                 .padding(.vertical, 4)
                             }
+                            .staggeredAppear(index: index, appeared: appeared)
                         }
                     }
                 }
@@ -84,6 +87,9 @@ struct SocialView: View {
         }
         .listStyle(.insetGrouped)
         .searchable(text: Binding(get: { vm.searchQuery }, set: { vm.searchQuery = $0 }), prompt: "Search climbers...")
-        .background(Color.geckoBackground)
+        .background(Color.surfaceBackground)
+        .onAppear {
+            withAnimation { appeared = true }
+        }
     }
 }

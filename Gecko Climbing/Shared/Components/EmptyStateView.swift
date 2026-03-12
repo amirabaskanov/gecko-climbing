@@ -7,11 +7,23 @@ struct EmptyStateView: View {
     var actionLabel: String? = nil
     var action: (() -> Void)? = nil
 
+    @State private var floatOffset: CGFloat = 0
+
     var body: some View {
         VStack(spacing: 16) {
             Image(systemName: icon)
-                .font(.system(size: 52))
+                .font(.system(size: 56))
                 .foregroundColor(Color.geckoGreen.opacity(0.6))
+                .offset(y: floatOffset)
+                .onAppear {
+                    withAnimation(
+                        .easeInOut(duration: 2.0)
+                        .repeatForever(autoreverses: true)
+                    ) {
+                        floatOffset = -8
+                    }
+                }
+
             Text(title)
                 .font(.title3.weight(.bold))
                 .multilineTextAlignment(.center)
@@ -30,6 +42,7 @@ struct EmptyStateView: View {
                         .background(Color.geckoGreen)
                         .clipShape(Capsule())
                 }
+                .bouncePress()
                 .padding(.top, 4)
             }
         }

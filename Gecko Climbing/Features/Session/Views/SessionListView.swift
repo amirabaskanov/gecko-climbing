@@ -12,6 +12,7 @@ struct SessionListView: View {
     @State private var showNewSession = false
     @State private var router = TabRouter<SessionRoute>()
     @State private var error: Error?
+    @State private var appeared = false
 
     var body: some View {
         NavigationStack(path: $router.path) {
@@ -24,7 +25,8 @@ struct SessionListView: View {
                 }
             }
             .navigationTitle("My Sessions")
-            .toolbarBackground(Color.geckoBackground, for: .navigationBar)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color.surfaceBackground, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
@@ -47,9 +49,13 @@ struct SessionListView: View {
             }
         }
         .sheet(isPresented: $showNewSession) {
-            NewSessionView { session in
-                viewModel?.sessions.insert(session, at: 0)
-            }
+            NewSessionView(
+                climbCount: .constant(0),
+                finishTrigger: UUID(),
+                onSessionSaved: { session in
+                    viewModel?.sessions.insert(session, at: 0)
+                }
+            )
         }
         .onAppear {
             if viewModel == nil {
@@ -81,15 +87,17 @@ struct SessionListView: View {
                 ) { showNewSession = true }
             } else {
                 List {
-                    ForEach(vm.sessions) { session in
+                    ForEach(Array(vm.sessions.enumerated()), id: \.element.id) { index, session in
                         Button {
                             router.push(.sessionDetail(sessionId: session.sessionId))
                         } label: {
                             SessionRowView(session: session)
                         }
+                        .buttonStyle(.plain)
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                        .staggeredAppear(index: index, appeared: appeared)
                     }
                     .onDelete { offsets in
                         for idx in offsets {
@@ -99,10 +107,13 @@ struct SessionListView: View {
                     }
                 }
                 .listStyle(.plain)
-                .background(Color.geckoBackground)
+                .background(Color.surfaceBackground)
+                .onAppear {
+                    withAnimation { appeared = true }
+                }
             }
         }
-        .background(Color.geckoBackground)
+        .background(Color.surfaceBackground)
         .refreshable { await vm.loadSessions() }
         .errorAlert(error: Binding(get: { vm.error }, set: { _ in }))
     }
@@ -111,40 +122,61 @@ struct SessionListView: View {
 struct SessionRowView: View {
     let session: SessionModel
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(session.gymName)
-                        .font(.headline)
-                    Text(session.date.sessionDateFormatted)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                Spacer()
-                if !session.highestGrade.isEmpty {
-                    GradeBadge(grade: session.highestGrade, isCompleted: true)
-                }
-            }
+    private var gradeColor: Color {
+        session.highestGrade.isEmpty ? .secondary : Color.gradeColor(for: session.highestGradeNumeric)
+    }
 
-            HStack(spacing: 12) {
-                if session.flashCount > 0 {
-                    Label("\(session.flashCount)", systemImage: "bolt.fill")
-                        .foregroundColor(Color.geckoFlashGold)
+    var body: some View {
+        HStack(spacing: 0) {
+            // Left accent stripe
+            RoundedRectangle(cornerRadius: 2)
+                .fill(gradeColor)
+                .frame(width: 4)
+                .padding(.vertical, 8)
+
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(session.gymName)
+                            .font(.headline)
+                        Text(session.date.sessionDateFormatted)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    Spacer()
+                    if !session.highestGrade.isEmpty {
+                        GradeBadge(grade: session.highestGrade, isCompleted: true)
+                    }
                 }
-                Label("\(session.completedClimbs) sends", systemImage: "checkmark.circle.fill")
-                    .foregroundColor(Color.geckoGreen)
-                if session.projectCount > 0 {
-                    Label("\(session.projectCount)", systemImage: "wrench.and.screwdriver.fill")
-                        .foregroundColor(Color.geckoProjectBlue)
+
+                HStack(spacing: 8) {
+                    if session.flashCount > 0 {
+                        statPill(icon: "bolt.fill", text: "\(session.flashCount)", color: .geckoFlashGold)
+                    }
+                    statPill(icon: "checkmark.circle.fill", text: "\(session.completedClimbs) sends", color: .geckoGreen)
+                    if session.attemptCount > 0 {
+                        statPill(icon: "arrow.trianglehead.counterclockwise", text: "\(session.attemptCount)", color: .geckoAttemptBlue)
+                    }
+                    Spacer()
+                    statPill(icon: "clock", text: session.durationMinutes.durationFormatted, color: .secondary)
                 }
-                Spacer()
-                Label(session.durationMinutes.durationFormatted, systemImage: "clock")
-                    .foregroundColor(.secondary)
             }
-            .font(.caption.weight(.medium))
+            .padding()
         }
-        .padding()
         .cardStyle()
+    }
+
+    private func statPill(icon: String, text: String, color: Color) -> some View {
+        HStack(spacing: 3) {
+            Image(systemName: icon)
+                .font(.system(size: 10, weight: .bold))
+            Text(text)
+                .font(.caption.weight(.semibold))
+        }
+        .foregroundColor(color)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(color.opacity(0.1))
+        .clipShape(Capsule())
     }
 }

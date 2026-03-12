@@ -13,7 +13,7 @@ struct ClimbDTO: Codable, Identifiable {
     let loggedAt: Date
 
     func toModel() -> ClimbModel {
-        let climbOutcome = ClimbOutcome(rawValue: outcome) ?? (isCompleted ? .sent : .fail)
+        let climbOutcome = ClimbOutcome.fromString(outcome)
         return ClimbModel(
             climbId: id ?? UUID().uuidString,
             sessionId: sessionId,

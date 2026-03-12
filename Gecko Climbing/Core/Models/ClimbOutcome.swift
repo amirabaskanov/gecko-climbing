@@ -1,16 +1,29 @@
 import SwiftUI
 
 enum ClimbOutcome: String, Codable, CaseIterable, Identifiable {
-    case flash, sent, project, fail
+    case flash, sent, project, attempt
 
     var id: String { rawValue }
+
+    /// Custom decoding to handle legacy "fail" values stored in SwiftData
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let raw = try container.decode(String.self)
+        self = ClimbOutcome.fromString(raw)
+    }
+
+    /// Resolve legacy "fail" strings to .attempt
+    static func fromString(_ raw: String) -> ClimbOutcome {
+        if raw == "fail" { return .attempt }
+        return ClimbOutcome(rawValue: raw) ?? .attempt
+    }
 
     var label: String {
         switch self {
         case .flash:   return "Flash"
         case .sent:    return "Sent"
         case .project: return "Project"
-        case .fail:    return "Fail"
+        case .attempt: return "Attempt"
         }
     }
 
@@ -19,7 +32,7 @@ enum ClimbOutcome: String, Codable, CaseIterable, Identifiable {
         case .flash:   return "bolt.fill"
         case .sent:    return "checkmark.circle.fill"
         case .project: return "wrench.and.screwdriver.fill"
-        case .fail:    return "xmark.circle.fill"
+        case .attempt: return "arrow.trianglehead.counterclockwise"
         }
     }
 
@@ -28,14 +41,14 @@ enum ClimbOutcome: String, Codable, CaseIterable, Identifiable {
         case .flash:   return .geckoFlashGold
         case .sent:    return .geckoGreen
         case .project: return .geckoProjectBlue
-        case .fail:    return .geckoOrange
+        case .attempt: return .geckoAttemptBlue
         }
     }
 
     var isCompleted: Bool {
         switch self {
         case .flash, .sent: return true
-        case .project, .fail: return false
+        case .project, .attempt: return false
         }
     }
 
@@ -43,7 +56,7 @@ enum ClimbOutcome: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .flash: return 1
         case .sent:  return 2
-        case .project, .fail: return 1
+        case .project, .attempt: return 1
         }
     }
 
@@ -51,7 +64,7 @@ enum ClimbOutcome: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .flash: return 1
         case .sent:  return 2
-        case .project, .fail: return 1
+        case .project, .attempt: return 1
         }
     }
 }

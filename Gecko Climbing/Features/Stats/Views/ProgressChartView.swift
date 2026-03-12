@@ -4,6 +4,8 @@ import Charts
 struct ProgressChartView: View {
     let data: [SessionProgress]
 
+    @State private var appeared = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Grade Progress")
@@ -24,13 +26,14 @@ struct ProgressChartView: View {
                     )
                     .foregroundStyle(Color.geckoGreen)
                     .interpolationMethod(.catmullRom)
+                    .lineStyle(StrokeStyle(lineWidth: 2.5))
 
                     PointMark(
                         x: .value("Date", item.date),
                         y: .value("Grade", item.highestGradeNumeric)
                     )
                     .foregroundStyle(Color.gradeColor(for: item.highestGradeNumeric))
-                    .symbolSize(60)
+                    .symbolSize(appeared ? 60 : 0)
                 }
                 .chartYAxis {
                     AxisMarks(values: .stride(by: 1)) { value in
@@ -57,6 +60,11 @@ struct ProgressChartView: View {
                 }
                 .frame(height: 200)
                 .padding(.horizontal)
+                .onAppear {
+                    withAnimation(.geckoSpring.delay(0.4)) {
+                        appeared = true
+                    }
+                }
             }
         }
         .padding(.vertical)

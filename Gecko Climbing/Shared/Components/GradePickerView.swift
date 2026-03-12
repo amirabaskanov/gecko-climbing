@@ -36,20 +36,41 @@ struct GradeChip: View {
         Button(action: onTap) {
             Text(grade)
                 .font(.system(size: 16, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+                .foregroundColor(isSelected ? .white : color)
                 .padding(.horizontal, 18)
-                .padding(.vertical, 12)
+                .padding(.vertical, 14)
+                .frame(minHeight: 52)
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(isSelected ? color : color.opacity(0.35))
+                        .fill(isSelected ? color : Color.surface)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 20)
-                                .stroke(isSelected ? color : Color.clear, lineWidth: 2)
+                            isSelected ?
+                                AnyView(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .fill(
+                                            LinearGradient(
+                                                colors: [Color.white.opacity(0.25), Color.clear],
+                                                startPoint: .top,
+                                                endPoint: .center
+                                            )
+                                        )
+                                )
+                            : AnyView(EmptyView())
                         )
                 )
-                .scaleEffect(isSelected ? 1.1 : 1.0)
-                .animation(.bouncy, value: isSelected)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(isSelected ? Color.clear : color.opacity(0.4), lineWidth: 1.5)
+                )
+                .shadow(
+                    color: isSelected ? color.opacity(0.4) : .clear,
+                    radius: isSelected ? 6 : 0,
+                    x: 0, y: isSelected ? 3 : 0
+                )
+                .scaleEffect(isSelected ? 1.05 : 1.0)
+                .animation(.geckoSnappy, value: isSelected)
         }
+        .buttonStyle(.plain)
     }
 }
 
@@ -87,7 +108,11 @@ struct GradeBadge: View {
             .padding(size.padding)
             .background(
                 RoundedRectangle(cornerRadius: 20)
-                    .fill(color)
+                    .fill(
+                        size == .large && isCompleted
+                            ? AnyShapeStyle(Color.gradeGradient(for: numeric))
+                            : AnyShapeStyle(color)
+                    )
             )
     }
 }

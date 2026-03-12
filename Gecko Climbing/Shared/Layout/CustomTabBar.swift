@@ -26,60 +26,108 @@ enum AppTab: Int, CaseIterable {
 
 struct CustomTabBar: View {
     @Binding var selectedTab: AppTab
+    var logClimbCount: Int = 0
     let onLogTap: () -> Void
+    var onFinishTap: (() -> Void)?
+
+    @State private var logPulse = false
+
+    private var isOnLogTab: Bool { selectedTab == .log }
+    private var hasClimbs: Bool { logClimbCount > 0 }
 
     var body: some View {
         HStack(spacing: 0) {
             ForEach(AppTab.allCases, id: \.rawValue) { tab in
                 if tab == .log {
-                    logButton
+                    centerButton
                 } else {
                     tabButton(tab)
                 }
             }
         }
-        .padding(.top, 10)
+        .padding(.horizontal, 8)
+        .padding(.top, 12)
         .padding(.bottom, 8)
         .background(
-            Color.white
-                .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: -2)
-                .ignoresSafeArea(edges: .bottom)
+            Capsule()
+                .fill(.ultraThinMaterial)
+                .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: -2)
+                .shadow(color: .black.opacity(0.04), radius: 2, x: 0, y: -1)
         )
+        .padding(.horizontal, 24)
+        .padding(.bottom, 8)
     }
 
     private func tabButton(_ tab: AppTab) -> some View {
         Button {
-            withAnimation(.easeInOut(duration: 0.15)) {
+            withAnimation(.geckoSnappy) {
                 selectedTab = tab
             }
         } label: {
             VStack(spacing: 4) {
                 Image(systemName: tab.icon)
                     .font(.system(size: 20))
+                    .scaleEffect(selectedTab == tab ? 1.1 : 1.0)
                 Text(tab.label)
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.system(size: 10, weight: selectedTab == tab ? .bold : .medium))
             }
             .foregroundColor(selectedTab == tab ? Color.geckoGreen : .secondary)
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .animation(.geckoSnappy, value: selectedTab)
     }
 
-    private var logButton: some View {
-        Button(action: onLogTap) {
+    private var centerButton: some View {
+        Button {
+            if isOnLogTab {
+                onFinishTap?()
+            } else {
+                onLogTap()
+            }
+        } label: {
             ZStack {
                 Circle()
-                    .fill(Color.geckoGreen)
-                    .frame(width: 52, height: 52)
-                    .shadow(color: Color.geckoGreen.opacity(0.35), radius: 6, x: 0, y: 3)
+                    .fill(centerButtonColor)
+                    .frame(width: 56, height: 56)
+                    .shadow(
+                        color: centerButtonColor.opacity(isOnLogTab && !hasClimbs ? 0.15 : (logPulse ? 0.4 : 0.2)),
+                        radius: logPulse && !isOnLogTab ? 10 : 6,
+                        x: 0, y: 3
+                    )
 
-                Image(systemName: "plus")
-                    .font(.system(size: 24, weight: .bold))
+                Image(systemName: centerButtonIcon)
+                    .font(.system(size: isOnLogTab ? 22 : 26, weight: .bold))
                     .foregroundColor(.white)
+                    .contentTransition(.symbolEffect(.replace))
             }
-            .offset(y: -14)
+            .offset(y: -18)
+            .onAppear {
+                withAnimation(
+                    .easeInOut(duration: 2.0)
+                    .repeatForever(autoreverses: true)
+                ) {
+                    logPulse = true
+                }
+            }
         }
         .frame(maxWidth: .infinity)
+        .animation(.geckoSpring, value: isOnLogTab)
+        .animation(.geckoSpring, value: hasClimbs)
+    }
+
+    private var centerButtonIcon: String {
+        if isOnLogTab {
+            return hasClimbs ? "checkmark" : "xmark"
+        }
+        return "plus"
+    }
+
+    private var centerButtonColor: Color {
+        if isOnLogTab {
+            return hasClimbs ? Color.geckoGreen : Color.secondary
+        }
+        return Color.geckoGreen
     }
 }

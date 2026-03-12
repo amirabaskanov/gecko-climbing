@@ -5,6 +5,7 @@ import Observation
 final class ProfileViewModel {
     var user: UserModel?
     var recentSessions: [SessionModel] = []
+    var allSessions: [SessionModel] = []
     var isLoading = false
     var error: Error?
 
@@ -34,6 +35,7 @@ final class ProfileViewModel {
         do {
             let (u, s) = try await (userTask, sessionsTask)
             user = u
+            allSessions = s
             recentSessions = Array(s.prefix(10))
             editDisplayName = u.displayName
             editBio = u.bio
@@ -41,6 +43,43 @@ final class ProfileViewModel {
             self.error = error
         }
         isLoading = false
+    }
+
+    /// Consecutive weeks (ending with the current or most recent week) that have at least one session.
+    var weeklyStreak: Int {
+        guard !allSessions.isEmpty else { return 0 }
+
+        let calendar = Calendar.current
+
+        // Collect unique week identifiers (year + weekOfYear) from all sessions
+        var weeksWithSessions = Set<DateComponents>()
+        for session in allSessions {
+            let comps = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: session.date)
+            weeksWithSessions.insert(comps)
+        }
+
+        // Walk backwards from the current week
+        let now = Date()
+        var currentWeek = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)
+        var streak = 0
+
+        // If the current week has no session, start from the previous week
+        if !weeksWithSessions.contains(currentWeek) {
+            guard let prevDate = calendar.date(byAdding: .weekOfYear, value: -1, to: now) else { return 0 }
+            currentWeek = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: prevDate)
+            // If that week also has no session, streak is 0
+            guard weeksWithSessions.contains(currentWeek) else { return 0 }
+        }
+
+        // Count consecutive weeks going backwards
+        while weeksWithSessions.contains(currentWeek) {
+            streak += 1
+            guard let weekStart = calendar.date(from: currentWeek),
+                  let prevDate = calendar.date(byAdding: .weekOfYear, value: -1, to: weekStart) else { break }
+            currentWeek = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: prevDate)
+        }
+
+        return streak
     }
 
     func saveProfile() async {

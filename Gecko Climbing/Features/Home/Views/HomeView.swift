@@ -5,6 +5,7 @@ struct HomeView: View {
     @Environment(AuthViewModel.self) private var authViewModel
     @State private var viewModel: HomeViewModel?
     @State private var router = TabRouter<HomeRoute>()
+    @State private var appeared = false
 
     var body: some View {
         NavigationStack(path: $router.path) {
@@ -17,7 +18,8 @@ struct HomeView: View {
                 }
             }
             .navigationTitle("Feed")
-            .toolbarBackground(Color.geckoBackground, for: .navigationBar)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color.surfaceBackground, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .navigationDestination(for: HomeRoute.self) { route in
                 switch route {
@@ -54,7 +56,7 @@ struct HomeView: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 12) {
-                        ForEach(vm.posts) { post in
+                        ForEach(Array(vm.posts.enumerated()), id: \.element.id) { index, post in
                             FeedCardView(
                                 post: post,
                                 onLike: { Task { await vm.toggleLike(post) } },
@@ -64,14 +66,18 @@ struct HomeView: View {
                                 router.push(.postDetail(postId: post.postId))
                             }
                             .padding(.horizontal, 16)
+                            .staggeredAppear(index: index, appeared: appeared)
                         }
                     }
                     .padding(.vertical, 12)
                 }
-                .background(Color.geckoBackground)
+                .background(Color.surfaceBackground)
                 .refreshable { await vm.loadFeed() }
+                .onAppear {
+                    withAnimation { appeared = true }
+                }
             }
         }
-        .background(Color.geckoBackground)
+        .background(Color.surfaceBackground)
     }
 }
