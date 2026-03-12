@@ -1,0 +1,33 @@
+# Xcode
+DerivedData/
+build/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+xcuserdata/
+*.xcuserstate
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Packages/
+
+# CocoaPods (if ever used)
+Pods/
+
+# macOS
+.DS_Store
+*.swp
+*~
+
+# Tool configs
+.xcodebuildmcp/
+
+# Secrets / keys
+*.plist.bak
+GoogleService-Info-*.plist
+
+# Claude Code
+.claude/
