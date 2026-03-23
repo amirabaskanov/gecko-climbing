@@ -3,8 +3,8 @@ import SwiftUI
 struct ConfettiView: View {
     @Binding var isActive: Bool
     var colors: [Color] = [
-        .geckoPrimary, .geckoFlashGold, .geckoProjectBlue,
-        .geckoOrange, .geckoPink, Color(hex: "#FFC107"),
+        .geckoPrimary, .geckoFlashGold, .geckoAttemptBlue,
+        .geckoOrange, .geckoMint, Color(hex: "#FFC107"),
         Color(hex: "#9C27B0"), Color(hex: "#FF9800")
     ]
     var particleCount: Int = 60

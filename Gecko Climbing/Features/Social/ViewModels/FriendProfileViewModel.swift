@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 
-@Observable
+@Observable @MainActor
 final class FriendProfileViewModel {
     var user: UserModel?
     var sessions: [SessionModel] = []
@@ -12,11 +12,13 @@ final class FriendProfileViewModel {
     private let uid: String
     private let userRepository: any UserRepositoryProtocol
     private let sessionRepository: any SessionRepositoryProtocol
+    var onFollowChanged: ((Bool) -> Void)?
 
-    init(uid: String, userRepository: any UserRepositoryProtocol, sessionRepository: any SessionRepositoryProtocol) {
+    init(uid: String, userRepository: any UserRepositoryProtocol, sessionRepository: any SessionRepositoryProtocol, onFollowChanged: ((Bool) -> Void)? = nil) {
         self.uid = uid
         self.userRepository = userRepository
         self.sessionRepository = sessionRepository
+        self.onFollowChanged = onFollowChanged
     }
 
     func load() async {
@@ -30,6 +32,13 @@ final class FriendProfileViewModel {
             user = u
             sessions = s
             isFollowing = f
+            // Reconcile follow counts in background to fix any drift
+            Task {
+                try? await userRepository.reconcileFollowCounts(uid: uid)
+                if let refreshed = try? await userRepository.fetchUser(uid: uid) {
+                    self.user = refreshed
+                }
+            }
         } catch {
             self.error = error
         }
@@ -37,7 +46,7 @@ final class FriendProfileViewModel {
     }
 
     func toggleFollow() async {
-        guard let user else { return }
+        guard user != nil else { return }
         do {
             if isFollowing {
                 try await userRepository.unfollow(targetUID: uid)
@@ -47,7 +56,7 @@ final class FriendProfileViewModel {
                 self.user?.followersCount = (self.user?.followersCount ?? 0) + 1
             }
             isFollowing.toggle()
-            _ = user
+            onFollowChanged?(isFollowing)
         } catch {
             self.error = error
         }

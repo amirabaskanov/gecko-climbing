@@ -1,133 +1,333 @@
 import SwiftUI
-import Charts
 
 struct FeedCardView: View {
     let post: PostModel
+    var currentUserId: String = ""
     let onLike: () -> Void
+    let onComment: () -> Void
     let onUserTap: () -> Void
+    var onCardTap: (() -> Void)?
 
     @State private var heartScale: CGFloat = 1.0
+    @State private var currentPhotoIndex = 0
+    @State private var showDoubleTapHeart = false
+    @State private var captionExpanded = false
 
-    var body: some View {
-        HStack(spacing: 0) {
-            // Left accent stripe
-            if !post.topGrade.isEmpty {
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(Color.gradeColor(for: post.topGradeNumeric))
-                    .frame(width: 4)
-                    .padding(.vertical, 8)
-            }
-
-            VStack(alignment: .leading, spacing: 12) {
-                // Header
-                HStack(spacing: 10) {
-                    Button(action: onUserTap) {
-                        AvatarView(url: post.userProfileImageURL, size: 42, name: post.userDisplayName)
-                    }
-
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(post.userDisplayName)
-                            .font(.subheadline.weight(.semibold))
-                        HStack(spacing: 4) {
-                            Text(post.gymName)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Text("·")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Text(post.createdAt.relativeFormatted)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    Spacer()
-
-                    // Top send badge
-                    if !post.topGrade.isEmpty {
-                        VStack(spacing: 1) {
-                            GradeBadge(grade: post.topGrade, isCompleted: true, size: .medium)
-                            Text("top send")
-                                .font(.system(size: 9, weight: .medium))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
-
-                // Caption
-                if !post.caption.isEmpty {
-                    Text(post.caption)
-                        .font(.subheadline)
-                        .lineLimit(3)
-                }
-
-                // Mini grade pyramid
-                if !post.gradeCounts.isEmpty {
-                    miniPyramid
-                }
-
-                // Stats row
-                HStack(spacing: 16) {
-                    Label("\(post.totalClimbs) climbs", systemImage: "figure.climbing")
-                        .font(.caption.weight(.medium))
-                        .foregroundColor(.secondary)
-                    Spacer()
-
-                    // Like button with animation
-                    Button {
-                        onLike()
-                        withAnimation(.geckoSpring) {
-                            heartScale = 1.3
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                            withAnimation(.geckoSpring) {
-                                heartScale = 1.0
-                            }
-                        }
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: post.isLikedByCurrentUser ? "heart.fill" : "heart")
-                                .foregroundColor(post.isLikedByCurrentUser ? .red : .secondary)
-                                .scaleEffect(heartScale)
-                            Text("\(post.likesCount)")
-                                .font(.caption.weight(.medium))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .buttonStyle(.plain)
-
-                    HStack(spacing: 4) {
-                        Image(systemName: "bubble.left")
-                            .foregroundColor(.secondary)
-                        Text("\(post.commentsCount)")
-                            .font(.caption.weight(.medium))
-                            .foregroundColor(.secondary)
-                    }
-                }
-            }
-            .padding()
-        }
-        .cardStyle()
+    private var photos: [String] {
+        if !post.imageURLs.isEmpty { return post.imageURLs }
+        if let url = post.imageURL, !url.isEmpty { return [url] }
+        return []
     }
 
-    // Compact grade distribution bars
-    private var miniPyramid: some View {
-        let sorted = post.gradeCounts
-            .map { (grade: $0.key, count: $0.value, numeric: VGrade.numeric(for: $0.key)) }
-            .sorted { $0.numeric < $1.numeric }
-        let maxCount = sorted.map { $0.count }.max() ?? 1
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Header
+            headerSection
+                .padding(.horizontal, 16)
+                .padding(.top, 16)
+                .padding(.bottom, 12)
 
-        return HStack(alignment: .bottom, spacing: 4) {
-            ForEach(sorted, id: \.grade) { item in
+            // Photos (swipeable, double-tap to like with heart overlay)
+            if !photos.isEmpty {
+                photoSection
+                    .overlay {
+                        // Double-tap heart animation
+                        Image(systemName: "heart.fill")
+                            .font(.system(size: 64))
+                            .foregroundStyle(.white)
+                            .shadow(color: .black.opacity(0.3), radius: 8)
+                            .scaleEffect(showDoubleTapHeart ? 1.0 : 0.3)
+                            .opacity(showDoubleTapHeart ? 1 : 0)
+                    }
+                    .onTapGesture(count: 2) { doubleTapLike() }
+                    .padding(.bottom, 12)
+            }
+
+            // Caption + sends + footer
+            VStack(alignment: .leading, spacing: 0) {
+                if !post.caption.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(post.caption)
+                            .font(.subheadline)
+                            .lineLimit(captionExpanded ? nil : 3)
+
+                        if post.caption.count > 120 && !captionExpanded {
+                            Button("Show more") {
+                                withAnimation(.geckoSnappy) { captionExpanded = true }
+                            }
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(Color.geckoPrimary)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 12)
+                }
+
+                if !post.gradeCounts.isEmpty {
+                    sendsSection
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 12)
+                }
+
+                footerSection
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 16)
+            }
+        }
+        .cardStyle()
+        .contentShape(Rectangle())
+        .onTapGesture(count: 2) { doubleTapLike() }
+        .onTapGesture(count: 1) { onCardTap?() }
+    }
+
+    private func doubleTapLike() {
+        guard !post.isLikedByCurrentUser else { return }
+        onLike()
+        withAnimation(.geckoSpring) {
+            heartScale = 1.3
+            showDoubleTapHeart = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            withAnimation(.geckoSpring) { heartScale = 1.0 }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            withAnimation(.easeOut(duration: 0.3)) { showDoubleTapHeart = false }
+        }
+    }
+
+    // MARK: - Header
+
+    private var headerSection: some View {
+        HStack(spacing: 10) {
+            Button(action: onUserTap) {
+                AvatarView(url: post.userProfileImageURL, size: 42, name: post.userDisplayName)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 4) {
+                    Text(post.userDisplayName)
+                        .font(.subheadline.weight(.semibold))
+                    if post.userId == currentUserId {
+                        Text("(you)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                HStack(spacing: 4) {
+                    Text(post.gymName)
+                    Text("·")
+                    Text(post.createdAt.relativeFormatted)
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            // Top send badge
+            if !post.topGrade.isEmpty {
                 VStack(spacing: 2) {
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(Color.gradeColor(for: item.numeric))
-                        .frame(width: 22, height: CGFloat(item.count) / CGFloat(maxCount) * 40 + 8)
-                    Text(item.grade)
-                        .font(.system(size: 8, weight: .bold))
-                        .foregroundColor(.secondary)
+                    Text(post.topGrade)
+                        .font(.system(size: 20, weight: .black, design: .rounded))
+                        .foregroundStyle(.white)
+                    Text("TOP SEND")
+                        .font(.system(size: 7, weight: .bold))
+                        .foregroundStyle(.white.opacity(0.85))
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color.gradeColor(for: post.topGradeNumeric), in: RoundedRectangle(cornerRadius: 12))
+            }
+        }
+    }
+
+    // MARK: - Photos
+
+    private var photoSection: some View {
+        TabView(selection: $currentPhotoIndex) {
+            ForEach(Array(photos.enumerated()), id: \.offset) { index, url in
+                AsyncImage(url: URL(string: url)) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 280)
+                            .clipped()
+                    case .failure:
+                        photoPlaceholder
+                    case .empty:
+                        ProgressView()
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 280)
+                            .background(Color.gray.opacity(0.08))
+                    @unknown default:
+                        photoPlaceholder
+                    }
+                }
+                .tag(index)
+            }
+        }
+        .tabViewStyle(.page(indexDisplayMode: photos.count > 1 ? .automatic : .never))
+        .frame(height: 280)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(.horizontal, 16)
+    }
+
+    private var photoPlaceholder: some View {
+        Rectangle()
+            .fill(Color.gray.opacity(0.08))
+            .frame(height: 280)
+            .overlay(
+                VStack(spacing: 8) {
+                    Image(systemName: "photo.on.rectangle")
+                        .foregroundStyle(.gray.opacity(0.35))
+                        .font(.title)
+                    Text("Photo unavailable")
+                        .font(.caption2)
+                        .foregroundStyle(.gray.opacity(0.4))
+                }
+            )
+    }
+
+    // MARK: - Sends Section
+
+    /// Max pills that fit without scrolling (~8 at 42pt each + spacing in a card)
+    private let maxUnbundledPills = 8
+
+    private var gradeSequence: [String] {
+        if !post.gradeSequence.isEmpty { return post.gradeSequence }
+        // Fallback for older posts without gradeSequence
+        return post.gradeCounts
+            .sorted { VGrade.numeric(for: $0.key) < VGrade.numeric(for: $1.key) }
+            .flatMap { Array(repeating: $0.key, count: $0.value) }
+    }
+
+    /// Groups consecutive identical grades only when the session is too long to show unbundled
+    private var gradeChips: [(grade: String, count: Int, index: Int)] {
+        let sequence = gradeSequence
+
+        // Small sessions: show every pill individually
+        if sequence.count <= maxUnbundledPills {
+            return sequence.enumerated().map { (grade: $1, count: 1, index: $0) }
+        }
+
+        // Large sessions: bundle consecutive identical grades
+        var chips: [(grade: String, count: Int, index: Int)] = []
+        for grade in sequence {
+            if let last = chips.last, last.grade == grade {
+                chips[chips.count - 1].count += 1
+            } else {
+                chips.append((grade: grade, count: 1, index: chips.count))
+            }
+        }
+        return chips
+    }
+
+    private var sendsSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("SENDS THIS SESSION")
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(.secondary)
+                .tracking(0.5)
+
+            ScrollView(.horizontal) {
+                HStack(alignment: .bottom, spacing: 6) {
+                    ForEach(gradeChips, id: \.index) { chip in
+                        gradePill(grade: chip.grade, count: chip.count)
+                    }
+                }
+            }
+            .scrollIndicators(.hidden)
+        }
+    }
+
+    private func gradePill(grade: String, count: Int) -> some View {
+        let numeric = VGrade.numeric(for: grade)
+        let color = Color.gradeColor(for: numeric)
+        let pillHeight: CGFloat = 32 + CGFloat(min(numeric, 10)) * 2.4
+
+        return VStack(spacing: 4) {
+            RoundedRectangle(cornerRadius: 8)
+                .fill(color.opacity(0.85))
+                .frame(width: 36, height: pillHeight)
+
+            HStack(spacing: 2) {
+                Text(grade)
+                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                    .foregroundStyle(color)
+
+                if count > 1 {
+                    Text("×\(count)")
+                        .font(.system(size: 9, weight: .heavy, design: .rounded))
+                        .foregroundStyle(color.opacity(0.6))
                 }
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // MARK: - Footer
+
+    private var footerSection: some View {
+        HStack(spacing: 10) {
+            // Like button
+            Button {
+                onLike()
+                withAnimation(.geckoSpring) { heartScale = 1.3 }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                    withAnimation(.geckoSpring) { heartScale = 1.0 }
+                }
+            } label: {
+                HStack(spacing: 5) {
+                    Image(systemName: post.isLikedByCurrentUser ? "heart.fill" : "heart")
+                        .font(.system(size: 13))
+                        .foregroundStyle(post.isLikedByCurrentUser ? .red : .secondary)
+                        .scaleEffect(heartScale)
+                    Text("\(post.likesCount)")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 7)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                )
+            }
+            .buttonStyle(.plain)
+
+            // Comment button
+            Button {
+                onComment()
+            } label: {
+                HStack(spacing: 5) {
+                    Image(systemName: "bubble.left")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.secondary)
+                    Text("\(post.commentsCount)")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 7)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                )
+            }
+            .buttonStyle(.plain)
+
+            Spacer()
+
+            // Climb count
+            HStack(spacing: 4) {
+                Image(systemName: "clock")
+                    .font(.system(size: 11))
+                Text("\(post.totalClimbs) climbs")
+                    .font(.caption.weight(.medium))
+            }
+            .foregroundStyle(.secondary)
+        }
     }
 }

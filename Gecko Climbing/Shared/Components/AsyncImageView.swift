@@ -17,7 +17,7 @@ struct AsyncImageView: View {
                 case .empty:
                     ProgressView()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.gray.opacity(0.1))
+                        .background(Color.gray.opacity(0.08))
                 @unknown default:
                     placeholderView
                 }
@@ -32,7 +32,7 @@ struct AsyncImageView: View {
             .fill(Color.gray.opacity(0.15))
             .overlay(
                 Image(systemName: "photo")
-                    .foregroundColor(.gray.opacity(0.4))
+                    .foregroundStyle(.gray.opacity(0.4))
                     .font(.title2)
             )
     }
@@ -70,11 +70,11 @@ struct AvatarView: View {
 
     private var initialsView: some View {
         Circle()
-            .fill(Color.geckoGreen.opacity(0.2))
+            .fill(Color.geckoPrimary.opacity(0.15))
             .overlay(
                 Text(initials)
                     .font(.system(size: size * 0.35, weight: .bold, design: .rounded))
-                    .foregroundColor(Color.geckoGreen)
+                    .foregroundStyle(Color.geckoPrimaryDark)
             )
     }
 

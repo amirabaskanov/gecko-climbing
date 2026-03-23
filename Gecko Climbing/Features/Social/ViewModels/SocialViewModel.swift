@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 
-@Observable
+@Observable @MainActor
 final class SocialViewModel {
     var searchQuery = ""
     var searchResults: [UserModel] = []

@@ -34,7 +34,7 @@ struct SessionListView: View {
                         showNewSession = true
                     } label: {
                         Image(systemName: "plus.circle.fill")
-                            .foregroundColor(Color.geckoGreen)
+                            .foregroundStyle(Color.geckoPrimary)
                             .font(.title3)
                     }
                 }
@@ -61,6 +61,7 @@ struct SessionListView: View {
             if viewModel == nil {
                 let vm = SessionListViewModel(
                     sessionRepository: appEnv.sessionRepository,
+                    postRepository: appEnv.postRepository,
                     userId: authViewModel.currentUserId
                 )
                 viewModel = vm
@@ -76,11 +77,19 @@ struct SessionListView: View {
     private func content(_ vm: SessionListViewModel) -> some View {
         Group {
             if vm.isLoading && vm.sessions.isEmpty {
-                ProgressView("Loading sessions...")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                ScrollView {
+                    LazyVStack(spacing: 12) {
+                        ForEach(0..<4, id: \.self) { _ in
+                            SessionRowSkeleton()
+                                .padding(.horizontal, 16)
+                        }
+                    }
+                    .padding(.vertical, 12)
+                }
+                .background(Color.surfaceBackground)
             } else if vm.sessions.isEmpty {
                 EmptyStateView(
-                    icon: "figure.climbing",
+                    
                     title: "No sessions yet",
                     subtitle: "Tap + to log your first bouldering session",
                     actionLabel: "Start Session"
@@ -107,6 +116,7 @@ struct SessionListView: View {
                     }
                 }
                 .listStyle(.plain)
+                .contentMargins(.bottom, 48)
                 .background(Color.surfaceBackground)
                 .onAppear {
                     withAnimation { appeared = true }
@@ -115,68 +125,128 @@ struct SessionListView: View {
         }
         .background(Color.surfaceBackground)
         .refreshable { await vm.loadSessions() }
-        .errorAlert(error: Binding(get: { vm.error }, set: { _ in }))
+        .errorAlert(error: Binding(get: { vm.error }, set: { vm.error = $0 })) {
+            Task { await vm.loadSessions() }
+        }
     }
 }
 
 struct SessionRowView: View {
     let session: SessionModel
 
-    private var gradeColor: Color {
-        session.highestGrade.isEmpty ? .secondary : Color.gradeColor(for: session.highestGradeNumeric)
+    /// Completed climbs in chronological order (as logged), grouped into consecutive runs
+    private var gradeChips: [(grade: String, numeric: Int, count: Int)] {
+        let completed = session.climbs.filter { $0.climbOutcome.isCompleted }
+        var chips: [(grade: String, numeric: Int, count: Int)] = []
+        for climb in completed {
+            if let last = chips.last, last.numeric == climb.gradeNumeric {
+                chips[chips.count - 1].count += 1
+            } else {
+                chips.append((grade: climb.grade, numeric: climb.gradeNumeric, count: 1))
+            }
+        }
+        return chips
     }
 
     var body: some View {
-        HStack(spacing: 0) {
-            // Left accent stripe
-            RoundedRectangle(cornerRadius: 2)
-                .fill(gradeColor)
-                .frame(width: 4)
-                .padding(.vertical, 8)
+        VStack(alignment: .leading, spacing: 0) {
+            // Header: gym + date + top grade badge
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(session.gymName)
+                        .font(.subheadline.weight(.bold))
 
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(session.gymName)
-                            .font(.headline)
-                        Text(session.date.sessionDateFormatted)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
-                    Spacer()
-                    if !session.highestGrade.isEmpty {
-                        GradeBadge(grade: session.highestGrade, isCompleted: true)
-                    }
+                    Text(session.date.sessionDateFormatted)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
 
-                HStack(spacing: 8) {
-                    if session.flashCount > 0 {
-                        statPill(icon: "bolt.fill", text: "\(session.flashCount)", color: .geckoFlashGold)
-                    }
-                    statPill(icon: "checkmark.circle.fill", text: "\(session.completedClimbs) sends", color: .geckoSentGreen)
-                    if session.attemptCount > 0 {
-                        statPill(icon: "arrow.trianglehead.counterclockwise", text: "\(session.attemptCount)", color: .geckoAttemptBlue)
-                    }
-                    Spacer()
-                    statPill(icon: "clock", text: session.durationMinutes.durationFormatted, color: .secondary)
+                Spacer()
+
+                if !session.highestGrade.isEmpty {
+                    GradeBadge(grade: session.highestGrade, isCompleted: true)
                 }
             }
-            .padding()
+            .padding(.horizontal, 16)
+            .padding(.top, 14)
+            .padding(.bottom, 12)
+
+            // Grade chips — shows what you climbed
+            if !gradeChips.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(gradeChips, id: \.numeric) { chip in
+                            gradeChip(grade: chip.grade, numeric: chip.numeric, count: chip.count)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                }
+                .padding(.bottom, 12)
+            }
+
+            // Footer: outcome counts + duration
+            HStack(spacing: 0) {
+                if session.flashCount > 0 {
+                    miniStat(icon: "bolt.fill", value: "\(session.flashCount)", color: .geckoFlashGold)
+                }
+
+                miniStat(
+                    icon: "checkmark.circle.fill",
+                    value: "\(session.completedClimbs) send\(session.completedClimbs == 1 ? "" : "s")",
+                    color: .geckoSentGreen
+                )
+
+                if session.attemptCount > 0 {
+                    miniStat(icon: "arrow.trianglehead.counterclockwise", value: "\(session.attemptCount)", color: .geckoAttemptBlue)
+                }
+
+                Spacer()
+
+                HStack(spacing: 4) {
+                    Image(systemName: "clock")
+                        .font(.system(size: 10))
+                    Text(session.durationMinutes.durationFormatted)
+                        .font(.caption2.weight(.medium))
+                        .fontDesign(.rounded)
+                }
+                .foregroundStyle(.tertiary)
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 14)
         }
         .cardStyle()
     }
 
-    private func statPill(icon: String, text: String, color: Color) -> some View {
+    // MARK: - Grade Chip
+
+    private func gradeChip(grade: String, numeric: Int, count: Int) -> some View {
+        let color = Color.gradeColor(for: numeric)
+        return HStack(spacing: 4) {
+            Text(grade)
+                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+
+            if count > 1 {
+                Text("\u{00D7}\(count)")
+                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.8))
+            }
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
+        .background(color, in: Capsule())
+    }
+
+    // MARK: - Mini Stat
+
+    private func miniStat(icon: String, value: String, color: Color) -> some View {
         HStack(spacing: 3) {
             Image(systemName: icon)
-                .font(.system(size: 10, weight: .bold))
-            Text(text)
-                .font(.caption.weight(.semibold))
+                .font(.system(size: 9, weight: .bold))
+            Text(value)
+                .font(.caption2.weight(.semibold))
         }
-        .foregroundColor(color)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(color.opacity(0.1))
-        .clipShape(Capsule())
+        .foregroundStyle(color)
+        .padding(.trailing, 10)
     }
 }

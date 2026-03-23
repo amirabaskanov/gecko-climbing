@@ -67,8 +67,12 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
         let uid = authRepository.currentUserId
         guard !uid.isEmpty else { throw UserError.notFound }
 
-        let batch = db.batch()
+        // Guard against duplicate follows — only increment counts if not already following
         let followingRef = usersRef.document(uid).collection("following").document(targetUID)
+        let existingDoc = try await followingRef.getDocument()
+        guard !existingDoc.exists else { return }
+
+        let batch = db.batch()
         let followerRef = usersRef.document(targetUID).collection("followers").document(uid)
 
         batch.setData(["createdAt": FieldValue.serverTimestamp()], forDocument: followingRef)
@@ -83,8 +87,12 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
         let uid = authRepository.currentUserId
         guard !uid.isEmpty else { throw UserError.notFound }
 
-        let batch = db.batch()
+        // Only decrement if the follow relationship actually exists
         let followingRef = usersRef.document(uid).collection("following").document(targetUID)
+        let followDoc = try await followingRef.getDocument()
+        guard followDoc.exists else { return }
+
+        let batch = db.batch()
         let followerRef = usersRef.document(targetUID).collection("followers").document(uid)
 
         batch.deleteDocument(followingRef)
@@ -100,6 +108,19 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
         guard !uid.isEmpty else { return false }
         let doc = try await usersRef.document(uid).collection("following").document(targetUID).getDocument()
         return doc.exists
+    }
+
+    func reconcileFollowCounts(uid: String) async throws {
+        let followersSnapshot = try await usersRef.document(uid).collection("followers").getDocuments()
+        let followingSnapshot = try await usersRef.document(uid).collection("following").getDocuments()
+
+        let actualFollowers = followersSnapshot.documents.count
+        let actualFollowing = followingSnapshot.documents.count
+
+        try await usersRef.document(uid).updateData([
+            "followersCount": actualFollowers,
+            "followingCount": actualFollowing
+        ])
     }
 
     // MARK: - Followers / Following Lists

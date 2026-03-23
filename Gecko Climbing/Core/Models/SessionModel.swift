@@ -60,6 +60,5 @@ final class SessionModel {
 
     var flashCount: Int { climbs.filter { $0.climbOutcome == .flash }.count }
     var sentCount: Int { climbs.filter { $0.climbOutcome == .sent }.count }
-    var projectCount: Int { climbs.filter { $0.climbOutcome == .project }.count }
     var attemptCount: Int { climbs.filter { $0.climbOutcome == .attempt }.count }
 }

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct AttemptBubbleSelector: View {
-    var accentColor: Color = .geckoGreen
+    var accentColor: Color = .geckoPrimary
     let onSelect: (Int) -> Void
 
     @State private var selectedNumber: Int = 2
@@ -17,10 +17,10 @@ struct AttemptBubbleSelector: View {
             HStack(spacing: 4) {
                 Image(systemName: "number.circle.fill")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(accentColor)
+                    .foregroundStyle(accentColor)
                 Text("How many tries?")
                     .font(.subheadline.weight(.semibold))
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
 
             if showCustomField {
@@ -58,7 +58,7 @@ struct AttemptBubbleSelector: View {
             } label: {
                 Text("7+")
                     .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundColor(accentColor)
+                    .foregroundStyle(accentColor)
                     .frame(width: bubbleSize, height: bubbleSize)
                     .background(
                         Circle()
@@ -83,7 +83,7 @@ struct AttemptBubbleSelector: View {
         } label: {
             Text("\(number)")
                 .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundColor(isDefault ? .white : accentColor)
+                .foregroundStyle(isDefault ? .white : accentColor)
                 .frame(width: bubbleSize, height: bubbleSize)
                 .background(
                     Circle()
@@ -119,7 +119,7 @@ struct AttemptBubbleSelector: View {
             } label: {
                 Text("Log")
                     .font(.callout.weight(.bold))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                     .padding(.horizontal, 24)
                     .frame(height: 44)
                     .background(accentColor, in: Capsule())
@@ -133,7 +133,7 @@ struct AttemptBubbleSelector: View {
             } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                     .frame(width: 32, height: 32)
                     .background(Color.surfaceBackground, in: Circle())
             }

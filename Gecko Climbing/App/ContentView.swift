@@ -3,12 +3,7 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         VStack {
-            Image(systemName: "figure.climbing")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Gecko Climbing")
-                .font(.largeTitle)
-                .bold()
+            GeckoLogoView(size: 80, color: .geckoPrimary, showWordmark: true)
         }
         .padding()
     }

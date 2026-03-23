@@ -1,18 +1,26 @@
 import Foundation
 import Observation
 
-@Observable
+@Observable @MainActor
 final class HomeViewModel {
     var posts: [PostModel] = []
     var isLoading = false
     var error: Error?
 
-    private let postRepository: any PostRepositoryProtocol
-    private let userId: String
+    let postRepository: any PostRepositoryProtocol
+    let userId: String
+    var userDisplayName: String = ""
+    var userProfileImageURL: String = ""
 
     init(postRepository: any PostRepositoryProtocol, userId: String) {
         self.postRepository = postRepository
         self.userId = userId
+    }
+
+    func updateCommentCount(postId: String, count: Int) {
+        if let idx = posts.firstIndex(where: { $0.postId == postId }) {
+            posts[idx].commentsCount = count
+        }
     }
 
     func loadFeed() async {
@@ -20,8 +28,25 @@ final class HomeViewModel {
         isLoading = true
         error = nil
         do {
-            posts = try await postRepository.fetchFeed(for: userId)
+            let fetched = try await postRepository.fetchFeed(for: userId)
+            posts = fetched
+            AnalyticsService.capture(.feedLoaded, properties: ["post_count": fetched.count])
+            print("📰 Feed loaded: \(fetched.count) posts for userId: \(userId)")
+
+            // Backfill gradeSequence for posts that don't have it
+            Task {
+                for (idx, post) in fetched.enumerated() where post.gradeSequence.isEmpty && !post.sessionId.isEmpty {
+                    if let sequence = try? await postRepository.backfillGradeSequence(
+                        postId: post.postId, sessionId: post.sessionId
+                    ) {
+                        if let currentIdx = posts.firstIndex(where: { $0.postId == post.postId }) {
+                            posts[currentIdx].gradeSequence = sequence
+                        }
+                    }
+                }
+            }
         } catch {
+            print("❌ Feed load error: \(error)")
             self.error = error
         }
         isLoading = false
@@ -36,8 +61,10 @@ final class HomeViewModel {
         do {
             if wasLiked {
                 try await postRepository.unlikePost(post.postId, userId: userId)
+                AnalyticsService.capture(.postUnliked)
             } else {
                 try await postRepository.likePost(post.postId, userId: userId)
+                AnalyticsService.capture(.postLiked)
             }
         } catch {
             // Revert on failure

@@ -11,6 +11,7 @@ protocol UserRepositoryProtocol: AnyObject {
     func fetchFollowers(uid: String) async throws -> [UserModel]
     func fetchFollowing(uid: String) async throws -> [UserModel]
     func searchUsers(query: String) async throws -> [UserModel]
+    func reconcileFollowCounts(uid: String) async throws
 }
 
 // MARK: - Mock Implementation
@@ -51,6 +52,7 @@ final class MockUserRepository: UserRepositoryProtocol, @unchecked Sendable {
 
     func follow(targetUID: String) async throws {
         try await Task.sleep(nanoseconds: 200_000_000)
+        guard !followingSet.contains(targetUID) else { return }
         followingSet.insert(targetUID)
         if let idx = users.firstIndex(where: { $0.uid == targetUID }) {
             users[idx].followersCount += 1
@@ -86,6 +88,10 @@ final class MockUserRepository: UserRepositoryProtocol, @unchecked Sendable {
             $0.displayName.localizedCaseInsensitiveContains(query) ||
             $0.username.localizedCaseInsensitiveContains(query)
         }.filter { $0.uid != currentUserId }
+    }
+
+    func reconcileFollowCounts(uid: String) async throws {
+        // No-op for mock
     }
 
     private static func makeSeedUsers(currentUserId: String) -> [UserModel] {

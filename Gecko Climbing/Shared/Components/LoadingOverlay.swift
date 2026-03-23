@@ -17,7 +17,7 @@ struct LoadingOverlay: View {
                     .scaleEffect(1.4)
                 Text(message)
                     .font(.subheadline.weight(.medium))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
             }
             .padding(28)
             .background(

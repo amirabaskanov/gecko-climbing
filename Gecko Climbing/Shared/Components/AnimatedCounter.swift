@@ -13,7 +13,7 @@ struct AnimatedCounter: View {
     var body: some View {
         Text("\(displayValue)")
             .font(font)
-            .foregroundColor(color)
+            .foregroundStyle(color)
             .contentTransition(.numericText())
             .onAppear {
                 DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
@@ -51,7 +51,7 @@ struct AnimatedCounterText: View {
     var body: some View {
         Text(value)
             .font(font)
-            .foregroundColor(color)
+            .foregroundStyle(color)
             .scaleEffect(appeared ? 1.0 : 0.5)
             .opacity(appeared ? 1 : 0)
             .onAppear {

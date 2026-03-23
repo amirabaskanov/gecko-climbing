@@ -89,6 +89,10 @@ final class FirestoreSessionRepository: SessionRepositoryProtocol, @unchecked Se
     }
 
     func deleteSession(_ sessionId: String, context: ModelContext) async throws {
+        // Read the session's userId before deleting so we can update stats
+        let sessionDoc = try await sessionsRef.document(sessionId).getDocument()
+        let userId = sessionDoc.data()?["userId"] as? String
+
         // Delete climbs subcollection first
         let climbsSnapshot = try await sessionsRef.document(sessionId)
             .collection("climbs")
@@ -100,6 +104,11 @@ final class FirestoreSessionRepository: SessionRepositoryProtocol, @unchecked Se
         }
         batch.deleteDocument(sessionsRef.document(sessionId))
         try await batch.commit()
+
+        // Update user stats after deletion
+        if let userId, !userId.isEmpty {
+            try await updateUserStats(userId: userId)
+        }
     }
 
     // MARK: - Private
@@ -117,7 +126,9 @@ final class FirestoreSessionRepository: SessionRepositoryProtocol, @unchecked Se
             completedClimbs: data["completedClimbs"] as? Int ?? 0,
             highestGrade: data["highestGrade"] as? String ?? "",
             highestGradeNumeric: data["highestGradeNumeric"] as? Int ?? 0,
-            isSyncedToFirestore: true
+            isSyncedToFirestore: true,
+            isLiveSession: data["isLiveSession"] as? Bool ?? false,
+            startedAt: (data["startedAt"] as? Timestamp)?.dateValue()
         )
     }
 

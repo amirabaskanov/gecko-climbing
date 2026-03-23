@@ -56,6 +56,7 @@ struct CustomTabBar: View {
         )
         .padding(.horizontal, 24)
         .padding(.bottom, 8)
+        .padding(.top, 4)
     }
 
     private func tabButton(_ tab: AppTab) -> some View {
@@ -71,7 +72,7 @@ struct CustomTabBar: View {
                 Text(tab.label)
                     .font(.system(size: 10, weight: selectedTab == tab ? .bold : .medium))
             }
-            .foregroundColor(selectedTab == tab ? Color.geckoGreen : .secondary)
+            .foregroundStyle(selectedTab == tab ? Color.geckoPrimary : .secondary)
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
         }
@@ -99,7 +100,7 @@ struct CustomTabBar: View {
 
                 Image(systemName: centerButtonIcon)
                     .font(.system(size: isOnLogTab ? 22 : 26, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                     .contentTransition(.symbolEffect(.replace))
             }
             .offset(y: -18)
@@ -125,9 +126,6 @@ struct CustomTabBar: View {
     }
 
     private var centerButtonColor: Color {
-        if isOnLogTab {
-            return hasClimbs ? Color.geckoGreen : Color.secondary
-        }
-        return Color.geckoGreen
+        return Color.geckoPrimary
     }
 }

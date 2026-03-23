@@ -75,7 +75,7 @@ struct SignUpView: View {
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color.white)
-                            .foregroundColor(.primary)
+                            .foregroundStyle(.primary)
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                             .shadow(color: .black.opacity(0.10), radius: 4, x: 0, y: 2)
                         }
@@ -87,14 +87,14 @@ struct SignUpView: View {
                     HStack {
                         Rectangle()
                             .frame(height: 1)
-                            .foregroundColor(.secondary.opacity(0.3))
+                            .foregroundStyle(.secondary.opacity(0.3))
                         Text("or sign up with email")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .layoutPriority(1)
                         Rectangle()
                             .frame(height: 1)
-                            .foregroundColor(.secondary.opacity(0.3))
+                            .foregroundStyle(.secondary.opacity(0.3))
                     }
                     .padding(.horizontal, 24)
 
@@ -103,7 +103,7 @@ struct SignUpView: View {
                         inputField("Your Name", text: $displayName, icon: "person.fill")
                         inputField("Email", text: $email, icon: "envelope.fill")
                             .keyboardType(.emailAddress)
-                            .autocapitalization(.none)
+                            .textInputAutocapitalization(.never)
                         secureField("Password", text: $password)
 
                         Button {
@@ -119,8 +119,8 @@ struct SignUpView: View {
                             }
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(canSubmit ? Color.geckoGreen : Color.gray.opacity(0.4))
-                            .foregroundColor(.white)
+                            .background(canSubmit ? Color.geckoPrimary : Color.gray.opacity(0.4))
+                            .foregroundStyle(.white)
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                         }
                         .disabled(!canSubmit)
@@ -130,11 +130,11 @@ struct SignUpView: View {
                     // Sign in link
                     HStack {
                         Text("Already have an account?")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                         Button("Sign In") {
                             withAnimation { showSignUp = false }
                         }
-                        .foregroundColor(Color.geckoGreen)
+                        .foregroundStyle(Color.geckoPrimary)
                         .fontWeight(.semibold)
                     }
                     .font(.subheadline)
@@ -151,26 +151,32 @@ struct SignUpView: View {
     private func inputField(_ placeholder: String, text: Binding<String>, icon: String) -> some View {
         HStack {
             Image(systemName: icon)
-                .foregroundColor(Color.geckoGreen)
+                .foregroundStyle(Color.geckoPrimary)
                 .frame(width: 24)
             TextField(placeholder, text: text)
         }
         .padding()
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.secondary.opacity(0.15), lineWidth: 1)
+        )
     }
 
     private func secureField(_ placeholder: String, text: Binding<String>) -> some View {
         HStack {
             Image(systemName: "lock.fill")
-                .foregroundColor(Color.geckoGreen)
+                .foregroundStyle(Color.geckoPrimary)
                 .frame(width: 24)
             SecureField(placeholder, text: text)
         }
         .padding()
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.secondary.opacity(0.15), lineWidth: 1)
+        )
     }
 }

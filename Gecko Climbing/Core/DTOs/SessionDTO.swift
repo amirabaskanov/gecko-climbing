@@ -12,6 +12,8 @@ struct SessionDTO: Codable, Identifiable {
     let completedClimbs: Int
     let highestGrade: String
     let highestGradeNumeric: Int
+    let isLiveSession: Bool
+    let startedAt: Date?
     let createdAt: Date
 
     func toModel() -> SessionModel {
@@ -27,12 +29,14 @@ struct SessionDTO: Codable, Identifiable {
             completedClimbs: completedClimbs,
             highestGrade: highestGrade,
             highestGradeNumeric: highestGradeNumeric,
-            isSyncedToFirestore: true
+            isSyncedToFirestore: true,
+            isLiveSession: isLiveSession,
+            startedAt: startedAt
         )
     }
 
     func asDictionary() -> [String: Any] {
-        [
+        var dict: [String: Any] = [
             "userId": userId,
             "gymName": gymName,
             "date": date,
@@ -43,8 +47,11 @@ struct SessionDTO: Codable, Identifiable {
             "completedClimbs": completedClimbs,
             "highestGrade": highestGrade,
             "highestGradeNumeric": highestGradeNumeric,
+            "isLiveSession": isLiveSession,
             "createdAt": createdAt
         ]
+        if let startedAt { dict["startedAt"] = startedAt }
+        return dict
     }
 }
 
@@ -62,6 +69,8 @@ extension SessionModel {
             completedClimbs: completedClimbs,
             highestGrade: highestGrade,
             highestGradeNumeric: highestGradeNumeric,
+            isLiveSession: isLiveSession,
+            startedAt: startedAt,
             createdAt: Date()
         )
     }

@@ -2,7 +2,7 @@ import Foundation
 import Observation
 import SwiftData
 
-@Observable
+@Observable @MainActor
 final class NewSessionViewModel {
     // Form fields (deferred to post-save)
     var gymName = ""
@@ -52,14 +52,12 @@ final class NewSessionViewModel {
 
     var flashes: [ClimbModel] { climbs.filter { $0.climbOutcome == .flash } }
     var sends: [ClimbModel] { climbs.filter { $0.climbOutcome == .sent } }
-    var projects: [ClimbModel] { climbs.filter { $0.climbOutcome == .project } }
     var attempts: [ClimbModel] { climbs.filter { $0.climbOutcome == .attempt } }
 
     var climbSummaryText: String {
         var parts: [String] = []
         if !flashes.isEmpty { parts.append("\(flashes.count) flash\(flashes.count == 1 ? "" : "es")") }
         if !sends.isEmpty { parts.append("\(sends.count) send\(sends.count == 1 ? "" : "s")") }
-        if !projects.isEmpty { parts.append("\(projects.count) project\(projects.count == 1 ? "" : "s")") }
         if !attempts.isEmpty { parts.append("\(attempts.count) attempt\(attempts.count == 1 ? "" : "s")") }
         return parts.isEmpty ? "No climbs" : parts.joined(separator: ", ")
     }
@@ -79,6 +77,11 @@ final class NewSessionViewModel {
             attempts: attempts
         )
         climbs.insert(climb, at: 0)
+        AnalyticsService.capture(.climbAdded, properties: [
+            "grade": grade,
+            "outcome": outcome.rawValue,
+            "attempts": attempts
+        ])
     }
 
     func moveClimb(from source: IndexSet, to destination: Int) {
@@ -121,6 +124,12 @@ final class NewSessionViewModel {
 
         do {
             try await sessionRepository.createSession(session, context: context)
+            AnalyticsService.capture(.sessionLogged, properties: [
+                "climb_count": session.climbs.count,
+                "max_grade": session.highestGrade,
+                "gym": session.gymName,
+                "duration_minutes": session.durationMinutes
+            ])
             isLoading = false
             return session
         } catch {

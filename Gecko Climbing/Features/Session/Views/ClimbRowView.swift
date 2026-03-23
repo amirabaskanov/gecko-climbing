@@ -24,23 +24,23 @@ struct ClimbRowView: View {
                     HStack(spacing: 5) {
                         Image(systemName: outcome.icon)
                             .font(.caption.weight(.semibold))
-                            .foregroundColor(outcome.color)
+                            .foregroundStyle(outcome.color)
                         Text(outcome.label)
                             .font(.subheadline.weight(.semibold))
                         if outcome != .flash {
                             Text("· \(climb.attempts) \(climb.attempts == 1 ? "try" : "tries")")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                         }
                     }
                     if outcome == .flash {
                         Text("First try!")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     } else if !climb.notes.isEmpty {
                         Text(climb.notes)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .lineLimit(1)
                     }
                 }
@@ -50,7 +50,7 @@ struct ClimbRowView: View {
                 // Timestamp
                 Text(climb.loggedAt.timeFormatted)
                     .font(.caption2)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)

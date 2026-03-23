@@ -8,11 +8,11 @@ struct WallAnalysisView: View {
 
                 ZStack {
                     Circle()
-                        .fill(Color.geckoGreen.opacity(0.12))
+                        .fill(Color.geckoPrimary.opacity(0.12))
                         .frame(width: 140, height: 140)
                     Image(systemName: "camera.viewfinder")
                         .font(.system(size: 60))
-                        .foregroundColor(Color.geckoGreen)
+                        .foregroundStyle(Color.geckoPrimary)
                 }
 
                 VStack(spacing: 12) {
@@ -21,7 +21,7 @@ struct WallAnalysisView: View {
 
                     Text("Coming in v2")
                         .font(.subheadline.weight(.semibold))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 6)
                         .background(Color.geckoOrange)
@@ -29,7 +29,7 @@ struct WallAnalysisView: View {
 
                     Text("Point your camera at a bouldering wall and Gecko will detect holds, identify routes, and help you plan your next problem.")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
                 }
@@ -54,11 +54,11 @@ struct WallAnalysisView: View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: icon)
                 .font(.title3)
-                .foregroundColor(Color.geckoGreen)
+                .foregroundStyle(Color.geckoPrimary)
                 .frame(width: 28)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).font(.subheadline.weight(.semibold))
-                Text(description).font(.caption).foregroundColor(.secondary)
+                Text(description).font(.caption).foregroundStyle(.secondary)
             }
         }
     }

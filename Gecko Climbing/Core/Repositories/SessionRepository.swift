@@ -46,8 +46,8 @@ final class MockSessionRepository: SessionRepositoryProtocol, @unchecked Sendabl
     private static func makeSeedSessions(userId: String) -> [SessionModel] {
         let grades: [(String, Int, ClimbOutcome)] = [
             ("V3", 3, .flash), ("V4", 4, .sent), ("V4", 4, .attempt),
-            ("V5", 5, .sent), ("V3", 3, .flash), ("V6", 6, .project),
-            ("V2", 2, .flash), ("V5", 5, .attempt), ("V7", 7, .project)
+            ("V5", 5, .sent), ("V3", 3, .flash), ("V6", 6, .attempt),
+            ("V2", 2, .flash), ("V5", 5, .attempt), ("V7", 7, .attempt)
         ]
 
         var sessions: [SessionModel] = []
@@ -65,7 +65,7 @@ final class MockSessionRepository: SessionRepositoryProtocol, @unchecked Sendabl
                 switch outcome {
                 case .flash: attempts = 1
                 case .sent: attempts = Int.random(in: 2...4)
-                case .project, .attempt: attempts = Int.random(in: 1...5)
+                case .attempt: attempts = Int.random(in: 1...5)
                 }
                 let climb = ClimbModel(
                     sessionId: session.sessionId,

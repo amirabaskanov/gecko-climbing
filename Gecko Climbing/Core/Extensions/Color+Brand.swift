@@ -1,23 +1,18 @@
 import SwiftUI
 
 extension Color {
-    // MARK: - Brand Colors (Coral Red)
-    static let geckoPrimary = Color(hex: "#E54B4B")
-    static let geckoPrimaryLight = Color(hex: "#F07070")
-    static let geckoPrimaryDark = Color(hex: "#C93D3D")
-    static let geckoPink = Color(hex: "#F5BDB8")
-    static let geckoMaroon = Color(hex: "#3D1A1A")
-
-    // MARK: - Legacy Brand Aliases
-    static let geckoGreen = geckoPrimary
-    static let geckoGreenLight = geckoPrimaryLight
-    static let geckoGreenDark = geckoPrimaryDark
+    // MARK: - Brand Colors (Vibrant Forest)
+    static let geckoPrimary = Color(hex: "#2A6B55")
+    static let geckoPrimaryLight = Color(hex: "#3D8A6E")
+    static let geckoPrimaryDark = Color(hex: "#1F5242")
+    static let geckoMint = Color(hex: "#B8DFD0")
+    static let geckoDeepForest = Color(hex: "#132E25")
 
     // MARK: - Outcome Colors
     static let geckoSentGreen = Color(hex: "#4CAF50")
     static let geckoSentGreenLight = Color(hex: "#81C784")
-    static let geckoFlashGold = Color(hex: "#FFD700")
-    static let geckoProjectBlue = Color(hex: "#2196F3")
+    static let geckoFlashGold = Color(hex: "#E6AC00")
+    static let geckoFlashGoldLight = Color(hex: "#FFD700")
     static let geckoAttemptBlue = Color(hex: "#42A5F5")
     static let geckoOrange = Color(hex: "#FF6B6B")
 
@@ -25,16 +20,17 @@ extension Color {
     static let geckoBackground = Color(hex: "#FAF8F5")
     static let geckoCard = Color.white
     static let geckoSecondaryText = Color(hex: "#9E9E9E")
-    static let surface = Color.white
-    static let surfaceElevated = Color(hex: "#FAFAF7")
-    static let surfaceBackground = Color(hex: "#FAF8F5")
+    static let geckoSurfaceElevated = Color(hex: "#FAFAF7")
+
+    // Legacy aliases — prefer semantic names above
+    static let surface = geckoCard
+    static let surfaceElevated = geckoSurfaceElevated
+    static let surfaceBackground = geckoBackground
 
     // MARK: - Gradients
     static var geckoPrimaryGradient: LinearGradient {
         LinearGradient(colors: [geckoPrimary, geckoPrimaryDark], startPoint: .top, endPoint: .bottom)
     }
-
-    static var geckoGreenGradient: LinearGradient { geckoPrimaryGradient }
 
     static var warmGlow: LinearGradient {
         LinearGradient(colors: [geckoFlashGold, Color(hex: "#FF9800")], startPoint: .topLeading, endPoint: .bottomTrailing)
@@ -44,11 +40,9 @@ extension Color {
     static func outcomeGradient(for outcome: ClimbOutcome) -> LinearGradient {
         switch outcome {
         case .flash:
-            return LinearGradient(colors: [geckoFlashGold, Color(hex: "#FFA000")], startPoint: .top, endPoint: .bottom)
+            return LinearGradient(colors: [geckoFlashGoldLight, geckoFlashGold], startPoint: .top, endPoint: .bottom)
         case .sent:
             return LinearGradient(colors: [geckoSentGreen, Color(hex: "#388E3C")], startPoint: .top, endPoint: .bottom)
-        case .project:
-            return LinearGradient(colors: [geckoProjectBlue, Color(hex: "#1565C0")], startPoint: .top, endPoint: .bottom)
         case .attempt:
             return LinearGradient(colors: [geckoAttemptBlue, Color(hex: "#1E88E5")], startPoint: .top, endPoint: .bottom)
         }
@@ -122,6 +116,9 @@ enum VGrade {
     }
 
     static func textColor(for gradeNumeric: Int) -> Color {
-        gradeNumeric >= 12 ? .white : .white
+        switch gradeNumeric {
+        case 3...4: return Color(hex: "#3E2723") // dark brown on yellow/amber
+        default:    return .white
+        }
     }
 }

@@ -13,6 +13,7 @@ final class AppEnvironment {
     let userRepository: any UserRepositoryProtocol
     let postRepository: any PostRepositoryProtocol
     let storageRepository: any StorageRepositoryProtocol
+    let feedbackRepository: any FeedbackRepositoryProtocol
 
     init(modelContext: ModelContext) {
         #if DEBUG
@@ -24,6 +25,7 @@ final class AppEnvironment {
             userRepository = MockUserRepository(currentUserId: mockAuth.currentUserId)
             postRepository = MockPostRepository()
             storageRepository = MockStorageRepository()
+            feedbackRepository = MockFeedbackRepository()
             return
         }
         #endif
@@ -35,5 +37,6 @@ final class AppEnvironment {
         userRepository = FirestoreUserRepository(authRepository: firebaseAuth)
         postRepository = FirestorePostRepository(authRepository: firebaseAuth)
         storageRepository = FirebaseStorageRepository()
+        feedbackRepository = FirestoreFeedbackRepository()
     }
 }

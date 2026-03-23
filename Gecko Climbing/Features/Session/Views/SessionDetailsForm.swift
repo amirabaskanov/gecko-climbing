@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import PhotosUI
 
 struct SessionDetailsForm: View {
     let climbCount: Int
@@ -10,9 +11,16 @@ struct SessionDetailsForm: View {
     @Binding var durationMinutes: Int
     @Binding var notes: String
     @Binding var caption: String
+    @Binding var selectedPhotos: [PhotosPickerItem]
+    @Binding var photoImages: [UIImage]
 
     let recentGyms: [String]
+    let isSaving: Bool
     let onSave: () -> Void
+
+    private var isButtonDisabled: Bool {
+        gymName.trimmingCharacters(in: .whitespaces).isEmpty || isSaving
+    }
 
     @State private var showNotes = false
     @State private var showDatePicker = false
@@ -26,10 +34,10 @@ struct SessionDetailsForm: View {
             VStack(spacing: 4) {
                 Text("Session Complete!")
                     .font(.system(size: 24, weight: .black, design: .rounded))
-                    .foregroundColor(.primary)
+                    .foregroundStyle(.primary)
                 Text("\(climbCount) climbs logged")
                     .font(.subheadline.weight(.medium))
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
             .opacity(appeared ? 1 : 0)
             .offset(y: appeared ? 0 : 10)
@@ -39,11 +47,11 @@ struct SessionDetailsForm: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Where did you climb?")
                     .font(.subheadline.weight(.semibold))
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
 
                 HStack(spacing: 8) {
                     Image(systemName: "mappin.circle.fill")
-                        .foregroundColor(.geckoGreen)
+                        .foregroundStyle(Color.geckoPrimary)
                         .font(.system(size: 20))
                     TextField("Gym name", text: $gymName)
                         .font(.body.weight(.medium))
@@ -55,27 +63,33 @@ struct SessionDetailsForm: View {
                 .clipShape(RoundedRectangle(cornerRadius: 14))
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
-                        .stroke(gymFieldFocused ? Color.geckoGreen : Color.geckoGreen.opacity(0.2), lineWidth: gymFieldFocused ? 2 : 1)
+                        .stroke(gymFieldFocused ? Color.geckoPrimary : Color.geckoPrimary.opacity(0.2), lineWidth: gymFieldFocused ? 2 : 1)
                 )
 
-                // Recent gyms chips
-                if !recentGyms.isEmpty && gymName.isEmpty {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(recentGyms, id: \.self) { gym in
-                                Button {
-                                    withAnimation(.geckoSnappy) { gymName = gym }
-                                } label: {
-                                    Text(gym)
-                                        .font(.caption.weight(.semibold))
-                                        .foregroundColor(.geckoGreen)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 7)
-                                        .background(Color.geckoGreen.opacity(0.1), in: Capsule())
-                                        .overlay(
-                                            Capsule()
-                                                .stroke(Color.geckoGreen.opacity(0.2), lineWidth: 1)
-                                        )
+                // Recent gyms chips — show matching or all when empty
+                if !recentGyms.isEmpty {
+                    let filtered = gymName.isEmpty
+                        ? recentGyms
+                        : recentGyms.filter { $0.localizedCaseInsensitiveContains(gymName) && $0 != gymName }
+
+                    if !filtered.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(filtered, id: \.self) { gym in
+                                    Button {
+                                        withAnimation(.geckoSnappy) { gymName = gym }
+                                    } label: {
+                                        Text(gym)
+                                            .font(.caption.weight(.semibold))
+                                            .foregroundStyle(Color.geckoPrimary)
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 7)
+                                            .background(Color.geckoPrimary.opacity(0.1), in: Capsule())
+                                            .overlay(
+                                                Capsule()
+                                                    .stroke(Color.geckoPrimary.opacity(0.2), lineWidth: 1)
+                                            )
+                                    }
                                 }
                             }
                         }
@@ -98,7 +112,7 @@ struct SessionDetailsForm: View {
                         Text(durationMinutes.durationFormatted)
                             .font(.subheadline.weight(.semibold))
                     }
-                    .foregroundColor(.primary)
+                    .foregroundStyle(.primary)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
                     .frame(maxWidth: .infinity)
@@ -116,7 +130,7 @@ struct SessionDetailsForm: View {
                         Text(Calendar.current.isDateInToday(date) ? "Today" : date.dayMonthFormatted)
                             .font(.subheadline.weight(.semibold))
                     }
-                    .foregroundColor(.primary)
+                    .foregroundStyle(.primary)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
                     .frame(maxWidth: .infinity)
@@ -180,18 +194,80 @@ struct SessionDetailsForm: View {
                             Text("Add notes...")
                                 .font(.subheadline)
                         }
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                     }
                 }
             }
             .opacity(appeared ? 1 : 0)
             .animation(.geckoSpring.delay(0.35), value: appeared)
 
+            // Photos
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Photos (optional)")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        // Existing photo thumbnails
+                        ForEach(Array(photoImages.enumerated()), id: \.offset) { index, image in
+                            ZStack(alignment: .topTrailing) {
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 80, height: 80)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+
+                                Button {
+                                    withAnimation(.geckoSnappy) {
+                                        photoImages.remove(at: index)
+                                        if index < selectedPhotos.count {
+                                            selectedPhotos.remove(at: index)
+                                        }
+                                    }
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .font(.system(size: 18))
+                                        .foregroundStyle(.white, .black.opacity(0.6))
+                                }
+                                .offset(x: 4, y: -4)
+                            }
+                        }
+
+                        // Add photo button
+                        if photoImages.count < 5 {
+                            PhotosPicker(
+                                selection: $selectedPhotos,
+                                maxSelectionCount: 5 - photoImages.count,
+                                matching: .images
+                            ) {
+                                VStack(spacing: 6) {
+                                    Image(systemName: "camera.fill")
+                                        .font(.system(size: 20))
+                                    Text("Add")
+                                        .font(.caption2.weight(.medium))
+                                }
+                                .foregroundStyle(.secondary)
+                                .frame(width: 80, height: 80)
+                                .background(Color.surfaceBackground, in: RoundedRectangle(cornerRadius: 10))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [6]))
+                                        .foregroundStyle(.secondary.opacity(0.3))
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            .opacity(appeared ? 1 : 0)
+            .animation(.geckoSpring.delay(0.4), value: appeared)
+
             // Caption for feed post
             VStack(alignment: .leading, spacing: 8) {
                 Text("Feed caption (optional)")
                     .font(.caption.weight(.semibold))
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                 TextField("How was this session?", text: $caption, axis: .vertical)
                     .lineLimit(3, reservesSpace: false)
                     .font(.subheadline)
@@ -207,28 +283,33 @@ struct SessionDetailsForm: View {
             // Save & Share
             Button(action: onSave) {
                 HStack(spacing: 8) {
-                    Image(systemName: "paperplane.fill")
-                    Text("Save & Share")
+                    if isSaving {
+                        ProgressView()
+                            .tint(.white)
+                    } else {
+                        Image(systemName: "paperplane.fill")
+                    }
+                    Text(isSaving ? "Saving..." : "Save & Share")
                         .fontWeight(.bold)
                 }
                 .font(.headline)
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
                 .background(
-                    gymName.trimmingCharacters(in: .whitespaces).isEmpty
+                    isButtonDisabled
                         ? AnyShapeStyle(Color.gray.opacity(0.2))
-                        : AnyShapeStyle(Color.geckoGreenGradient)
+                        : AnyShapeStyle(Color.geckoPrimaryGradient)
                 )
-                .foregroundColor(gymName.trimmingCharacters(in: .whitespaces).isEmpty ? .secondary : .white)
+                .foregroundStyle(isButtonDisabled ? Color.secondary : Color.white)
                 .clipShape(Capsule())
                 .shadow(
-                    color: gymName.trimmingCharacters(in: .whitespaces).isEmpty ? .clear : Color.geckoGreen.opacity(0.3),
-                    radius: gymName.trimmingCharacters(in: .whitespaces).isEmpty ? 0 : 8,
+                    color: isButtonDisabled ? .clear : Color.geckoPrimary.opacity(0.3),
+                    radius: isButtonDisabled ? 0 : 8,
                     x: 0, y: 4
                 )
             }
             .bouncePress()
-            .disabled(gymName.trimmingCharacters(in: .whitespaces).isEmpty)
+            .disabled(isButtonDisabled)
             .sensoryFeedback(.impact(weight: .heavy), trigger: gymName.trimmingCharacters(in: .whitespaces).isEmpty)
             .opacity(appeared ? 1 : 0)
             .offset(y: appeared ? 0 : 10)

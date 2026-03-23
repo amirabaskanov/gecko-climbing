@@ -16,7 +16,7 @@ struct SessionProgress: Identifiable {
     let highestGrade: String
 }
 
-@Observable
+@Observable @MainActor
 final class StatsViewModel {
     var sessions: [SessionModel] = []
     var isLoading = false

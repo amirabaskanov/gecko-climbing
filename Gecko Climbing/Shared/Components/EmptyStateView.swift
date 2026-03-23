@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct EmptyStateView: View {
-    let icon: String
     let title: String
     let subtitle: String
     var actionLabel: String? = nil
@@ -11,9 +10,7 @@ struct EmptyStateView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            Image(systemName: icon)
-                .font(.system(size: 56))
-                .foregroundColor(Color.geckoGreen.opacity(0.6))
+            GeckoLogoView(size: 56, color: .geckoPrimary.opacity(0.6))
                 .offset(y: floatOffset)
                 .onAppear {
                     withAnimation(
@@ -29,17 +26,17 @@ struct EmptyStateView: View {
                 .multilineTextAlignment(.center)
             Text(subtitle)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
             if let actionLabel, let action {
                 Button(action: action) {
                     Text(actionLabel)
                         .font(.subheadline.weight(.semibold))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .padding(.horizontal, 24)
                         .padding(.vertical, 12)
-                        .background(Color.geckoGreen)
+                        .background(Color.geckoPrimary)
                         .clipShape(Capsule())
                 }
                 .bouncePress()

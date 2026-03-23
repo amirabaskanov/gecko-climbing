@@ -7,13 +7,20 @@ protocol PostRepositoryProtocol: AnyObject {
     func likePost(_ postId: String, userId: String) async throws
     func unlikePost(_ postId: String, userId: String) async throws
     func deletePost(_ postId: String) async throws
+    func deletePostBySessionId(_ sessionId: String) async throws
     func fetchPosts(for userId: String) async throws -> [PostModel]
+    func reconcileLikesCount(postId: String) async throws
+    func backfillGradeSequence(postId: String, sessionId: String) async throws -> [String]?
+    func fetchComments(postId: String) async throws -> [CommentModel]
+    func addComment(_ comment: CommentModel) async throws
+    func deleteComment(postId: String, commentId: String) async throws
 }
 
 // MARK: - Mock Implementation
 final class MockPostRepository: PostRepositoryProtocol, @unchecked Sendable {
     private var posts: [PostModel]
     private var likedPostIds: Set<String> = []
+    private var mockComments: [String: [CommentModel]] = [:]
 
     init() {
         self.posts = Self.makeSeedPosts()
@@ -58,9 +65,43 @@ final class MockPostRepository: PostRepositoryProtocol, @unchecked Sendable {
         posts.removeAll { $0.postId == postId }
     }
 
+    func deletePostBySessionId(_ sessionId: String) async throws {
+        try await Task.sleep(nanoseconds: 200_000_000)
+        posts.removeAll { $0.sessionId == sessionId }
+    }
+
     func fetchPosts(for userId: String) async throws -> [PostModel] {
         try await Task.sleep(nanoseconds: 300_000_000)
         return posts.filter { $0.userId == userId }.sorted { $0.createdAt > $1.createdAt }
+    }
+
+    func reconcileLikesCount(postId: String) async throws {
+        // No-op for mock
+    }
+
+    func backfillGradeSequence(postId: String, sessionId: String) async throws -> [String]? {
+        return nil // No-op for mock
+    }
+
+    func fetchComments(postId: String) async throws -> [CommentModel] {
+        try await Task.sleep(nanoseconds: 300_000_000)
+        return mockComments[postId] ?? []
+    }
+
+    func addComment(_ comment: CommentModel) async throws {
+        try await Task.sleep(nanoseconds: 200_000_000)
+        mockComments[comment.postId, default: []].append(comment)
+        if let idx = posts.firstIndex(where: { $0.postId == comment.postId }) {
+            posts[idx].commentsCount += 1
+        }
+    }
+
+    func deleteComment(postId: String, commentId: String) async throws {
+        try await Task.sleep(nanoseconds: 200_000_000)
+        mockComments[postId]?.removeAll { $0.id == commentId }
+        if let idx = posts.firstIndex(where: { $0.postId == postId }) {
+            posts[idx].commentsCount = max(0, posts[idx].commentsCount - 1)
+        }
     }
 
     private static func makeSeedPosts() -> [PostModel] {
@@ -86,7 +127,11 @@ final class MockPostRepository: PostRepositoryProtocol, @unchecked Sendable {
                 topGrade: topGrade,
                 topGradeNumeric: topNum,
                 totalClimbs: gradeCounts.values.reduce(0, +),
-                gradeCounts: gradeCounts
+                gradeCounts: gradeCounts,
+                gradeSequence: gradeCounts
+                    .sorted { VGrade.numeric(for: $0.key) < VGrade.numeric(for: $1.key) }
+                    .flatMap { Array(repeating: $0.key, count: $0.value) }
+                    .shuffled()
             )
         }
     }

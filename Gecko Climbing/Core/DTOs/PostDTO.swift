@@ -10,6 +10,7 @@ struct PostDTO: Codable, Identifiable {
     let type: String
     let caption: String
     let imageURL: String?
+    let imageURLs: [String]
     let likesCount: Int
     let commentsCount: Int
     let createdAt: Date
@@ -17,6 +18,7 @@ struct PostDTO: Codable, Identifiable {
     let topGradeNumeric: Int
     let totalClimbs: Int
     let gradeCounts: [String: Int]
+    let gradeSequence: [String]
     let visibility: String
 
     func asDictionary() -> [String: Any] {
@@ -28,6 +30,7 @@ struct PostDTO: Codable, Identifiable {
             "gymName": gymName,
             "type": type,
             "caption": caption,
+            "imageURLs": imageURLs,
             "likesCount": likesCount,
             "commentsCount": commentsCount,
             "createdAt": createdAt,
@@ -35,6 +38,7 @@ struct PostDTO: Codable, Identifiable {
             "topGradeNumeric": topGradeNumeric,
             "totalClimbs": totalClimbs,
             "gradeCounts": gradeCounts,
+            "gradeSequence": gradeSequence,
             "visibility": visibility
         ]
         if let imageURL { dict["imageURL"] = imageURL }
@@ -52,6 +56,7 @@ struct PostDTO: Codable, Identifiable {
             type: type,
             caption: caption,
             imageURL: imageURL,
+            imageURLs: imageURLs,
             likesCount: likesCount,
             commentsCount: commentsCount,
             createdAt: createdAt,
@@ -59,6 +64,7 @@ struct PostDTO: Codable, Identifiable {
             topGradeNumeric: topGradeNumeric,
             totalClimbs: totalClimbs,
             gradeCounts: gradeCounts,
+            gradeSequence: gradeSequence,
             visibility: visibility
         )
     }
@@ -76,6 +82,7 @@ extension PostModel {
             type: type,
             caption: caption,
             imageURL: imageURL,
+            imageURLs: imageURLs,
             likesCount: likesCount,
             commentsCount: commentsCount,
             createdAt: createdAt,
@@ -83,6 +90,7 @@ extension PostModel {
             topGradeNumeric: topGradeNumeric,
             totalClimbs: totalClimbs,
             gradeCounts: gradeCounts,
+            gradeSequence: gradeSequence,
             visibility: visibility
         )
     }

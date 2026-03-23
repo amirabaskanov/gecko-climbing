@@ -40,7 +40,7 @@ struct FriendProfileView: View {
                 // Sessions
                 if vm.sessions.isEmpty {
                     EmptyStateView(
-                        icon: "figure.climbing",
+                        
                         title: "No sessions shared yet",
                         subtitle: ""
                     )
@@ -56,9 +56,10 @@ struct FriendProfileView: View {
             }
             .padding(.bottom, 24)
         }
-        .background(Color.geckoBackground)
+        .background(Color.surfaceBackground)
         .navigationTitle(vm.user?.displayName ?? "Profile")
         .navigationBarTitleDisplayMode(.inline)
+        .errorAlert(error: Binding(get: { vm.error }, set: { vm.error = $0 }))
     }
 
     private func profileHeader(_ user: UserModel, vm: FriendProfileViewModel) -> some View {
@@ -68,18 +69,30 @@ struct FriendProfileView: View {
                 .font(.title2.weight(.bold))
             Text("@\(user.username)")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
             if !user.bio.isEmpty {
                 Text(user.bio)
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
             }
 
             HStack(spacing: 32) {
-                statPill(value: "\(user.followersCount)", label: "Followers")
-                statPill(value: "\(user.followingCount)", label: "Following")
+                NavigationLink {
+                    FollowersListView(uid: user.uid, mode: .followers)
+                } label: {
+                    statPill(value: "\(user.followersCount)", label: "Followers")
+                }
+                .buttonStyle(.plain)
+
+                NavigationLink {
+                    FollowersListView(uid: user.uid, mode: .following)
+                } label: {
+                    statPill(value: "\(user.followingCount)", label: "Following")
+                }
+                .buttonStyle(.plain)
+
                 statPill(value: user.highestGrade.isEmpty ? "—" : user.highestGrade, label: "Top Grade")
             }
 
@@ -90,8 +103,8 @@ struct FriendProfileView: View {
                     .font(.subheadline.weight(.semibold))
                     .frame(width: 140)
                     .padding(.vertical, 10)
-                    .background(vm.isFollowing ? Color.gray.opacity(0.15) : Color.geckoGreen)
-                    .foregroundColor(vm.isFollowing ? .primary : .white)
+                    .background(vm.isFollowing ? Color.gray.opacity(0.15) : Color.geckoPrimary)
+                    .foregroundStyle(vm.isFollowing ? Color.primary : Color.white)
                     .clipShape(Capsule())
             }
         }
@@ -105,7 +118,7 @@ struct FriendProfileView: View {
                 .font(.system(size: 18, weight: .black, design: .rounded))
             Text(label)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
         }
     }
 }

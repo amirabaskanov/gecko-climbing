@@ -71,7 +71,7 @@ struct SignInView: View {
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color.white)
-                            .foregroundColor(.primary)
+                            .foregroundStyle(.primary)
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                             .shadow(color: .black.opacity(0.10), radius: 4, x: 0, y: 2)
                         }
@@ -83,14 +83,14 @@ struct SignInView: View {
                     HStack {
                         Rectangle()
                             .frame(height: 1)
-                            .foregroundColor(.secondary.opacity(0.3))
+                            .foregroundStyle(.secondary.opacity(0.3))
                         Text("or sign in with email")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .layoutPriority(1)
                         Rectangle()
                             .frame(height: 1)
-                            .foregroundColor(.secondary.opacity(0.3))
+                            .foregroundStyle(.secondary.opacity(0.3))
                     }
                     .padding(.horizontal, 24)
 
@@ -98,19 +98,25 @@ struct SignInView: View {
                     VStack(spacing: 16) {
                         TextField("Email", text: $email)
                             .keyboardType(.emailAddress)
-                            .autocapitalization(.none)
+                            .textInputAutocapitalization(.never)
                             .textContentType(.emailAddress)
                             .padding()
                             .background(Color.white)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.secondary.opacity(0.15), lineWidth: 1)
+                            )
 
                         SecureField("Password", text: $password)
                             .textContentType(.password)
                             .padding()
                             .background(Color.white)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .shadow(color: .black.opacity(0.06), radius: 4, x: 0, y: 2)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.secondary.opacity(0.15), lineWidth: 1)
+                            )
 
                         Button {
                             Task { await authViewModel.signIn(email: email, password: password) }
@@ -125,8 +131,8 @@ struct SignInView: View {
                             }
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.geckoGreen)
-                            .foregroundColor(.white)
+                            .background(Color.geckoPrimary)
+                            .foregroundStyle(.white)
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                         }
                         .disabled(email.isEmpty || password.isEmpty || authViewModel.isLoading)
@@ -136,11 +142,11 @@ struct SignInView: View {
                     // Sign up link
                     HStack {
                         Text("Don't have an account?")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                         Button("Sign Up") {
                             withAnimation { showSignUp = true }
                         }
-                        .foregroundColor(Color.geckoGreen)
+                        .foregroundStyle(Color.geckoPrimary)
                         .fontWeight(.semibold)
                     }
                     .font(.subheadline)

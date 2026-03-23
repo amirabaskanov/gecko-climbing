@@ -3,7 +3,7 @@ import Observation
 import UIKit
 import GoogleSignIn
 
-@Observable
+@Observable @MainActor
 final class AuthViewModel {
     var isAuthenticated: Bool = false
     var isLoading: Bool = false
@@ -20,6 +20,11 @@ final class AuthViewModel {
         authRepository.addAuthStateListener { [weak self] isAuthenticated in
             DispatchQueue.main.async {
                 self?.isAuthenticated = isAuthenticated
+                if isAuthenticated, let self {
+                    AnalyticsService.identify(userId: self.currentUserId, properties: [
+                        "display_name": self.currentUserDisplayName
+                    ])
+                }
             }
         }
     }
@@ -33,6 +38,7 @@ final class AuthViewModel {
         error = nil
         do {
             try await authRepository.signIn(email: email, password: password)
+            AnalyticsService.capture(.signIn, properties: ["method": "email"])
         } catch {
             self.error = error
         }
@@ -50,6 +56,7 @@ final class AuthViewModel {
             let suffix = String(UUID().uuidString.prefix(6).lowercased())
             let username = "\(base)_\(suffix)"
             try await authRepository.signUp(email: email, password: password, username: username, displayName: displayName)
+            AnalyticsService.capture(.signUp, properties: ["method": "email"])
         } catch {
             self.error = error
         }
@@ -59,12 +66,13 @@ final class AuthViewModel {
     func signOut() {
         do {
             try authRepository.signOut()
+            AnalyticsService.capture(.signOut)
+            AnalyticsService.reset()
         } catch {
             self.error = error
         }
     }
 
-    @MainActor
     func signInWithGoogle() async {
         isLoading = true
         error = nil
@@ -79,6 +87,7 @@ final class AuthViewModel {
             }
             let accessToken = result.user.accessToken.tokenString
             try await authRepository.signInWithGoogle(idToken: idToken, accessToken: accessToken)
+            AnalyticsService.capture(.signIn, properties: ["method": "google"])
         } catch let gidError as GIDSignInError where gidError.code == .canceled {
             // User cancelled — no error shown
         } catch {
@@ -92,6 +101,7 @@ final class AuthViewModel {
         error = nil
         do {
             try await authRepository.signInWithApple(idToken: idToken, rawNonce: rawNonce, fullName: fullName)
+            AnalyticsService.capture(.signIn, properties: ["method": "apple"])
         } catch {
             self.error = error
         }

@@ -2,31 +2,151 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(AuthViewModel.self) private var authViewModel
+    @Environment(AppEnvironment.self) private var appEnvironment
     @State private var showSignOutConfirm = false
+    @State private var showFeedback = false
+    @State private var appeared = false
 
     var body: some View {
-        Form {
-            Section("Account") {
-                Button(role: .destructive) {
-                    showSignOutConfirm = true
-                } label: {
-                    Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
-                }
-            }
+        ScrollView {
+            VStack(spacing: 20) {
 
-            Section("About") {
-                LabeledContent("Version", value: "1.0.0")
-                LabeledContent("Build", value: "1")
-                Label("Gecko Climbing", systemImage: "figure.climbing")
-                    .foregroundColor(Color.geckoGreen)
+                // MARK: - Support
+
+                VStack(alignment: .leading, spacing: 12) {
+                    sectionHeader("Support")
+
+                    settingsRow(
+                        icon: "bubble.left.and.text.bubble.right",
+                        title: "Send Feedback",
+                        subtitle: "Report bugs or share ideas",
+                        iconColor: .geckoPrimary
+                    ) {
+                        showFeedback = true
+                    }
+                }
+                .staggeredAppear(index: 0, appeared: appeared)
+
+                // MARK: - Account
+
+                VStack(alignment: .leading, spacing: 12) {
+                    sectionHeader("Account")
+
+                    settingsRow(
+                        icon: "rectangle.portrait.and.arrow.right",
+                        title: "Sign Out",
+                        subtitle: nil,
+                        iconColor: .red
+                    ) {
+                        showSignOutConfirm = true
+                    }
+                }
+                .staggeredAppear(index: 1, appeared: appeared)
+
+                // MARK: - About
+
+                VStack(spacing: 16) {
+                    sectionHeader("About")
+
+                    VStack(spacing: 0) {
+                        aboutRow(label: "Version", value: "1.0.0")
+                        Divider().padding(.horizontal, 16)
+                        aboutRow(label: "Build", value: "1")
+                    }
+                    .cardStyle()
+
+                    HStack(spacing: 8) {
+                        GeckoLogoView(size: 24, color: .geckoPrimary)
+                        Text("Gecko Climbing")
+                            .font(.subheadline.weight(.semibold))
+                            .fontDesign(.rounded)
+                            .foregroundStyle(Color.geckoPrimary)
+                    }
+                    .padding(.top, 4)
+                }
+                .staggeredAppear(index: 2, appeared: appeared)
             }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            .padding(.bottom, 32)
         }
+        .background(Color.geckoBackground)
         .navigationTitle("Settings")
+        .onAppear { appeared = true }
         .confirmationDialog("Sign out of Gecko Climbing?", isPresented: $showSignOutConfirm, titleVisibility: .visible) {
             Button("Sign Out", role: .destructive) {
                 authViewModel.signOut()
             }
             Button("Cancel", role: .cancel) {}
         }
+        .sheet(isPresented: $showFeedback) {
+            FeedbackView(viewModel: FeedbackViewModel(
+                feedbackRepository: appEnvironment.feedbackRepository,
+                userId: authViewModel.currentUserId
+            ))
+        }
+    }
+
+    // MARK: - Components
+
+    private func sectionHeader(_ title: String) -> some View {
+        Text(title.uppercased())
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .padding(.leading, 4)
+    }
+
+    private func settingsRow(
+        icon: String,
+        title: String,
+        subtitle: String?,
+        iconColor: Color,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(spacing: 14) {
+                Image(systemName: icon)
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundStyle(iconColor)
+                    .frame(width: 36, height: 36)
+                    .background(iconColor.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.body.weight(.medium))
+                        .foregroundStyle(iconColor == .red ? .red : .primary)
+
+                    if let subtitle {
+                        Text(subtitle)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.quaternary)
+            }
+            .padding(14)
+            .cardStyle()
+        }
+        .bouncePress()
+    }
+
+    private func aboutRow(label: String, value: String) -> some View {
+        HStack {
+            Text(label)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Text(value)
+                .font(.subheadline.weight(.medium))
+                .fontDesign(.rounded)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 13)
     }
 }

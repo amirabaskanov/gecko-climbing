@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 import FirebaseCore
 import GoogleSignIn
+import PostHog
 
 @main
 struct GeckoClimbingApp: App {
@@ -13,6 +14,7 @@ struct GeckoClimbingApp: App {
         if Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist") != nil {
             FirebaseApp.configure()
         }
+        AnalyticsService.configure()
         if let clientID = FirebaseApp.app()?.options.clientID {
             GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
         }
@@ -39,6 +41,7 @@ struct GeckoClimbingApp: App {
                 .environment(appEnv)
                 .environment(authViewModel)
                 .modelContainer(modelContainer)
+                .tint(Color.geckoPrimary)
                 .onOpenURL { url in
                     GIDSignIn.sharedInstance.handle(url)
                 }

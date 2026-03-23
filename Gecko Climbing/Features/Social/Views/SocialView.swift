@@ -34,11 +34,12 @@ struct SocialView: View {
         }
         .onAppear {
             if viewModel == nil {
-                let vm = SocialViewModel(
+                viewModel = SocialViewModel(
                     userRepository: appEnv.userRepository,
                     userId: authViewModel.currentUserId
                 )
-                viewModel = vm
+            }
+            if let vm = viewModel {
                 Task { await vm.loadFollowing() }
             }
         }
@@ -57,12 +58,12 @@ struct SocialView: View {
             if vm.searchQuery.isEmpty {
                 Section("Following (\(vm.following.count))") {
                     if vm.following.isEmpty {
-                        Text("You're not following anyone yet.\nSearch for climbers above!")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding()
-                            .listRowBackground(Color.clear)
+                        EmptyStateView(
+                            title: "No friends yet",
+                            subtitle: "Search for climbers above to start following!"
+                        )
+                        .frame(height: 180)
+                        .listRowBackground(Color.clear)
                     } else {
                         ForEach(Array(vm.following.enumerated()), id: \.element.id) { index, user in
                             NavigationLink(value: SocialRoute.friendProfile(uid: user.uid)) {
@@ -70,7 +71,7 @@ struct SocialView: View {
                                     AvatarView(url: user.profileImageURL, size: 44, name: user.displayName)
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(user.displayName).font(.subheadline.weight(.semibold))
-                                        Text("@\(user.username)").font(.caption).foregroundColor(.secondary)
+                                        Text("@\(user.username)").font(.caption).foregroundStyle(.secondary)
                                     }
                                     Spacer()
                                     if !user.highestGrade.isEmpty {
@@ -86,8 +87,11 @@ struct SocialView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .contentMargins(.bottom, 48)
         .searchable(text: Binding(get: { vm.searchQuery }, set: { vm.searchQuery = $0 }), prompt: "Search climbers...")
         .background(Color.surfaceBackground)
+        .refreshable { await vm.loadFollowing() }
         .onAppear {
             withAnimation { appeared = true }
         }

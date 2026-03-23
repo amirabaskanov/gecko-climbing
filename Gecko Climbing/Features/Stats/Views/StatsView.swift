@@ -59,7 +59,7 @@ struct StatsView: View {
 
     private func summaryRow(_ vm: StatsViewModel) -> some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-            statCard(value: "\(vm.totalSessions)", label: "Sessions", icon: "figure.climbing", color: Color.geckoGreen, index: 0)
+            statCard(value: "\(vm.totalSessions)", label: "Sessions", icon: "figure.climbing", color: Color.geckoPrimary, index: 0)
             statCard(value: vm.highestGrade, label: "Top Grade", icon: "trophy.fill", color: Color.gradeColor(for: vm.highestGradeNumeric), index: 1)
             statCard(value: "\(vm.totalSends)", label: "Total Sends", icon: "checkmark.seal.fill", color: Color.geckoOrange, index: 2)
             statCard(value: "\(vm.currentStreak)", label: "Day Streak", icon: "flame.fill", color: .orange, index: 3)
@@ -71,14 +71,14 @@ struct StatsView: View {
         VStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.title2)
-                .foregroundColor(color)
+                .foregroundStyle(color)
             Text(value)
                 .font(.system(size: 28, weight: .black, design: .rounded))
-                .foregroundColor(.primary)
+                .foregroundStyle(.primary)
                 .contentTransition(.numericText())
             Text(label)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 20)

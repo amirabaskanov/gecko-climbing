@@ -11,31 +11,8 @@ struct FollowersListView: View {
     @State private var isLoading = true
 
     var body: some View {
-        Group {
-            if isLoading {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else if users.isEmpty {
-                EmptyStateView(icon: "person.2", title: "No \(mode == .followers ? "followers" : "following") yet", subtitle: "")
-            } else {
-                List(users) { user in
-                    NavigationLink(value: SocialRoute.friendProfile(uid: user.uid)) {
-                        HStack(spacing: 12) {
-                            AvatarView(url: user.profileImageURL, size: 44, name: user.displayName)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(user.displayName).font(.subheadline.weight(.semibold))
-                                Text("@\(user.username)").font(.caption).foregroundColor(.secondary)
-                            }
-                            Spacer()
-                            if !user.highestGrade.isEmpty {
-                                GradeBadge(grade: user.highestGrade, isCompleted: true, size: .small)
-                            }
-                        }
-                    }
-                }
-                .listStyle(.plain)
-            }
-        }
+        content
+            .background(Color.surfaceBackground)
         .navigationTitle(mode == .followers ? "Followers" : "Following")
         .task {
             do {
@@ -46,6 +23,48 @@ struct FollowersListView: View {
                 }
             } catch {}
             isLoading = false
+        }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if isLoading {
+            ProgressView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if users.isEmpty {
+            EmptyStateView(title: "No \(mode == .followers ? "followers" : "following") yet", subtitle: "")
+        } else {
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    ForEach(users, id: \.uid) { user in
+                        NavigationLink {
+                            FriendProfileView(uid: user.uid)
+                        } label: {
+                            HStack(spacing: 12) {
+                                AvatarView(url: user.profileImageURL, size: 44, name: user.displayName)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(user.displayName).font(.subheadline.weight(.semibold))
+                                    Text("@\(user.username)").font(.caption).foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                if !user.highestGrade.isEmpty {
+                                    GradeBadge(grade: user.highestGrade, isCompleted: true, size: .small)
+                                }
+                                Image(systemName: "chevron.right")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(.secondary.opacity(0.5))
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                        }
+                        .buttonStyle(.plain)
+
+                        if user.uid != users.last?.uid {
+                            Divider().padding(.leading, 72)
+                        }
+                    }
+                }
+            }
         }
     }
 }

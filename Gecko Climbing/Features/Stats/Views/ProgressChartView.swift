@@ -15,7 +15,7 @@ struct ProgressChartView: View {
             if data.isEmpty {
                 Text("Log more sessions to see your progress")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding()
             } else {
@@ -24,7 +24,7 @@ struct ProgressChartView: View {
                         x: .value("Date", item.date),
                         y: .value("Grade", item.highestGradeNumeric)
                     )
-                    .foregroundStyle(Color.geckoGreen)
+                    .foregroundStyle(Color.geckoPrimary)
                     .interpolationMethod(.catmullRom)
                     .lineStyle(StrokeStyle(lineWidth: 2.5))
 
@@ -41,7 +41,7 @@ struct ProgressChartView: View {
                             AxisValueLabel {
                                 Text(VGrade.label(for: numeric))
                                     .font(.caption2)
-                                    .foregroundColor(Color.gradeColor(for: numeric))
+                                    .foregroundStyle(Color.gradeColor(for: numeric))
                             }
                             AxisGridLine()
                         }

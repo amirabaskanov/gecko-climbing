@@ -22,6 +22,7 @@ final class MockStorageRepository: StorageRepositoryProtocol, @unchecked Sendabl
 
     func uploadSessionPhoto(userId: String, sessionId: String, imageData: Data) async throws -> String {
         try await Task.sleep(nanoseconds: 800_000_000)
-        return "https://picsum.photos/seed/\(sessionId)/600/400"
+        let photoId = UUID().uuidString.prefix(8)
+        return "https://picsum.photos/seed/\(photoId)/600/400"
     }
 }

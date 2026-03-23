@@ -1,5 +1,11 @@
 import SwiftUI
 
+// MARK: - String + Identifiable (for .sheet(item:) with String IDs)
+
+extension String: @retroactive Identifiable {
+    public var id: String { self }
+}
+
 // MARK: - BounceButtonStyle
 
 struct BounceButtonStyle: ButtonStyle {
@@ -26,6 +32,23 @@ extension View {
         }
     }
 
+    func errorAlert(error: Binding<Error?>, retryAction: @escaping () -> Void) -> some View {
+        alert("Something went wrong", isPresented: Binding(
+            get: { error.wrappedValue != nil },
+            set: { if !$0 { error.wrappedValue = nil } }
+        )) {
+            Button("Retry") {
+                error.wrappedValue = nil
+                retryAction()
+            }
+            Button("Dismiss", role: .cancel) { error.wrappedValue = nil }
+        } message: {
+            if let error = error.wrappedValue {
+                Text(error.localizedDescription)
+            }
+        }
+    }
+
     func cardStyle(cornerRadius: CGFloat = 16) -> some View {
         self
             .background(Color.surface)
@@ -40,7 +63,7 @@ extension View {
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(Color.geckoGreen.opacity(0.1), lineWidth: 1)
+                    .stroke(Color.geckoPrimary.opacity(0.1), lineWidth: 1)
             )
             .shadow(color: .black.opacity(0.04), radius: 2, x: 0, y: 1)
             .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
@@ -48,6 +71,11 @@ extension View {
 
     func bouncePress() -> some View {
         self.buttonStyle(BounceButtonStyle())
+    }
+
+    /// Extra bottom padding so content isn't hidden behind the floating tab bar
+    func tabBarPadding() -> some View {
+        self.safeAreaPadding(.bottom, 16)
     }
 
     func staggeredAppear(index: Int, appeared: Bool) -> some View {

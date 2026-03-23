@@ -1,7 +1,9 @@
 import Foundation
 import Observation
+import PhotosUI
+import SwiftUI
 
-@Observable
+@Observable @MainActor
 final class ProfileViewModel {
     var user: UserModel?
     var recentSessions: [SessionModel] = []
@@ -39,6 +41,13 @@ final class ProfileViewModel {
             recentSessions = Array(s.prefix(10))
             editDisplayName = u.displayName
             editBio = u.bio
+            // Reconcile follow counts in background to fix any drift
+            Task {
+                try? await userRepository.reconcileFollowCounts(uid: userId)
+                if let refreshed = try? await userRepository.fetchCurrentUser() {
+                    self.user = refreshed
+                }
+            }
         } catch {
             self.error = error
         }
@@ -89,6 +98,19 @@ final class ProfileViewModel {
         do {
             try await userRepository.updateUser(updatedUser)
             user = updatedUser
+        } catch {
+            self.error = error
+        }
+    }
+
+    func uploadProfilePhoto(item: PhotosPickerItem) async {
+        do {
+            guard let data = try await item.loadTransferable(type: Data.self) else { return }
+            let url = try await storageRepository.uploadProfilePhoto(userId: userId, imageData: data)
+            user?.profileImageURL = url
+            if let user {
+                try await userRepository.updateUser(user)
+            }
         } catch {
             self.error = error
         }

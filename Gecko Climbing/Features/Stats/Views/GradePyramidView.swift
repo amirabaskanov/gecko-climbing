@@ -15,7 +15,7 @@ struct GradePyramidView: View {
             if data.isEmpty {
                 Text("No sends recorded yet")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding()
             } else {
@@ -38,7 +38,7 @@ struct GradePyramidView: View {
                     .annotation(position: .trailing, alignment: .leading) {
                         Text("\(item.count)")
                             .font(.caption.weight(.semibold))
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                 }
                 .chartYAxis {
@@ -47,7 +47,7 @@ struct GradePyramidView: View {
                             if let grade = value.as(String.self) {
                                 Text(grade)
                                     .font(.caption.weight(.bold))
-                                    .foregroundColor(Color.gradeColor(for: VGrade.numeric(for: grade)))
+                                    .foregroundStyle(Color.gradeColor(for: VGrade.numeric(for: grade)))
                             }
                         }
                     }

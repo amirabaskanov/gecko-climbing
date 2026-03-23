@@ -16,25 +16,28 @@ struct ProfileView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
-            .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color.surfaceBackground, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    NavigationLink {
-                        SettingsView()
-                    } label: {
-                        Image(systemName: "gearshape.fill")
-                            .foregroundColor(.secondary)
-                    }
+                ToolbarItem(placement: .principal) {
+                    Text("Profile")
+                        .font(.headline.weight(.bold))
                 }
-                ToolbarItem(placement: .secondaryAction) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button {
                         showEditProfile = true
                     } label: {
                         Text("Edit")
-                            .foregroundColor(Color.geckoGreen)
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(Color.geckoPrimary)
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink {
+                        SettingsView()
+                    } label: {
+                        Image(systemName: "gearshape")
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundStyle(Color.geckoPrimary)
                     }
                 }
             }
@@ -61,174 +64,183 @@ struct ProfileView: View {
     @ViewBuilder
     private func content(_ vm: ProfileViewModel) -> some View {
         ScrollView {
-            VStack(spacing: 0) {
-                // Profile header with gradient
+            VStack(spacing: 24) {
                 if let user = vm.user {
+                    // MARK: - Header
                     profileHeader(user)
-                }
 
-                Divider().padding(.vertical, 16)
-
-                // Stats row
-                if let user = vm.user {
-                    statsRow(vm, user: user)
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 8)
-
-                    NavigationLink {
-                        StatsView()
-                    } label: {
-                        HStack {
-                            Image(systemName: "chart.bar.fill")
-                                .foregroundColor(.white)
-                            Text("View Full Stats")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundColor(.white)
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.caption.weight(.semibold))
-                                .foregroundColor(.white.opacity(0.7))
-                        }
-                        .padding()
-                        .background(Color.geckoGreenGradient)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 16)
-                }
-
-                // Recent sessions
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Recent Sessions")
-                        .font(.headline)
+                    // MARK: - Stats
+                    statsSection(vm, user: user)
                         .padding(.horizontal, 16)
 
-                    if vm.recentSessions.isEmpty {
-                        EmptyStateView(
-                            icon: "figure.climbing",
-                            title: "No sessions yet",
-                            subtitle: "Your sessions will appear here"
-                        )
-                        .frame(height: 160)
-                    } else {
-                        ForEach(vm.recentSessions) { session in
-                            SessionRowView(session: session)
-                                .padding(.horizontal, 16)
-                        }
-                    }
+                    // MARK: - Recent Sessions
+                    sessionsSection(vm)
                 }
-                .padding(.bottom, 32)
             }
+            .padding(.bottom, 32)
         }
+        .contentMargins(.bottom, 48)
         .background(Color.surfaceBackground)
         .refreshable { await vm.load() }
     }
 
+    // MARK: - Profile Header
+
     private func profileHeader(_ user: UserModel) -> some View {
         VStack(spacing: 12) {
-            // Subtle gradient behind avatar
-            ZStack {
-                LinearGradient(
-                    colors: [Color.geckoGreen.opacity(0.08), Color.clear],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .frame(height: 100)
+            AvatarView(url: user.profileImageURL, size: 80, name: user.displayName)
 
-                AvatarView(url: user.profileImageURL, size: 88, name: user.displayName)
-                    .offset(y: 20)
+            VStack(spacing: 4) {
+                Text(user.displayName)
+                    .font(.title3.weight(.bold))
+                Text("@\(user.username)")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
             }
 
-            Text(user.displayName)
-                .font(.title2.weight(.bold))
-                .padding(.top, 12)
-            Text("@\(user.username)")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
             if !user.bio.isEmpty {
                 Text(user.bio)
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
             }
-            HStack(spacing: 32) {
-                statPill(value: "\(user.followersCount)", label: "Followers")
-                statPill(value: "\(user.followingCount)", label: "Following")
-            }
-        }
-        .padding(.bottom, 8)
-    }
 
-    private func statsRow(_ vm: ProfileViewModel, user: UserModel) -> some View {
-        let streak = vm.weeklyStreak
-        return VStack(spacing: 10) {
-            HStack(spacing: 10) {
-                statMiniCard(
-                    value: "\(user.totalSessions)",
-                    label: "Sessions",
-                    color: .geckoGreen
-                )
-                statMiniCard(
-                    value: user.highestGrade.isEmpty ? "—" : user.highestGrade,
-                    label: "Top Grade",
-                    color: user.highestGrade.isEmpty ? .secondary : Color.gradeColor(for: user.highestGradeNumeric)
-                )
-                statMiniCard(
-                    value: "\(user.totalClimbs)",
-                    label: "Climbs",
-                    color: .geckoProjectBlue
-                )
-            }
-
-            // Weekly streak
-            HStack(spacing: 8) {
-                Text("\u{1F525}")
-                    .font(.title3)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("\(streak) week streak")
-                        .font(.subheadline.weight(.bold))
-                    Text(streak > 0 ? "Keep it going!" : "Climb this week to start a streak")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+            HStack(spacing: 24) {
+                NavigationLink {
+                    FollowersListView(uid: user.uid, mode: .followers)
+                } label: {
+                    statPill(value: "\(user.followersCount)", label: "Followers")
                 }
-                Spacer()
+                .buttonStyle(.plain)
+
+                NavigationLink {
+                    FollowersListView(uid: user.uid, mode: .following)
+                } label: {
+                    statPill(value: "\(user.followingCount)", label: "Following")
+                }
+                .buttonStyle(.plain)
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
-            .background(Color.geckoFlashGold.opacity(streak > 0 ? 0.08 : 0.04))
-            .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(Color.geckoFlashGold.opacity(streak > 0 ? 0.2 : 0.08), lineWidth: 1)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 14))
         }
+        .padding(.top, 8)
     }
 
-    private func statMiniCard(value: String, label: String, color: Color) -> some View {
+    // MARK: - Stats
+
+    private func statsSection(_ vm: ProfileViewModel, user: UserModel) -> some View {
+        NavigationLink {
+            StatsView()
+        } label: {
+            VStack(spacing: 16) {
+                HStack(spacing: 0) {
+                    statItem(
+                        value: "\(user.totalSessions)",
+                        label: "Sessions"
+                    )
+                    Divider().frame(height: 32).opacity(0.3)
+                    statItem(
+                        value: user.highestGrade.isEmpty ? "—" : user.highestGrade,
+                        label: "Top Grade"
+                    )
+                    Divider().frame(height: 32).opacity(0.3)
+                    statItem(
+                        value: "\(user.totalClimbs)",
+                        label: "Climbs"
+                    )
+                }
+
+                if vm.weeklyStreak > 0 {
+                    HStack(spacing: 6) {
+                        Image(systemName: "flame.fill")
+                            .font(.caption)
+                            .foregroundStyle(Color.geckoFlashGold)
+                        Text("\(vm.weeklyStreak) week streak")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                HStack(spacing: 4) {
+                    Text("View Full Stats")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(Color.geckoPrimary)
+                    Image(systemName: "chevron.right")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(Color.geckoPrimary)
+                }
+            }
+            .padding(.vertical, 16)
+            .frame(maxWidth: .infinity)
+            .background(Color.white)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
+        }
+        .buttonStyle(.plain)
+        .bouncePress()
+    }
+
+    private func statItem(value: String, label: String) -> some View {
         VStack(spacing: 4) {
             Text(value)
-                .font(.system(size: 20, weight: .black, design: .rounded))
-                .foregroundColor(color)
+                .font(.system(size: 20, weight: .bold, design: .rounded))
+                .foregroundStyle(.primary)
             Text(label)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 14)
-        .background(color.opacity(0.06))
-        .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .stroke(color.opacity(0.12), lineWidth: 1)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 14))
     }
+
+    // MARK: - Sessions
+
+    private func sessionsSection(_ vm: ProfileViewModel) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Recent Sessions")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                if !vm.recentSessions.isEmpty {
+                    NavigationLink {
+                        SessionListView(refreshToken: UUID())
+                    } label: {
+                        Text("See all")
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(Color.geckoPrimary)
+                    }
+                }
+            }
+            .padding(.horizontal, 16)
+
+            if vm.recentSessions.isEmpty {
+                EmptyStateView(
+                    title: "No sessions yet",
+                    subtitle: "Your sessions will appear here"
+                )
+                .frame(height: 160)
+            } else {
+                ForEach(vm.recentSessions) { session in
+                    NavigationLink {
+                        SessionDetailView(session: session)
+                    } label: {
+                        SessionRowView(session: session)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, 16)
+                }
+            }
+        }
+    }
+
+    // MARK: - Components
 
     private func statPill(value: String, label: String) -> some View {
         VStack(spacing: 2) {
-            Text(value).font(.system(size: 18, weight: .black, design: .rounded))
-            Text(label).font(.caption).foregroundColor(.secondary)
+            Text(value)
+                .font(.system(size: 16, weight: .bold, design: .rounded))
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
     }
 }

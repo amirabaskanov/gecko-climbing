@@ -8,8 +8,15 @@
 
 /* Begin PBXBuildFile section */
 		106E9D7CB9DB43D12B4C497B /* ConfettiView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DFCE518CEAAC010499D7267 /* ConfettiView.swift */; };
+		155CF285E35379EEA3714D11 /* CommentsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DC52164E07007813F0BE721 /* CommentsViewModel.swift */; };
+		1A7483333D4E1395285CF84B /* FeedbackRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFCFD2EAD0DFCA6B5F175FE /* FeedbackRepository.swift */; };
+		293972122F6DD7250094ED7B /* PostHog in Frameworks */ = {isa = PBXBuildFile; productRef = 293972112F6DD7250094ED7B /* PostHog */; };
 		55804C2FCF62956FC9CD0313 /* Animation+Gecko.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210A18FB1D170D1A318A5D9D /* Animation+Gecko.swift */; };
 		5F742BB5AECF9030F1A5B2D2 /* AnimatedCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF087C0C87D75CC545532A78 /* AnimatedCounter.swift */; };
+		6164F35BD5F28F338841FB15 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7952659A9D0EC939FB359ED /* AnalyticsService.swift */; };
+		6E91A078FE51C92FCB413D42 /* SessionShareCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64954CF733DCF19AFCB1CCF2 /* SessionShareCard.swift */; };
+		6FBDBD0D53D63B6DE4E55E1C /* FirestoreFeedbackRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD1EBB65F03EABE1DEA6EDC /* FirestoreFeedbackRepository.swift */; };
+		777D9EBD784B52DAFAE51C2A /* SkeletonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34D56FBC16636B26129FD496 /* SkeletonView.swift */; };
 		A1000001 /* GeckoClimbingApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001 /* GeckoClimbingApp.swift */; };
 		A1000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000002 /* ContentView.swift */; };
 		A1000003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000003 /* Assets.xcassets */; };
@@ -79,23 +86,29 @@
 		AA00F111 /* ClimbOutcome.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00F101 /* ClimbOutcome.swift */; };
 		AA00F112 /* QuickAddClimbSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00F102 /* QuickAddClimbSheet.swift */; };
 		AA00F113 /* CustomTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00F103 /* CustomTabBar.swift */; };
-		BB00F101 /* GradeBarrelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F001 /* GradeBarrelView.swift */; };
-		DD00F101 /* GeckoLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD00F001 /* GeckoLogoView.swift */; };
-		BB00F102 /* AttemptBubbleSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F002 /* AttemptBubbleSelector.swift */; };
-		BB00F103 /* ClimbPillView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F003 /* ClimbPillView.swift */; };
-		BB00F104 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F004 /* FlowLayout.swift */; };
-		BB00F105 /* SessionDetailsForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F005 /* SessionDetailsForm.swift */; };
-		CC300002 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CC300001 /* PrivacyInfo.xcprivacy */; };
-		CC100001 /* FirestoreUserRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200001 /* FirestoreUserRepository.swift */; };
-		CC100002 /* FirestoreSessionRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200002 /* FirestoreSessionRepository.swift */; };
-		CC100003 /* FirestoreClimbRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200003 /* FirestoreClimbRepository.swift */; };
-		CC100004 /* FirestorePostRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200004 /* FirestorePostRepository.swift */; };
-		CC100005 /* FirebaseStorageRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200005 /* FirebaseStorageRepository.swift */; };
+		B226E68833861A1010AA3474 /* FeedbackViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B790BE74001032A61D76F858 /* FeedbackViewModel.swift */; };
+		B7DE19698BB9C07FCB5D0B50 /* SessionInsightsEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B01C78180CA4BDBE4B9C796 /* SessionInsightsEngine.swift */; };
 		BB000010 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = CC000001 /* FirebaseCore */; };
 		BB000011 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CC000002 /* FirebaseAuth */; };
 		BB000012 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = CC000003 /* GoogleSignIn */; };
 		BB000013 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = CC000004 /* FirebaseFirestore */; };
 		BB000014 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = CC000005 /* FirebaseStorage */; };
+		BB00F101 /* GradeBarrelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F001 /* GradeBarrelView.swift */; };
+		BB00F102 /* AttemptBubbleSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F002 /* AttemptBubbleSelector.swift */; };
+		BB00F103 /* ClimbPillView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F003 /* ClimbPillView.swift */; };
+		BB00F104 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F004 /* FlowLayout.swift */; };
+		BB00F105 /* SessionDetailsForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F005 /* SessionDetailsForm.swift */; };
+		CC100001 /* FirestoreUserRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200001 /* FirestoreUserRepository.swift */; };
+		CC100002 /* FirestoreSessionRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200002 /* FirestoreSessionRepository.swift */; };
+		CC100003 /* FirestoreClimbRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200003 /* FirestoreClimbRepository.swift */; };
+		CC100004 /* FirestorePostRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200004 /* FirestorePostRepository.swift */; };
+		CC100005 /* FirebaseStorageRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200005 /* FirebaseStorageRepository.swift */; };
+		CC300002 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CC300001 /* PrivacyInfo.xcprivacy */; };
+		DA2F207D235787713C0B17B4 /* CommentModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA9370EA6F1FE7C0E87273E7 /* CommentModel.swift */; };
+		DD00F101 /* GeckoLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD00F001 /* GeckoLogoView.swift */; };
+		FCDC53FADBE63D6F59D1BE5A /* SessionInsight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F7C51D1DCBA17F7391C88F8 /* SessionInsight.swift */; };
+		FD71D963B30139FE3E88631F /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC94383047E32B70E58063C /* FeedbackView.swift */; };
+		FFD3740A94B2E9425D9A5317 /* CommentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7780164948E9E512E7A7F80F /* CommentsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -116,8 +129,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0DC52164E07007813F0BE721 /* CommentsViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CommentsViewModel.swift; sourceTree = "<group>"; };
 		210A18FB1D170D1A318A5D9D /* Animation+Gecko.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Animation+Gecko.swift"; sourceTree = "<group>"; };
+		2BD1EBB65F03EABE1DEA6EDC /* FirestoreFeedbackRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FirestoreFeedbackRepository.swift; sourceTree = "<group>"; };
+		34D56FBC16636B26129FD496 /* SkeletonView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SkeletonView.swift; sourceTree = "<group>"; };
 		5DFCE518CEAAC010499D7267 /* ConfettiView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConfettiView.swift; sourceTree = "<group>"; };
+		5F7C51D1DCBA17F7391C88F8 /* SessionInsight.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionInsight.swift; sourceTree = "<group>"; };
+		64954CF733DCF19AFCB1CCF2 /* SessionShareCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionShareCard.swift; sourceTree = "<group>"; };
+		7780164948E9E512E7A7F80F /* CommentsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CommentsView.swift; sourceTree = "<group>"; };
+		8B01C78180CA4BDBE4B9C796 /* SessionInsightsEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionInsightsEngine.swift; sourceTree = "<group>"; };
 		A2000000 /* Gecko Climbing.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Gecko Climbing.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2000001 /* GeckoClimbingApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeckoClimbingApp.swift; sourceTree = "<group>"; };
 		A2000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -187,24 +207,29 @@
 		AA000157 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		AA000158 /* WallAnalysisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallAnalysisView.swift; sourceTree = "<group>"; };
 		AA000160 /* FirebaseAuthRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseAuthRepository.swift; sourceTree = "<group>"; };
-		CC200001 /* FirestoreUserRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreUserRepository.swift; sourceTree = "<group>"; };
-		CC200002 /* FirestoreSessionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreSessionRepository.swift; sourceTree = "<group>"; };
-		CC200003 /* FirestoreClimbRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreClimbRepository.swift; sourceTree = "<group>"; };
-		CC200004 /* FirestorePostRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestorePostRepository.swift; sourceTree = "<group>"; };
-		CC200005 /* FirebaseStorageRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseStorageRepository.swift; sourceTree = "<group>"; };
 		AA000161 /* AppleSignInHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInHelper.swift; sourceTree = "<group>"; };
 		AA00F101 /* ClimbOutcome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClimbOutcome.swift; sourceTree = "<group>"; };
 		AA00F102 /* QuickAddClimbSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddClimbSheet.swift; sourceTree = "<group>"; };
 		AA00F103 /* CustomTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabBar.swift; sourceTree = "<group>"; };
 		AA00F200 /* Gecko Climbing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Gecko Climbing.entitlements"; sourceTree = "<group>"; };
-		CC300001 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		CF087C0C87D75CC545532A78 /* AnimatedCounter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AnimatedCounter.swift; sourceTree = "<group>"; };
+		B790BE74001032A61D76F858 /* FeedbackViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedbackViewModel.swift; sourceTree = "<group>"; };
 		BB00F001 /* GradeBarrelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradeBarrelView.swift; sourceTree = "<group>"; };
-		DD00F001 /* GeckoLogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeckoLogoView.swift; sourceTree = "<group>"; };
 		BB00F002 /* AttemptBubbleSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttemptBubbleSelector.swift; sourceTree = "<group>"; };
 		BB00F003 /* ClimbPillView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClimbPillView.swift; sourceTree = "<group>"; };
 		BB00F004 /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowLayout.swift; sourceTree = "<group>"; };
 		BB00F005 /* SessionDetailsForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailsForm.swift; sourceTree = "<group>"; };
+		BEC94383047E32B70E58063C /* FeedbackView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedbackView.swift; sourceTree = "<group>"; };
+		CA9370EA6F1FE7C0E87273E7 /* CommentModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CommentModel.swift; sourceTree = "<group>"; };
+		CC200001 /* FirestoreUserRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreUserRepository.swift; sourceTree = "<group>"; };
+		CC200002 /* FirestoreSessionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreSessionRepository.swift; sourceTree = "<group>"; };
+		CC200003 /* FirestoreClimbRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestoreClimbRepository.swift; sourceTree = "<group>"; };
+		CC200004 /* FirestorePostRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirestorePostRepository.swift; sourceTree = "<group>"; };
+		CC200005 /* FirebaseStorageRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseStorageRepository.swift; sourceTree = "<group>"; };
+		CC300001 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		CF087C0C87D75CC545532A78 /* AnimatedCounter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AnimatedCounter.swift; sourceTree = "<group>"; };
+		D7952659A9D0EC939FB359ED /* AnalyticsService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
+		DBFCFD2EAD0DFCA6B5F175FE /* FeedbackRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedbackRepository.swift; sourceTree = "<group>"; };
+		DD00F001 /* GeckoLogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeckoLogoView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -215,6 +240,7 @@
 				BB000010 /* FirebaseCore in Frameworks */,
 				BB000011 /* FirebaseAuth in Frameworks */,
 				BB000012 /* GoogleSignIn in Frameworks */,
+				293972122F6DD7250094ED7B /* PostHog in Frameworks */,
 				BB000013 /* FirebaseFirestore in Frameworks */,
 				BB000014 /* FirebaseStorage in Frameworks */,
 			);
@@ -295,6 +321,8 @@
 				AA000105 /* UserModel.swift */,
 				AA000106 /* PostModel.swift */,
 				AA00F101 /* ClimbOutcome.swift */,
+				CA9370EA6F1FE7C0E87273E7 /* CommentModel.swift */,
+				5F7C51D1DCBA17F7391C88F8 /* SessionInsight.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -326,6 +354,8 @@
 				CC200003 /* FirestoreClimbRepository.swift */,
 				CC200004 /* FirestorePostRepository.swift */,
 				CC200005 /* FirebaseStorageRepository.swift */,
+				DBFCFD2EAD0DFCA6B5F175FE /* FeedbackRepository.swift */,
+				2BD1EBB65F03EABE1DEA6EDC /* FirestoreFeedbackRepository.swift */,
 			);
 			path = Repositories;
 			sourceTree = "<group>";
@@ -333,6 +363,8 @@
 		A3000024 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				D7952659A9D0EC939FB359ED /* AnalyticsService.swift */,
+				8B01C78180CA4BDBE4B9C796 /* SessionInsightsEngine.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -404,6 +436,7 @@
 				AA000145 /* FeedCardView.swift */,
 				AA000146 /* PostDetailView.swift */,
 				AA000147 /* HomeView.swift */,
+				7780164948E9E512E7A7F80F /* CommentsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -412,6 +445,7 @@
 			isa = PBXGroup;
 			children = (
 				AA000144 /* HomeViewModel.swift */,
+				0DC52164E07007813F0BE721 /* CommentsViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -545,6 +579,7 @@
 				AA000155 /* EditProfileView.swift */,
 				AA000156 /* SettingsView.swift */,
 				AA000157 /* ProfileView.swift */,
+				BEC94383047E32B70E58063C /* FeedbackView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -553,6 +588,7 @@
 			isa = PBXGroup;
 			children = (
 				AA000154 /* ProfileViewModel.swift */,
+				B790BE74001032A61D76F858 /* FeedbackViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -580,6 +616,8 @@
 				BB00F002 /* AttemptBubbleSelector.swift */,
 				BB00F003 /* ClimbPillView.swift */,
 				DD00F001 /* GeckoLogoView.swift */,
+				34D56FBC16636B26129FD496 /* SkeletonView.swift */,
+				64954CF733DCF19AFCB1CCF2 /* SessionShareCard.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -642,6 +680,7 @@
 				CC000003 /* GoogleSignIn */,
 				CC000004 /* FirebaseFirestore */,
 				CC000005 /* FirebaseStorage */,
+				293972112F6DD7250094ED7B /* PostHog */,
 			);
 			productName = "Gecko Climbing";
 			productReference = A2000000 /* Gecko Climbing.app */;
@@ -718,6 +757,7 @@
 			packageReferences = (
 				BB000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				BB000002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				293972102F6DD7250094ED7B /* XCRemoteSwiftPackageReference "posthog-ios" */,
 			);
 			productRefGroup = A3000000 /* Products */;
 			projectDirPath = "";
@@ -841,6 +881,18 @@
 				BB00F104 /* FlowLayout.swift in Sources */,
 				BB00F105 /* SessionDetailsForm.swift in Sources */,
 				DD00F101 /* GeckoLogoView.swift in Sources */,
+				6164F35BD5F28F338841FB15 /* AnalyticsService.swift in Sources */,
+				1A7483333D4E1395285CF84B /* FeedbackRepository.swift in Sources */,
+				B226E68833861A1010AA3474 /* FeedbackViewModel.swift in Sources */,
+				FD71D963B30139FE3E88631F /* FeedbackView.swift in Sources */,
+				6FBDBD0D53D63B6DE4E55E1C /* FirestoreFeedbackRepository.swift in Sources */,
+				777D9EBD784B52DAFAE51C2A /* SkeletonView.swift in Sources */,
+				6E91A078FE51C92FCB413D42 /* SessionShareCard.swift in Sources */,
+				DA2F207D235787713C0B17B4 /* CommentModel.swift in Sources */,
+				FFD3740A94B2E9425D9A5317 /* CommentsView.swift in Sources */,
+				155CF285E35379EEA3714D11 /* CommentsViewModel.swift in Sources */,
+				FCDC53FADBE63D6F59D1BE5A /* SessionInsight.swift in Sources */,
+				B7DE19698BB9C07FCB5D0B50 /* SessionInsightsEngine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1006,6 +1058,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = H38UKRAS6C;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "Gecko Climbing/App/Info.plist";
@@ -1032,6 +1085,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = H38UKRAS6C;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "Gecko Climbing/App/Info.plist";
@@ -1161,6 +1215,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		293972102F6DD7250094ED7B /* XCRemoteSwiftPackageReference "posthog-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/PostHog/posthog-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.48.0;
+			};
+		};
 		BB000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
@@ -1180,6 +1242,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		293972112F6DD7250094ED7B /* PostHog */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 293972102F6DD7250094ED7B /* XCRemoteSwiftPackageReference "posthog-ios" */;
+			productName = PostHog;
+		};
 		CC000001 /* FirebaseCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = BB000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

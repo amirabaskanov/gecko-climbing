@@ -8,10 +8,19 @@ struct UserSearchView: View {
             if viewModel.isSearching {
                 ProgressView().padding()
             } else if !viewModel.searchQuery.isEmpty && viewModel.searchResults.isEmpty {
-                Text("No users found")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .padding()
+                VStack(spacing: 8) {
+                    Image(systemName: "person.slash")
+                        .font(.title2)
+                        .foregroundStyle(.secondary.opacity(0.5))
+                    Text("No climbers found")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.secondary)
+                    Text("Try a different name or username")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 32)
             } else {
                 ForEach(viewModel.searchResults) { user in
                     NavigationLink(value: SocialRoute.friendProfile(uid: user.uid)) {
@@ -30,12 +39,29 @@ struct UserSearchView: View {
             AvatarView(url: user.profileImageURL, size: 48, name: user.displayName)
             VStack(alignment: .leading, spacing: 2) {
                 Text(user.displayName).font(.subheadline.weight(.semibold))
-                Text("@\(user.username)").font(.caption).foregroundColor(.secondary)
+                Text("@\(user.username)").font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
-            if !user.highestGrade.isEmpty {
-                GradeBadge(grade: user.highestGrade, isCompleted: true, size: .small)
+
+            let following = viewModel.isFollowing(user.uid)
+            Button {
+                Task {
+                    if following {
+                        await viewModel.unfollow(user: user)
+                    } else {
+                        await viewModel.follow(user: user)
+                    }
+                }
+            } label: {
+                Text(following ? "Following" : "Follow")
+                    .font(.caption.weight(.semibold))
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 7)
+                    .background(following ? Color.gray.opacity(0.15) : Color.geckoPrimary)
+                    .foregroundStyle(following ? Color.primary : Color.white)
+                    .clipShape(Capsule())
             }
+            .buttonStyle(.plain)
         }
         .padding()
         .background(Color.white)

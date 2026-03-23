@@ -36,7 +36,7 @@ struct GradeChip: View {
         Button(action: onTap) {
             Text(grade)
                 .font(.system(size: 16, weight: .bold, design: .rounded))
-                .foregroundColor(isSelected ? .white : color)
+                .foregroundStyle(isSelected ? .white : color)
                 .padding(.horizontal, 18)
                 .padding(.vertical, 14)
                 .frame(minHeight: 52)
@@ -104,7 +104,7 @@ struct GradeBadge: View {
     var body: some View {
         Text(grade)
             .font(size.font)
-            .foregroundColor(.white)
+            .foregroundStyle(.white)
             .padding(size.padding)
             .background(
                 RoundedRectangle(cornerRadius: 20)

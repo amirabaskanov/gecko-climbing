@@ -12,11 +12,14 @@ struct NewSessionView: View {
     @State private var showCelebration = false
 
     // Inline climb logger state
-    @State private var selectedGrade = "V5"
+    @AppStorage("lastSelectedGrade") private var selectedGrade = "V5"
     @State private var showAttemptSelector = false
     @State private var attemptSelectorOutcome: ClimbOutcome = .sent
     @State private var showCancelConfirmation = false
     @State private var lastLoggedOutcome: ClimbOutcome?
+    @State private var userAllTimeBestGrade: Int = -1
+    @State private var showNewPBBanner = false
+    @State private var newPBGrade: String = ""
 
     // Timer (tick every second for m:ss display)
     @State private var timerTick = Date()
@@ -49,16 +52,17 @@ struct NewSessionView: View {
                             if let onCancel { onCancel() } else { dismiss() }
                         }
                     }
+                    .foregroundStyle(.secondary)
                 }
                 ToolbarItem(placement: .principal) {
                     if let vm = viewModel {
                         HStack(spacing: 4) {
                             Image(systemName: "timer")
                                 .font(.caption2)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                             Text(vm.elapsedTimeFormatted)
                                 .font(.subheadline.weight(.semibold).monospacedDigit())
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                         }
                         .id(timerTick)
                     }
@@ -79,6 +83,14 @@ struct NewSessionView: View {
                     sessionRepository: appEnv.sessionRepository,
                     userId: authViewModel.currentUserId
                 )
+            }
+            // Fetch user's all-time best for PB detection
+            if userAllTimeBestGrade == -1 {
+                Task {
+                    if let user = try? await appEnv.userRepository.fetchUser(uid: authViewModel.currentUserId) {
+                        userAllTimeBestGrade = user.highestGradeNumeric
+                    }
+                }
             }
         }
         .onReceive(timer) { _ in
@@ -103,11 +115,17 @@ struct NewSessionView: View {
                     session: session,
                     viewModel: vm,
                     modelContext: modelContext,
-                    appEnv: appEnv
+                    appEnv: appEnv,
+                    userDisplayName: authViewModel.currentUserDisplayName,
+                    userProfileImageURL: ""
                 ) { savedSession, post in
                     Task {
                         if let post {
-                            try? await appEnv.postRepository.createPost(post)
+                            do {
+                                try await appEnv.postRepository.createPost(post)
+                            } catch {
+                                print("❌ Failed to create post: \(error)")
+                            }
                         }
                         if let savedSession {
                             finishedSession = savedSession
@@ -131,6 +149,14 @@ struct NewSessionView: View {
                 // Zone B: Climb list + stats
                 ScrollViewReader { proxy in
                     List {
+                        // New PB banner
+                        if showNewPBBanner {
+                            newPBBanner
+                                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(Color.clear)
+                        }
+
                         // Streak banner
                         if vm.climbs.count >= 5 {
                             climbMilestoneBanner(count: vm.climbs.count)
@@ -201,7 +227,7 @@ struct NewSessionView: View {
     // MARK: - Pinned Logger
 
     private func pinnedLogger(_ vm: NewSessionViewModel) -> some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 12) {
             // Grade barrel picker (tall)
             GradeBarrelView(selectedGrade: $selectedGrade)
 
@@ -249,17 +275,17 @@ struct NewSessionView: View {
                 if let subtitle {
                     Text(subtitle)
                         .font(.system(size: 9, weight: .medium))
-                        .foregroundColor(outcome.color.opacity(0.7))
+                        .foregroundStyle(outcome.color.opacity(0.7))
                 }
             }
             .frame(maxWidth: .infinity)
             .frame(minHeight: 64)
-            .foregroundColor(outcome.color)
-            .background(Color.surface)
+            .foregroundStyle(outcome.color)
+            .background(outcome.color.opacity(0.08))
             .clipShape(RoundedRectangle(cornerRadius: 14))
             .overlay(
                 RoundedRectangle(cornerRadius: 14)
-                    .stroke(outcome.color.opacity(0.4), lineWidth: 1.5)
+                    .stroke(outcome.color.opacity(outcome == .flash ? 0.6 : 0.3), lineWidth: outcome == .flash ? 2 : 1.5)
             )
         }
         .buttonStyle(.plain)
@@ -271,37 +297,49 @@ struct NewSessionView: View {
 
     // MARK: - Session Stats Bar
 
+    @State private var statsPopTrigger = 0
+
     private func sessionStatsBar(_ vm: NewSessionViewModel) -> some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 12) {
             if vm.flashes.count > 0 {
                 statChip(icon: "bolt.fill", count: vm.flashes.count, color: .geckoFlashGold)
+                    .transition(.scale.combined(with: .opacity))
             }
-            statChip(icon: "checkmark.circle.fill", count: vm.sends.count + vm.flashes.count, color: .geckoGreen)
+            statChip(icon: "checkmark.circle.fill", count: vm.sends.count + vm.flashes.count, color: .geckoPrimary)
             if vm.attempts.count > 0 {
                 statChip(icon: "arrow.trianglehead.counterclockwise", count: vm.attempts.count, color: .geckoAttemptBlue)
+                    .transition(.scale.combined(with: .opacity))
             }
 
             Spacer()
 
             Text("Total: \(vm.climbs.count)")
                 .font(.caption.weight(.bold))
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
                 .contentTransition(.numericText())
                 .animation(.geckoSnappy, value: vm.climbs.count)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 10)
-        .background(Color.geckoGreen.opacity(0.06))
+        .background(Color.geckoPrimary.opacity(0.06))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .scaleEffect(statsPopTrigger > 0 ? 1.0 : 1.0)
+        .onChange(of: vm.climbs.count) {
+            withAnimation(.geckoSnappy) {
+                statsPopTrigger += 1
+            }
+        }
     }
 
     private func statChip(icon: String, count: Int, color: Color) -> some View {
         HStack(spacing: 3) {
             Image(systemName: icon)
                 .font(.system(size: 10, weight: .bold))
-                .foregroundColor(color)
+                .foregroundStyle(color)
+                .symbolEffect(.bounce, value: count)
             Text("\(count)")
                 .font(.caption.weight(.bold))
-                .foregroundColor(color)
+                .foregroundStyle(color)
                 .contentTransition(.numericText())
                 .animation(.geckoSnappy, value: count)
         }
@@ -321,33 +359,68 @@ struct NewSessionView: View {
             Text("\u{1F525}")
             Text(message)
                 .font(.subheadline.weight(.bold))
-                .foregroundStyle(Color.geckoGreen)
+                .foregroundStyle(Color.geckoPrimary)
                 .contentTransition(.numericText())
                 .animation(.geckoSnappy, value: count)
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 16)
         .frame(maxWidth: .infinity)
-        .background(Color.geckoGreen.opacity(0.1), in: Capsule())
+        .background(Color.geckoPrimary.opacity(0.1), in: Capsule())
         .transition(.scale.combined(with: .opacity))
+    }
+
+    // MARK: - New PB Banner
+
+    private var newPBBanner: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "trophy.fill")
+                .font(.title3)
+                .foregroundStyle(Color.geckoFlashGold)
+                .symbolEffect(.bounce, value: showNewPBBanner)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("New Personal Best!")
+                    .font(.subheadline.weight(.black))
+                    .foregroundStyle(.primary)
+                Text("\(newPBGrade) — you've never sent this grade before!")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+        }
+        .padding(.vertical, 10)
+        .padding(.horizontal, 16)
+        .frame(maxWidth: .infinity)
+        .background(
+            LinearGradient(
+                colors: [Color.geckoFlashGold.opacity(0.15), Color.geckoFlashGold.opacity(0.05)],
+                startPoint: .leading,
+                endPoint: .trailing
+            ),
+            in: RoundedRectangle(cornerRadius: 12)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.geckoFlashGold.opacity(0.3), lineWidth: 1)
+        )
+        .transition(.scale.combined(with: .opacity))
+        .sensoryFeedback(.success, trigger: showNewPBBanner)
     }
 
     // MARK: - Empty State
 
     private var emptyState: some View {
         VStack(spacing: 14) {
-            Image(systemName: "figure.climbing")
-                .font(.system(size: 44))
-                .foregroundColor(Color.geckoGreen.opacity(0.4))
+            GeckoLogoView(size: 44, color: .geckoPrimary.opacity(0.4))
 
             Text("Scroll a grade, tap an outcome!")
                 .font(.subheadline.weight(.medium))
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
 
             Image(systemName: "arrow.up")
                 .font(.caption)
-                .foregroundColor(.secondary.opacity(0.5))
+                .foregroundStyle(.secondary.opacity(0.5))
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 60)
@@ -371,9 +444,6 @@ struct NewSessionView: View {
                 attemptSelectorOutcome = .attempt
                 showAttemptSelector = true
             }
-
-        default:
-            break
         }
     }
 
@@ -381,6 +451,20 @@ struct NewSessionView: View {
 
     private func logClimb(vm: NewSessionViewModel, outcome: ClimbOutcome, attempts: Int) {
         lastLoggedOutcome = outcome
+
+        // Check for all-time Personal Best (only for completed climbs)
+        if outcome.isCompleted && userAllTimeBestGrade >= 0 {
+            let gradeNumeric = VGrade.numeric(for: selectedGrade)
+            if gradeNumeric > userAllTimeBestGrade {
+                userAllTimeBestGrade = gradeNumeric
+                newPBGrade = selectedGrade
+                withAnimation(.geckoSpring) { showNewPBBanner = true }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
+                    withAnimation(.geckoSnappy) { showNewPBBanner = false }
+                }
+            }
+        }
+
         withAnimation(.geckoSpring) {
             vm.addClimb(grade: selectedGrade, outcome: outcome, attempts: attempts)
         }

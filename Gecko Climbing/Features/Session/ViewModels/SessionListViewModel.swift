@@ -2,17 +2,19 @@ import Foundation
 import Observation
 import SwiftData
 
-@Observable
+@Observable @MainActor
 final class SessionListViewModel {
     var sessions: [SessionModel] = []
     var isLoading = false
     var error: Error?
 
     private let sessionRepository: any SessionRepositoryProtocol
+    private let postRepository: any PostRepositoryProtocol
     private let userId: String
 
-    init(sessionRepository: any SessionRepositoryProtocol, userId: String) {
+    init(sessionRepository: any SessionRepositoryProtocol, postRepository: any PostRepositoryProtocol, userId: String) {
         self.sessionRepository = sessionRepository
+        self.postRepository = postRepository
         self.userId = userId
     }
 
@@ -31,6 +33,7 @@ final class SessionListViewModel {
     func deleteSession(_ session: SessionModel, context: ModelContext) async {
         do {
             try await sessionRepository.deleteSession(session.sessionId, context: context)
+            try await postRepository.deletePostBySessionId(session.sessionId)
             sessions.removeAll { $0.sessionId == session.sessionId }
         } catch {
             self.error = error

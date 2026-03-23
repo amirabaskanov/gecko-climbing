@@ -12,6 +12,7 @@ final class PostModel {
     var type: String
     var caption: String
     var imageURL: String?
+    var imageURLs: [String]
     var likesCount: Int
     var commentsCount: Int
     var createdAt: Date
@@ -20,6 +21,7 @@ final class PostModel {
     var topGradeNumeric: Int
     var totalClimbs: Int
     var gradeCounts: [String: Int]
+    var gradeSequence: [String]
     var visibility: String
 
     init(postId: String = UUID().uuidString,
@@ -31,6 +33,7 @@ final class PostModel {
          type: String = "session",
          caption: String = "",
          imageURL: String? = nil,
+         imageURLs: [String] = [],
          likesCount: Int = 0,
          commentsCount: Int = 0,
          createdAt: Date = Date(),
@@ -39,6 +42,7 @@ final class PostModel {
          topGradeNumeric: Int = -1,
          totalClimbs: Int = 0,
          gradeCounts: [String: Int] = [:],
+         gradeSequence: [String] = [],
          visibility: String = "followers") {
         self.postId = postId
         self.userId = userId
@@ -49,6 +53,7 @@ final class PostModel {
         self.type = type
         self.caption = caption
         self.imageURL = imageURL
+        self.imageURLs = imageURLs
         self.likesCount = likesCount
         self.commentsCount = commentsCount
         self.createdAt = createdAt
@@ -57,6 +62,7 @@ final class PostModel {
         self.topGradeNumeric = topGradeNumeric
         self.totalClimbs = totalClimbs
         self.gradeCounts = gradeCounts
+        self.gradeSequence = gradeSequence
         self.visibility = visibility
     }
 }

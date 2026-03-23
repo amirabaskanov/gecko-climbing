@@ -1,18 +1,26 @@
 import SwiftUI
 import SwiftData
+import PhotosUI
 
 struct CelebrationView: View {
     let session: SessionModel
     let viewModel: NewSessionViewModel
     let modelContext: ModelContext
     let appEnv: AppEnvironment
+    let userDisplayName: String
+    let userProfileImageURL: String
     let onDone: (SessionModel?, PostModel?) -> Void
 
     @State private var caption = ""
     @State private var animateIn = false
     @State private var showConfetti = false
     @State private var showDetailsForm = false
+    @State private var showInsights = false
     @State private var recentGyms: [String] = []
+    @State private var selectedPhotos: [PhotosPickerItem] = []
+    @State private var photoImages: [UIImage] = []
+    @State private var isSaving = false
+    @State private var insights: [SessionInsight] = []
 
     // Form bindings that sync to viewModel
     @State private var gymName = ""
@@ -30,7 +38,7 @@ struct CelebrationView: View {
             LinearGradient(
                 colors: showDetailsForm
                     ? [Color.surfaceBackground, Color.surfaceBackground]
-                    : [Color.geckoGreen, Color.geckoGreenDark],
+                    : [Color.geckoPrimary, Color.geckoPrimaryDark],
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -48,9 +56,15 @@ struct CelebrationView: View {
                         durationMinutes: $durationMinutes,
                         notes: $notes,
                         caption: $caption,
+                        selectedPhotos: $selectedPhotos,
+                        photoImages: $photoImages,
                         recentGyms: recentGyms,
+                        isSaving: isSaving,
                         onSave: { saveAndShare() }
                     )
+                }
+                .onChange(of: selectedPhotos) { _, newItems in
+                    Task { await loadPhotos(from: newItems) }
                 }
                 .transition(.move(edge: .trailing).combined(with: .opacity))
             } else {
@@ -68,13 +82,14 @@ struct CelebrationView: View {
             notes = viewModel.notes
             animateIn = true
             loadRecentGyms()
+            loadInsights()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 showConfetti = true
             }
-            // Auto-transition to details form after celebration
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+            // Show insights after celebration stats settle
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
                 withAnimation(.geckoSpring) {
-                    showDetailsForm = true
+                    showInsights = true
                 }
             }
         }
@@ -87,7 +102,7 @@ struct CelebrationView: View {
             // Checkmark icon
             Image(systemName: "checkmark.seal.fill")
                 .font(.system(size: 76))
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .scaleEffect(animateIn ? 1.0 : 0.2)
                 .opacity(animateIn ? 1 : 0)
                 .animation(.geckoBounce.delay(0.3), value: animateIn)
@@ -96,10 +111,10 @@ struct CelebrationView: View {
             VStack(spacing: 8) {
                 Text("Session Complete!")
                     .font(.system(size: 32, weight: .black, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                 Text("\(session.totalClimbs) climbs")
                     .font(.title3)
-                    .foregroundColor(.white.opacity(0.85))
+                    .foregroundStyle(.white.opacity(0.85))
             }
             .opacity(animateIn ? 1 : 0)
             .offset(y: animateIn ? 0 : 12)
@@ -107,24 +122,24 @@ struct CelebrationView: View {
 
             // Stats cards with animated counters
             HStack(spacing: 10) {
+                celebrationStat(
+                    target: session.totalClimbs,
+                    label: "Climbs",
+                    delay: 0.5
+                )
                 if session.flashCount > 0 {
                     celebrationStat(
                         target: session.flashCount,
                         label: "Flashes",
-                        delay: 0.5,
+                        delay: 0.6,
                         accentColor: .geckoFlashGold
                     )
                 }
                 celebrationStat(
                     target: session.completedClimbs,
                     label: "Sends",
-                    delay: 0.6,
+                    delay: 0.7,
                     accentColor: .geckoSentGreenLight
-                )
-                celebrationStat(
-                    target: session.totalClimbs,
-                    label: "Climbs",
-                    delay: 0.7
                 )
                 if viewModel.elapsedMinutes > 0 {
                     celebrationStatText(
@@ -143,8 +158,36 @@ struct CelebrationView: View {
             }
             .padding(.horizontal, 8)
 
+            // Insights
+            if showInsights && !insights.isEmpty {
+                insightsSection
+                    .padding(.horizontal, 16)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .bottom).combined(with: .opacity),
+                        removal: .opacity
+                    ))
+            }
+
             Spacer()
-            Spacer()
+
+            // Manual continue button
+            Button {
+                withAnimation(.geckoSpring) {
+                    showDetailsForm = true
+                }
+            } label: {
+                Text("Continue")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(.white.opacity(0.2), in: Capsule())
+                    .overlay(Capsule().stroke(.white.opacity(0.4), lineWidth: 1))
+            }
+            .padding(.horizontal, 32)
+            .padding(.bottom, 20)
+            .opacity(animateIn ? 1 : 0)
+            .animation(.easeOut.delay(1.0), value: animateIn)
         }
     }
 
@@ -159,7 +202,7 @@ struct CelebrationView: View {
             )
             Text(label)
                 .font(.caption2)
-                .foregroundColor(.white.opacity(0.75))
+                .foregroundStyle(.white.opacity(0.75))
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
@@ -180,7 +223,7 @@ struct CelebrationView: View {
             )
             Text(label)
                 .font(.caption2)
-                .foregroundColor(.white.opacity(0.75))
+                .foregroundStyle(.white.opacity(0.75))
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
@@ -194,6 +237,9 @@ struct CelebrationView: View {
     // MARK: - Save Actions
 
     private func saveAndShare() {
+        guard !isSaving else { return }
+        isSaving = true
+
         viewModel.gymName = gymName
         viewModel.date = sessionDate
         viewModel.durationMinutes = durationMinutes > 0 ? durationMinutes % 60 : viewModel.elapsedMinutes % 60
@@ -202,23 +248,110 @@ struct CelebrationView: View {
 
         Task {
             if let saved = await viewModel.saveSession(context: modelContext) {
+                // Upload photos
+                var uploadedURLs: [String] = []
+                for image in photoImages {
+                    if let data = image.jpegData(compressionQuality: 0.8) {
+                        do {
+                            let url = try await appEnv.storageRepository.uploadSessionPhoto(
+                                userId: saved.userId,
+                                sessionId: saved.sessionId,
+                                imageData: data
+                            )
+                            uploadedURLs.append(url)
+                        } catch {
+                            // Continue with remaining photos
+                        }
+                    }
+                }
+
+                let completedClimbs = saved.climbs.filter { $0.climbOutcome.isCompleted }
                 let gradeCounts = Dictionary(
-                    grouping: saved.climbs.filter { $0.climbOutcome.isCompleted },
+                    grouping: completedClimbs,
                     by: { $0.grade }
                 ).mapValues { $0.count }
+                let gradeSequence = completedClimbs.map(\.grade)
 
                 let post = PostModel(
                     userId: saved.userId,
+                    userDisplayName: userDisplayName,
+                    userProfileImageURL: userProfileImageURL,
                     sessionId: saved.sessionId,
                     gymName: saved.gymName,
                     caption: caption,
+                    imageURL: uploadedURLs.first,
+                    imageURLs: uploadedURLs,
                     topGrade: saved.highestGrade,
                     topGradeNumeric: saved.highestGradeNumeric,
                     totalClimbs: saved.totalClimbs,
-                    gradeCounts: gradeCounts
+                    gradeCounts: gradeCounts,
+                    gradeSequence: gradeSequence
                 )
                 onDone(saved, post)
             }
+        }
+    }
+
+    private func loadPhotos(from items: [PhotosPickerItem]) async {
+        var images: [UIImage] = []
+        for item in items {
+            if let data = try? await item.loadTransferable(type: Data.self),
+               let image = UIImage(data: data) {
+                images.append(image)
+            }
+        }
+        await MainActor.run {
+            photoImages = images
+        }
+    }
+
+    // MARK: - Insights Section
+
+    private var insightsSection: some View {
+        VStack(spacing: 8) {
+            ForEach(Array(insights.enumerated()), id: \.element.id) { index, insight in
+                insightCard(insight, index: index)
+            }
+        }
+    }
+
+    private func insightCard(_ insight: SessionInsight, index: Int) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: insight.icon)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(insight.accentColor)
+                .frame(width: 36, height: 36)
+                .background(insight.accentColor.opacity(0.2))
+                .clipShape(Circle())
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(insight.title)
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(.white)
+                Text(insight.description)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.75))
+                    .lineLimit(2)
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(12)
+        .background(.white.opacity(0.12))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .opacity(showInsights ? 1 : 0)
+        .offset(y: showInsights ? 0 : 12)
+        .animation(.geckoSpring.delay(Double(index) * 0.12), value: showInsights)
+    }
+
+    // MARK: - Data Loading
+
+    private func loadInsights() {
+        let descriptor = FetchDescriptor<SessionModel>(
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        if let history = try? modelContext.fetch(descriptor) {
+            insights = SessionInsightsEngine.generate(current: session, history: history)
         }
     }
 

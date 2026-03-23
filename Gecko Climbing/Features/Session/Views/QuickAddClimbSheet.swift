@@ -6,136 +6,105 @@ struct QuickAddClimbSheet: View {
     @State private var selectedGrade: String = "V5"
     @State private var selectedOutcome: ClimbOutcome = .sent
     @State private var attempts: Int = 2
+    @State private var showAttemptSelector = false
     @State private var logTrigger = 0
 
     let onAdd: (String, ClimbOutcome, Int) -> Void
 
     var body: some View {
-        VStack(spacing: 20) {
-            // Drag handle
-            Capsule()
-                .fill(Color.secondary.opacity(0.3))
-                .frame(width: 36, height: 5)
-                .padding(.top, 10)
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 16) {
+                    // Grade barrel
+                    GradeBarrelView(selectedGrade: $selectedGrade)
 
-            Text("Log Climb")
-                .font(.title3.weight(.black).width(.expanded))
-
-            // Large grade badge
-            GradeBadge(grade: selectedGrade, isCompleted: selectedOutcome.isCompleted, size: .large)
-                .animation(.bouncy, value: selectedGrade)
-                .animation(.bouncy, value: selectedOutcome)
-
-            // Horizontal scrolling grade pills with snapping
-            ScrollView(.horizontal) {
-                HStack(spacing: 10) {
-                    ForEach(VGrade.standard, id: \.self) { grade in
-                        GradeChip(grade: grade, isSelected: selectedGrade == grade) {
-                            withAnimation(.bouncy) { selectedGrade = grade }
-                        }
-                        .id(grade)
+                    // Outcome buttons (same style as NewSessionView)
+                    HStack(spacing: 10) {
+                        outcomeButton(.flash, icon: "bolt.fill", label: "FLASH", subtitle: "1 try")
+                        outcomeButton(.sent, icon: "checkmark", label: "SENT", subtitle: nil)
+                        outcomeButton(.attempt, icon: "arrow.trianglehead.counterclockwise", label: "ATTEMPT", subtitle: nil)
                     }
-                }
-                .scrollTargetLayout()
-                .padding(.horizontal, 16)
-                .padding(.vertical, 4)
-            }
-            .scrollTargetBehavior(.viewAligned)
-            .scrollPosition(id: Binding(
-                get: { Optional(selectedGrade) },
-                set: { if let g = $0 { selectedGrade = g } }
-            ))
-            .scrollIndicators(.hidden)
-            .sensoryFeedback(.impact(flexibility: .soft), trigger: selectedGrade)
+                    .padding(.horizontal, 16)
 
-            // 2x2 Outcome grid
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                ForEach(ClimbOutcome.allCases) { outcome in
-                    OutcomeCard(
-                        outcome: outcome,
-                        isSelected: selectedOutcome == outcome
-                    ) {
-                        withAnimation(.bouncy) {
-                            selectedOutcome = outcome
-                            attempts = outcome.defaultAttempts
-                        }
-
-                        // Flash logs immediately
-                        if outcome == .flash {
+                    // Attempt selector (for sent/attempt)
+                    if showAttemptSelector {
+                        AttemptBubbleSelector(accentColor: selectedOutcome.color) { count in
+                            withAnimation(.geckoSnappy) {
+                                showAttemptSelector = false
+                            }
+                            attempts = count
                             logTrigger += 1
-                            onAdd(selectedGrade, .flash, 1)
+                            onAdd(selectedGrade, selectedOutcome, count)
                             dismiss()
                         }
+                        .transition(.scale(scale: 0.8).combined(with: .opacity))
+                        .padding(.horizontal, 16)
                     }
+                }
+                .padding(.top, 4)
+            }
+            .background(Color.geckoBackground)
+            .navigationTitle("Log Climb")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                        .foregroundStyle(.secondary)
                 }
             }
-            .padding(.horizontal, 16)
-            .sensoryFeedback(.impact(flexibility: .rigid), trigger: selectedOutcome)
+            .sensoryFeedback(.success, trigger: logTrigger)
+            .animation(.geckoSnappy, value: showAttemptSelector)
+        }
+    }
 
-            // Attempt stepper (hidden for flash)
-            if selectedOutcome != .flash {
-                HStack(spacing: 20) {
-                    Button {
-                        if attempts > selectedOutcome.minAttempts {
-                            attempts -= 1
-                        }
-                    } label: {
-                        Image(systemName: "minus.circle.fill")
-                            .font(.title)
-                            .foregroundColor(attempts > selectedOutcome.minAttempts ? selectedOutcome.color : .gray.opacity(0.3))
-                    }
-                    .disabled(attempts <= selectedOutcome.minAttempts)
-
-                    VStack(spacing: 2) {
-                        Text("\(attempts)")
-                            .font(.system(size: 36, weight: .black, design: .rounded))
-                            .contentTransition(.numericText())
-                            .animation(.snappy, value: attempts)
-                        Text(attempts == 1 ? "attempt" : "attempts")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .frame(minWidth: 80)
-
-                    Button {
-                        attempts += 1
-                    } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title)
-                            .foregroundColor(selectedOutcome.color)
-                    }
+    private func outcomeButton(_ outcome: ClimbOutcome, icon: String, label: String, subtitle: String?) -> some View {
+        Button {
+            handleOutcomeTap(outcome)
+        } label: {
+            VStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 20, weight: .bold))
+                Text(label)
+                    .font(.system(size: 11, weight: .black, design: .rounded))
+                if let subtitle {
+                    Text(subtitle)
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundStyle(outcome.color.opacity(0.7))
                 }
-                .transition(.move(edge: .bottom).combined(with: .opacity))
             }
+            .frame(maxWidth: .infinity)
+            .frame(minHeight: 64)
+            .foregroundStyle(outcome.color)
+            .background(outcome.color.opacity(0.08))
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(outcome.color.opacity(outcome == .flash ? 0.6 : 0.3), lineWidth: outcome == .flash ? 2 : 1.5)
+            )
+        }
+        .buttonStyle(.plain)
+        .bouncePress()
+        .sensoryFeedback(.impact(flexibility: outcome == .flash ? .rigid : .soft,
+                                  intensity: outcome == .flash ? 0.9 : 0.5),
+                          trigger: selectedOutcome == outcome)
+    }
 
-            Spacer()
-
-            // Log button
-            if selectedOutcome != .flash {
-                Button {
-                    logTrigger += 1
-                    onAdd(selectedGrade, selectedOutcome, attempts)
-                    dismiss()
-                } label: {
-                    Text("Log \(selectedOutcome.label) \(selectedGrade)")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(selectedOutcome.color)
-                        .foregroundColor(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 8)
+    private func handleOutcomeTap(_ outcome: ClimbOutcome) {
+        switch outcome {
+        case .flash:
+            logTrigger += 1
+            onAdd(selectedGrade, .flash, 1)
+            dismiss()
+        case .sent, .attempt:
+            withAnimation(.geckoSnappy) {
+                selectedOutcome = outcome
+                showAttemptSelector = true
             }
         }
-        .sensoryFeedback(.success, trigger: logTrigger)
-        .presentationDetents([.medium, .large])
-        .presentationDragIndicator(.hidden)
     }
 }
 
-// MARK: - Outcome Card
+// MARK: - Outcome Card (kept for backwards compatibility)
 struct OutcomeCard: View {
     let outcome: ClimbOutcome
     let isSelected: Bool
@@ -155,7 +124,7 @@ struct OutcomeCard: View {
                 RoundedRectangle(cornerRadius: 14)
                     .fill(isSelected ? outcome.color : Color.gray.opacity(0.1))
             )
-            .foregroundColor(isSelected ? .white : .primary)
+            .foregroundStyle(isSelected ? .white : .primary)
             .scaleEffect(isSelected ? 1.03 : 1.0)
             .animation(.bouncy, value: isSelected)
         }
