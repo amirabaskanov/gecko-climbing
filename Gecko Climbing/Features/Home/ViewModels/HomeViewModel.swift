@@ -35,7 +35,7 @@ final class HomeViewModel {
 
             // Backfill gradeSequence for posts that don't have it
             Task {
-                for (idx, post) in fetched.enumerated() where post.gradeSequence.isEmpty && !post.sessionId.isEmpty {
+                for post in fetched where post.gradeSequence.isEmpty && !post.sessionId.isEmpty {
                     if let sequence = try? await postRepository.backfillGradeSequence(
                         postId: post.postId, sessionId: post.sessionId
                     ) {
