@@ -50,6 +50,7 @@ struct ClimbRowView: View {
                 // Timestamp
                 Text(climb.loggedAt.timeFormatted)
                     .font(.caption2)
+                    .fontDesign(.rounded)
                     .foregroundStyle(.secondary)
             }
             .padding(.horizontal, 12)
