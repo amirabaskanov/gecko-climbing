@@ -1,2 +1,5 @@
-// Cloud Functions entry point. Triggers land here in Phases 2b (social) and 2c (friend activity).
-export {};
+// Cloud Functions entry point — re-exports each trigger as a top-level named export for deploy.
+export { onFollowCreated } from './triggers/onFollowCreated';
+export { onLikeCreated } from './triggers/onLikeCreated';
+export { onCommentCreated } from './triggers/onCommentCreated';
+export { flushNotificationBatches } from './triggers/batchSweeper';
