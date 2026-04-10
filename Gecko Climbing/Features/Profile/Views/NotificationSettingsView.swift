@@ -59,6 +59,10 @@ struct NotificationSettingsView: View {
         return status == .authorized || status == .provisional
     }
 
+    private var isNotDetermined: Bool {
+        notificationService.authorizationStatus == .notDetermined
+    }
+
     private var systemDisabledBanner: some View {
         HStack(spacing: 12) {
             Image(systemName: "bell.slash.fill")
@@ -69,11 +73,11 @@ struct NotificationSettingsView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 10))
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("Notifications are off in Settings")
+                Text(isNotDetermined ? "Turn on notifications" : "Notifications are off in Settings")
                     .font(.subheadline.weight(.semibold))
                     .fontDesign(.rounded)
                     .foregroundStyle(.primary)
-                Text("Turn them on to get updates from Gecko.")
+                Text(isNotDetermined ? "Allow Gecko to send you alerts." : "Enable them in Settings to get updates.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -81,11 +85,13 @@ struct NotificationSettingsView: View {
             Spacer(minLength: 8)
 
             Button {
-                if let url = URL(string: UIApplication.openSettingsURLString) {
+                if isNotDetermined {
+                    Task { _ = await notificationService.requestAuthorization() }
+                } else if let url = URL(string: UIApplication.openSettingsURLString) {
                     openURL(url)
                 }
             } label: {
-                Text("Open Settings")
+                Text(isNotDetermined ? "Allow" : "Open Settings")
                     .font(.caption.weight(.semibold))
                     .fontDesign(.rounded)
                     .foregroundStyle(.white)
@@ -104,6 +110,10 @@ struct NotificationSettingsView: View {
             get: { vm.masterEnabled },
             set: { newValue in
                 Task {
+                    if newValue && isNotDetermined {
+                        let granted = await notificationService.requestAuthorization()
+                        guard granted else { return }
+                    }
                     await vm.setAll(newValue)
                     await notificationService.refreshScheduledNotifications()
                 }
