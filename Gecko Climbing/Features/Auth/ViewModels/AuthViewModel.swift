@@ -70,8 +70,18 @@ final class AuthViewModel {
     }
 
     func signOut() {
+        // Capture the userId BEFORE we drop Firebase auth — once we sign out the
+        // repository's currentUserId reverts to empty and we'd lose the key we
+        // need to wipe the per-user session draft.
+        let userIdToWipe = authRepository.currentUserId
         do {
             try authRepository.signOut()
+            // Belt-and-suspenders: even though drafts are now namespaced by userId,
+            // wipe the previous user's draft so a shared device can't leave a
+            // restorable in-progress session sitting in UserDefaults.
+            if !userIdToWipe.isEmpty {
+                NewSessionViewModel.wipeDraft(for: userIdToWipe)
+            }
             AnalyticsService.capture(.signOut)
             AnalyticsService.reset()
         } catch {

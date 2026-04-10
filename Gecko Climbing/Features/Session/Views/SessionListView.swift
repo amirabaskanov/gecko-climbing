@@ -7,9 +7,14 @@ struct SessionListView: View {
     @Environment(\.modelContext) private var modelContext
 
     var refreshToken: UUID = UUID()
+    /// Switches the parent MainTabView to the Log tab. We route the "+" and
+    /// "Start Session" affordances through here instead of presenting a second
+    /// NewSessionView in a sheet — two live NewSessionViewModels would race on
+    /// the persisted draft and the empty-instance would clobber the in-progress
+    /// one when the app backgrounds.
+    var onStartSession: (() -> Void)? = nil
 
     @State private var viewModel: SessionListViewModel?
-    @State private var showNewSession = false
     @State private var router = TabRouter<SessionRoute>()
     @State private var error: Error?
     @State private var appeared = false
@@ -31,7 +36,7 @@ struct SessionListView: View {
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
-                        showNewSession = true
+                        onStartSession?()
                     } label: {
                         Image(systemName: "plus.circle.fill")
                             .foregroundStyle(Color.geckoPrimary)
@@ -48,20 +53,10 @@ struct SessionListView: View {
                 }
             }
         }
-        .sheet(isPresented: $showNewSession) {
-            NewSessionView(
-                climbCount: .constant(0),
-                finishTrigger: UUID(),
-                onSessionSaved: { session in
-                    viewModel?.sessions.insert(session, at: 0)
-                }
-            )
-        }
         .onAppear {
             if viewModel == nil {
                 let vm = SessionListViewModel(
                     sessionRepository: appEnv.sessionRepository,
-                    postRepository: appEnv.postRepository,
                     userId: authViewModel.currentUserId
                 )
                 viewModel = vm
@@ -89,11 +84,11 @@ struct SessionListView: View {
                 .background(Color.geckoBackground)
             } else if vm.sessions.isEmpty {
                 EmptyStateView(
-                    
+
                     title: "No sessions yet",
                     subtitle: "Tap + to log your first bouldering session",
                     actionLabel: "Start Session"
-                ) { showNewSession = true }
+                ) { onStartSession?() }
             } else {
                 List {
                     ForEach(Array(vm.sessions.enumerated()), id: \.element.id) { index, session in

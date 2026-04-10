@@ -86,7 +86,7 @@ struct NewSessionView: View {
                     sessionRepository: appEnv.sessionRepository,
                     userId: authViewModel.currentUserId
                 )
-                if let draft = NewSessionViewModel.loadDraft(), !draft.climbs.isEmpty {
+                if let draft = NewSessionViewModel.loadDraft(userId: authViewModel.currentUserId), !draft.climbs.isEmpty {
                     vm.restoreFromDraft(draft)
                     showRestoredBanner = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 4.5) {
@@ -136,19 +136,28 @@ struct NewSessionView: View {
                     userProfileImageURL: ""
                 ) { savedSession, post in
                     Task {
+                        if let savedSession {
+                            finishedSession = savedSession
+                        }
                         if let post {
                             do {
                                 try await appEnv.postRepository.createPost(post)
                             } catch {
-                                print("❌ Failed to create post: \(error)")
+                                // Session is already saved to Firestore — the failure
+                                // is on the feed-post side. Surface it through the VM
+                                // and KEEP the celebration sheet up so the user sees
+                                // the alert and the session isn't silently orphaned.
+                                vm.error = error
+                                return
                             }
-                        }
-                        if let savedSession {
-                            finishedSession = savedSession
                         }
                         showCelebration = false
                     }
                 }
+                .errorAlert(error: Binding(
+                    get: { vm.error },
+                    set: { vm.error = $0 }
+                ))
             }
         }
     }

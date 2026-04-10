@@ -177,21 +177,50 @@ struct SessionDraft: Codable {
 }
 
 extension NewSessionViewModel {
-    private static let draftDefaultsKey = "active_session_draft_v1"
+    private static let draftDefaultsKeyPrefix = "active_session_draft_v1"
+    // Legacy un-namespaced key that pre-dates per-user scoping. We migrate/wipe it
+    // on first read so a stray draft from before this fix can never be restored
+    // under the wrong account.
+    private static let legacyDraftDefaultsKey = "active_session_draft_v1"
     // Anything older than this on restore is treated as abandoned and silently dropped.
     private static let draftMaxAge: TimeInterval = 7 * 24 * 60 * 60
 
-    /// Returns a draft if one exists and is fresh; otherwise clears any stale draft and returns nil.
-    static func loadDraft() -> SessionDraft? {
-        guard let data = UserDefaults.standard.data(forKey: draftDefaultsKey),
+    /// UserDefaults key for the draft of a specific user. Always namespaced so
+    /// signing out of A and into B can never surface A's in-progress climbs.
+    static func draftDefaultsKey(for userId: String) -> String {
+        "\(draftDefaultsKeyPrefix).\(userId)"
+    }
+
+    private var draftDefaultsKey: String {
+        Self.draftDefaultsKey(for: userId)
+    }
+
+    /// Returns a draft if one exists and is fresh for the given user; otherwise
+    /// clears any stale draft and returns nil. Also wipes the pre-namespacing
+    /// legacy key so it can never be restored cross-account.
+    static func loadDraft(userId: String) -> SessionDraft? {
+        // Defensively wipe the legacy global key on every load — it should not
+        // be revived under any account.
+        UserDefaults.standard.removeObject(forKey: legacyDraftDefaultsKey)
+
+        let key = draftDefaultsKey(for: userId)
+        guard let data = UserDefaults.standard.data(forKey: key),
               let draft = try? JSONDecoder().decode(SessionDraft.self, from: data) else {
             return nil
         }
         if Date().timeIntervalSince(draft.updatedAt) > draftMaxAge {
-            UserDefaults.standard.removeObject(forKey: draftDefaultsKey)
+            UserDefaults.standard.removeObject(forKey: key)
             return nil
         }
         return draft
+    }
+
+    /// Removes any persisted draft for the given user. Called on sign-out so a
+    /// shared device can't leak the previous user's in-progress climbs even if
+    /// the new user happens to have the same userId by some accident.
+    static func wipeDraft(for userId: String) {
+        UserDefaults.standard.removeObject(forKey: draftDefaultsKey(for: userId))
+        UserDefaults.standard.removeObject(forKey: legacyDraftDefaultsKey)
     }
 
     func restoreFromDraft(_ draft: SessionDraft) {
@@ -243,11 +272,11 @@ extension NewSessionViewModel {
             updatedAt: Date()
         )
         if let data = try? JSONEncoder().encode(draft) {
-            UserDefaults.standard.set(data, forKey: Self.draftDefaultsKey)
+            UserDefaults.standard.set(data, forKey: draftDefaultsKey)
         }
     }
 
     func clearDraft() {
-        UserDefaults.standard.removeObject(forKey: Self.draftDefaultsKey)
+        UserDefaults.standard.removeObject(forKey: draftDefaultsKey)
     }
 }

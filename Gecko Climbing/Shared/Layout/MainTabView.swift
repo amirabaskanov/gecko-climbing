@@ -17,7 +17,15 @@ struct MainTabView: View {
                 .opacity(selectedTab == .feed ? 1 : 0)
                 .allowsHitTesting(selectedTab == .feed)
 
-            SessionListView(refreshToken: sessionListRefreshToken)
+            SessionListView(
+                refreshToken: sessionListRefreshToken,
+                onStartSession: {
+                    if selectedTab != .log {
+                        previousTab = selectedTab
+                    }
+                    selectedTab = .log
+                }
+            )
                 .opacity(selectedTab == .sessions ? 1 : 0)
                 .allowsHitTesting(selectedTab == .sessions)
 

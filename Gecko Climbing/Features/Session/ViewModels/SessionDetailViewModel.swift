@@ -68,7 +68,13 @@ final class SessionDetailViewModel {
 
     func deleteSession(context: ModelContext) async {
         do {
-            try await sessionRepository.deleteSession(session.sessionId, context: context)
+            // Atomic batch delete: session doc and any post that references it
+            // commit together so the feed can never show a post pointing at a
+            // missing session (or vice versa).
+            try await sessionRepository.deleteSessionAndAssociatedPost(
+                sessionId: session.sessionId,
+                context: context
+            )
         } catch {
             self.error = error
         }

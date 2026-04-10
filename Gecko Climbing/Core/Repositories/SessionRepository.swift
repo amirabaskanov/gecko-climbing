@@ -7,6 +7,13 @@ protocol SessionRepositoryProtocol: AnyObject {
     func createSession(_ session: SessionModel, context: ModelContext) async throws
     func updateSession(_ session: SessionModel) async throws
     func deleteSession(_ sessionId: String, context: ModelContext) async throws
+
+    /// Atomically delete a session and any feed post that references it.
+    /// Implementations must commit both deletions in a single Firestore batch
+    /// (or transaction) so callers never observe an intermediate state where a
+    /// post is orphaned (pointing at a missing session) or vice versa. If no
+    /// post references the session, only the session is deleted.
+    func deleteSessionAndAssociatedPost(sessionId: String, context: ModelContext) async throws
 }
 
 // MARK: - Mock Implementation
@@ -38,6 +45,13 @@ final class MockSessionRepository: SessionRepositoryProtocol, @unchecked Sendabl
     }
 
     func deleteSession(_ sessionId: String, context: ModelContext) async throws {
+        try await Task.sleep(nanoseconds: 200_000_000)
+        sessions.removeAll { $0.sessionId == sessionId }
+    }
+
+    func deleteSessionAndAssociatedPost(sessionId: String, context: ModelContext) async throws {
+        // Mock has no post repository handle, so just remove the session.
+        // The real Firestore implementation atomically deletes both docs.
         try await Task.sleep(nanoseconds: 200_000_000)
         sessions.removeAll { $0.sessionId == sessionId }
     }

@@ -111,6 +111,68 @@ final class FirestoreSessionRepository: SessionRepositoryProtocol, @unchecked Se
         }
     }
 
+    func deleteSessionAndAssociatedPost(sessionId: String, context: ModelContext) async throws {
+        // Read the session's userId before deleting so we can update stats
+        let sessionDoc = try await sessionsRef.document(sessionId).getDocument()
+        let userId = sessionDoc.data()?["userId"] as? String
+
+        // Look up any feed posts that reference this session. The post docs are the
+        // user-visible "anchor" — if we delete the session but leave a post around,
+        // the feed renders broken state; if we delete a post but leave the session
+        // around, the user sees a session they thought they removed. Both must commit
+        // atomically.
+        let postsRef = db.collection("posts")
+        let postsSnapshot = try await postsRef
+            .whereField("sessionId", isEqualTo: sessionId)
+            .getDocuments()
+
+        // Atomic step: delete the session doc and every matching post doc in a single
+        // WriteBatch. This is the integrity-critical write — all anchors live or die
+        // together. (1 session + N posts; in practice N == 0 or 1, well under the 500
+        // op batch limit.)
+        let anchorBatch = db.batch()
+        anchorBatch.deleteDocument(sessionsRef.document(sessionId))
+        for postDoc in postsSnapshot.documents {
+            anchorBatch.deleteDocument(postDoc.reference)
+        }
+        try await anchorBatch.commit()
+
+        // Cleanup step: drain leaf subcollections (climbs under the deleted session,
+        // likes under each deleted post). These are best-effort — Firestore does not
+        // cascade-delete subcollections, but with their parent docs already gone the
+        // orphaned leaves are unreachable from the app and safe to garbage-collect
+        // later if a cleanup write fails. Failures here are logged but not rethrown
+        // so the user-visible delete still appears to succeed.
+        do {
+            try await deleteSubcollection(parent: sessionsRef.document(sessionId), name: "climbs")
+            for postDoc in postsSnapshot.documents {
+                try await deleteSubcollection(parent: postsRef.document(postDoc.documentID), name: "likes")
+            }
+        } catch {
+            print("⚠️ deleteSessionAndAssociatedPost: leaf cleanup failed (anchors already deleted): \(error)")
+        }
+
+        // Update user stats after deletion
+        if let userId, !userId.isEmpty {
+            try await updateUserStats(userId: userId)
+        }
+    }
+
+    private func deleteSubcollection(parent: DocumentReference, name: String) async throws {
+        let snapshot = try await parent.collection(name).getDocuments()
+        guard !snapshot.documents.isEmpty else { return }
+        // Chunk into 450-op batches to stay under the 500-op Firestore batch limit.
+        let refs = snapshot.documents.map(\.reference)
+        for start in stride(from: 0, to: refs.count, by: 450) {
+            let end = Swift.min(start + 450, refs.count)
+            let batch = db.batch()
+            for ref in refs[start..<end] {
+                batch.deleteDocument(ref)
+            }
+            try await batch.commit()
+        }
+    }
+
     // MARK: - Private
 
     private func decodeSession(from data: [String: Any], id: String) -> SessionModel {

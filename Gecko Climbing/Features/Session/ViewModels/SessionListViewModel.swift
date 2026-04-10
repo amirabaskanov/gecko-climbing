@@ -9,12 +9,10 @@ final class SessionListViewModel {
     var error: Error?
 
     private let sessionRepository: any SessionRepositoryProtocol
-    private let postRepository: any PostRepositoryProtocol
     private let userId: String
 
-    init(sessionRepository: any SessionRepositoryProtocol, postRepository: any PostRepositoryProtocol, userId: String) {
+    init(sessionRepository: any SessionRepositoryProtocol, userId: String) {
         self.sessionRepository = sessionRepository
-        self.postRepository = postRepository
         self.userId = userId
     }
 
@@ -32,9 +30,13 @@ final class SessionListViewModel {
 
     func deleteSession(_ session: SessionModel, context: ModelContext) async {
         do {
-            // Delete posts first so they can't become orphaned if session delete succeeds but post delete fails
-            try await postRepository.deletePostBySessionId(session.sessionId)
-            try await sessionRepository.deleteSession(session.sessionId, context: context)
+            // Atomic batch delete: session doc and any post that references it commit
+            // together. Replaces the previous two-call sequence which could orphan
+            // either side on partial failure (see commit 673205d).
+            try await sessionRepository.deleteSessionAndAssociatedPost(
+                sessionId: session.sessionId,
+                context: context
+            )
             sessions.removeAll { $0.sessionId == session.sessionId }
         } catch {
             self.error = error
