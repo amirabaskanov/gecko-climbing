@@ -15,8 +15,9 @@ final class SessionDetailViewModel {
         self.sessionRepository = sessionRepository
     }
 
+    /// Chronological (oldest → newest) — first logged climb appears first.
     var sortedClimbs: [ClimbModel] {
-        session.climbs.sorted { $0.loggedAt > $1.loggedAt }
+        session.climbs.sorted { $0.loggedAt < $1.loggedAt }
     }
 
     var flashes: [ClimbModel] { session.climbs.filter { $0.climbOutcome == .flash } }

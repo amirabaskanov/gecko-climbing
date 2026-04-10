@@ -32,8 +32,9 @@ final class SessionListViewModel {
 
     func deleteSession(_ session: SessionModel, context: ModelContext) async {
         do {
-            try await sessionRepository.deleteSession(session.sessionId, context: context)
+            // Delete posts first so they can't become orphaned if session delete succeeds but post delete fails
             try await postRepository.deletePostBySessionId(session.sessionId)
+            try await sessionRepository.deleteSession(session.sessionId, context: context)
             sessions.removeAll { $0.sessionId == session.sessionId }
         } catch {
             self.error = error
