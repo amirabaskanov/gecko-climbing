@@ -17,7 +17,7 @@ struct StatsView: View {
         }
         .navigationTitle("Stats")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(Color.surfaceBackground, for: .navigationBar)
+        .toolbarBackground(Color.geckoBackground, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .onAppear {
             if viewModel == nil {
@@ -48,7 +48,7 @@ struct StatsView: View {
             }
             .padding(.vertical, 16)
         }
-        .background(Color.surfaceBackground)
+        .background(Color.geckoBackground)
         .refreshable { await vm.loadStats() }
         .onAppear {
             withAnimation(.geckoSpring.delay(0.1)) {
@@ -58,11 +58,10 @@ struct StatsView: View {
     }
 
     private func summaryRow(_ vm: StatsViewModel) -> some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
             statCard(value: "\(vm.totalSessions)", label: "Sessions", icon: "figure.climbing", color: Color.geckoPrimary, index: 0)
             statCard(value: vm.highestGrade, label: "Top Grade", icon: "trophy.fill", color: Color.gradeColor(for: vm.highestGradeNumeric), index: 1)
             statCard(value: "\(vm.totalSends)", label: "Total Sends", icon: "checkmark.seal.fill", color: Color.geckoOrange, index: 2)
-            statCard(value: "\(vm.currentStreak)", label: "Day Streak", icon: "flame.fill", color: .orange, index: 3)
         }
         .padding(.horizontal, 16)
     }

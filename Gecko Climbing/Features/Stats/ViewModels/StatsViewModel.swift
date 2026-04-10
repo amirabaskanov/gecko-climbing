@@ -59,24 +59,6 @@ final class StatsViewModel {
             .map { SessionProgress(sessionId: $0.sessionId, date: $0.date, highestGradeNumeric: $0.highestGradeNumeric, highestGrade: $0.highestGrade) }
     }
 
-    var currentStreak: Int {
-        guard !sessions.isEmpty else { return 0 }
-        let calendar = Calendar.current
-        var streak = 0
-        var checkDate = calendar.startOfDay(for: Date())
-        let sessionDays = Set(sessions.map { calendar.startOfDay(for: $0.date) })
-
-        while sessionDays.contains(checkDate) || (streak == 0 && sessionDays.contains(calendar.date(byAdding: .day, value: -1, to: checkDate) ?? checkDate)) {
-            if sessionDays.contains(checkDate) {
-                streak += 1
-            }
-            guard let prev = calendar.date(byAdding: .day, value: -1, to: checkDate) else { break }
-            checkDate = prev
-            if streak > 365 { break }
-        }
-        return streak
-    }
-
     func loadStats() async {
         isLoading = true
         error = nil

@@ -903,7 +903,6 @@ final class StatsViewModelTests: XCTestCase {
         XCTAssertEqual(vm.totalClimbs, 0)
         XCTAssertEqual(vm.totalSends, 0)
         XCTAssertEqual(vm.highestGrade, "—")
-        XCTAssertEqual(vm.currentStreak, 0)
         XCTAssertTrue(vm.gradePyramidData.isEmpty)
         XCTAssertTrue(vm.progressData.isEmpty)
     }
@@ -948,16 +947,17 @@ final class StatsViewModelTests: XCTestCase {
 
 final class SessionDetailViewModelTests: XCTestCase {
 
-    func testSortedClimbsNewestFirst() {
+    func testSortedClimbsChronological() {
         let session = SessionModel(userId: "u1", gymName: "Test")
         let older = ClimbModel(sessionId: session.sessionId, grade: "V3", gradeNumeric: 3, outcome: .flash, loggedAt: Date().addingTimeInterval(-3600))
         let newer = ClimbModel(sessionId: session.sessionId, grade: "V5", gradeNumeric: 5, outcome: .sent, attempts: 2, loggedAt: Date())
-        session.climbs = [older, newer]
+        session.climbs = [newer, older]
 
         let vm = SessionDetailViewModel(session: session, sessionRepository: MockSessionRepository(currentUserId: "u1"))
 
-        XCTAssertEqual(vm.sortedClimbs[0].grade, "V5")
-        XCTAssertEqual(vm.sortedClimbs[1].grade, "V3")
+        // Chronological: first logged climb (V3) comes first, latest (V5) last.
+        XCTAssertEqual(vm.sortedClimbs[0].grade, "V3")
+        XCTAssertEqual(vm.sortedClimbs[1].grade, "V5")
     }
 
     func testOutcomeFilters() {
