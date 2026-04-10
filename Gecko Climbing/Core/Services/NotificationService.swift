@@ -53,6 +53,95 @@ final class NotificationService: NSObject {
             print("[NotificationService] Failed to upload FCM token: \(error.localizedDescription)")
         }
     }
+
+    // MARK: - Local Reminders
+
+    private enum LocalReminderID {
+        static let weeklyRecap = "weekly-recap"
+        static let dormantComeback = "dormant-comeback"
+    }
+
+    func refreshScheduledNotifications() async {
+        let uid = authRepository.currentUserId
+        guard !uid.isEmpty else {
+            await cancelAllLocalReminders()
+            return
+        }
+        let remindersEnabled: Bool
+        do {
+            let prefs = try await userRepository.fetchNotificationPrefs(for: uid)
+            remindersEnabled = prefs.reminders
+        } catch {
+            remindersEnabled = false
+        }
+        guard remindersEnabled else {
+            await cancelAllLocalReminders()
+            return
+        }
+        await scheduleWeeklyRecap(for: uid)
+        await rescheduleDormantComeback(for: uid)
+    }
+
+    func cancelAllLocalReminders() async {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(
+            withIdentifiers: [LocalReminderID.weeklyRecap, LocalReminderID.dormantComeback]
+        )
+    }
+
+    private func scheduleWeeklyRecap(for userId: String) async {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: [LocalReminderID.weeklyRecap])
+
+        let content = UNMutableNotificationContent()
+        content.title = "Your week is in"
+        content.body = "See how your climbing shaped up."
+        content.sound = .default
+        content.userInfo = ["route": "profile:\(userId)"]
+
+        var components = DateComponents()
+        components.weekday = 1 // Sunday
+        components.hour = 11
+        components.minute = 0
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+
+        let request = UNNotificationRequest(
+            identifier: LocalReminderID.weeklyRecap,
+            content: content,
+            trigger: trigger
+        )
+        do {
+            try await center.add(request)
+        } catch {
+            print("[NotificationService] Failed to schedule weekly recap: \(error.localizedDescription)")
+        }
+    }
+
+    private func rescheduleDormantComeback(for userId: String) async {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: [LocalReminderID.dormantComeback])
+
+        let content = UNMutableNotificationContent()
+        content.title = "Your gym misses you"
+        content.body = "It's been two weeks since your last session."
+        content.sound = .default
+        content.userInfo = ["route": "profile:\(userId)"]
+
+        let trigger = UNTimeIntervalNotificationTrigger(
+            timeInterval: 14 * 24 * 60 * 60,
+            repeats: false
+        )
+
+        let request = UNNotificationRequest(
+            identifier: LocalReminderID.dormantComeback,
+            content: content,
+            trigger: trigger
+        )
+        do {
+            try await center.add(request)
+        } catch {
+            print("[NotificationService] Failed to schedule dormant comeback: \(error.localizedDescription)")
+        }
+    }
 }
 
 extension NotificationService: MessagingDelegate {

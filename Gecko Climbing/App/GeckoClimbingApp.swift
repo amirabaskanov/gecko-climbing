@@ -66,6 +66,8 @@ struct GeckoClimbingApp: App {
 struct AppRootView: View {
     @Environment(AppEnvironment.self) private var appEnv
     @Environment(AuthViewModel.self) private var authViewModel
+    @Environment(NotificationService.self) private var notificationService
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         ZStack {
@@ -84,5 +86,9 @@ struct AppRootView: View {
             }
         }
         .animation(.easeInOut, value: authViewModel.isAuthenticated)
+        .onChange(of: scenePhase) { _, newPhase in
+            guard newPhase == .active, authViewModel.isAuthenticated else { return }
+            Task { await notificationService.refreshScheduledNotifications() }
+        }
     }
 }

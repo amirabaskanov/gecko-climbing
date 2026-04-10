@@ -103,7 +103,10 @@ struct NotificationSettingsView: View {
         let binding = Binding<Bool>(
             get: { vm.masterEnabled },
             set: { newValue in
-                Task { await vm.setAll(newValue) }
+                Task {
+                    await vm.setAll(newValue)
+                    await notificationService.refreshScheduledNotifications()
+                }
             }
         )
         return Toggle(isOn: binding) {
@@ -147,7 +150,12 @@ struct NotificationSettingsView: View {
                 subtitle: "Weekly recap and comeback nudges",
                 isOn: Binding(
                     get: { vm.prefs.reminders },
-                    set: { newValue in Task { await vm.updateReminders(newValue) } }
+                    set: { newValue in
+                        Task {
+                            await vm.updateReminders(newValue)
+                            await notificationService.refreshScheduledNotifications()
+                        }
+                    }
                 )
             )
         }
