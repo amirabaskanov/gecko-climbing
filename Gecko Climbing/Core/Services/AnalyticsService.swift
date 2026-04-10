@@ -4,6 +4,7 @@ import PostHog
 enum AnalyticsEvent: String {
     case signUp = "sign_up"
     case signIn = "sign_in"
+    case signInFailed = "sign_in_failed"
     case signOut = "sign_out"
     case sessionLogged = "session_logged"
     case postLiked = "post_liked"

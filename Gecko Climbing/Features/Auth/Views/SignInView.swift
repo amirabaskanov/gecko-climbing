@@ -42,16 +42,20 @@ struct SignInView: View {
                                     let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
                                     let tokenData = credential.identityToken,
                                     let idToken = String(data: tokenData, encoding: .utf8)
-                                else { return }
+                                else {
+                                    authViewModel.handleAppleTokenMissing()
+                                    return
+                                }
+                                let nonce = currentNonce
                                 Task {
                                     await authViewModel.signInWithApple(
                                         idToken: idToken,
-                                        rawNonce: currentNonce,
+                                        rawNonce: nonce,
                                         fullName: credential.fullName
                                     )
                                 }
-                            case .failure:
-                                break
+                            case .failure(let error):
+                                authViewModel.handleAppleAuthorizationFailure(error)
                             }
                         }
                         .signInWithAppleButtonStyle(.black)
@@ -70,7 +74,7 @@ struct SignInView: View {
                             }
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.white)
+                            .background(Color.geckoCard)
                             .foregroundStyle(.primary)
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                             .shadow(color: .black.opacity(0.10), radius: 4, x: 0, y: 2)
@@ -101,7 +105,7 @@ struct SignInView: View {
                             .textInputAutocapitalization(.never)
                             .textContentType(.emailAddress)
                             .padding()
-                            .background(Color.white)
+                            .background(Color.geckoInputBackground)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
@@ -111,7 +115,7 @@ struct SignInView: View {
                         SecureField("Password", text: $password)
                             .textContentType(.password)
                             .padding()
-                            .background(Color.white)
+                            .background(Color.geckoInputBackground)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)

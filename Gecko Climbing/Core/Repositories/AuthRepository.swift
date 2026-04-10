@@ -106,6 +106,14 @@ enum AuthError: LocalizedError {
     case networkError
     case cancelled
     case tokenMissing
+    /// Email is already registered via one or more other providers. `existingProviders`
+    /// holds Firebase provider IDs ("apple.com", "google.com", "password") so the UI can
+    /// tell the user exactly which button to tap. Empty if email enumeration protection
+    /// is on and we couldn't look them up.
+    case accountExistsWithDifferentCredential(email: String?, existingProviders: [String])
+    case providerNotEnabled
+    case appleAuthorizationFailed(String)
+    case unknown(String)
 
     var errorDescription: String? {
         switch self {
@@ -113,7 +121,42 @@ enum AuthError: LocalizedError {
         case .emailAlreadyInUse: return "An account with this email already exists."
         case .networkError: return "Network error. Please try again."
         case .cancelled: return "Sign-in was cancelled."
-        case .tokenMissing: return "Authentication token is missing. Please try again."
+        case .tokenMissing: return "Apple didn't return a sign-in token. Please try again."
+        case .accountExistsWithDifferentCredential(_, let providers):
+            return Self.accountCollisionMessage(providers: providers)
+        case .providerNotEnabled:
+            return "Apple Sign-In isn't enabled for this app yet. Please try Google or email."
+        case .appleAuthorizationFailed(let message):
+            return "Apple Sign-In failed: \(message)"
+        case .unknown(let message):
+            return message
+        }
+    }
+
+    private static func accountCollisionMessage(providers: [String]) -> String {
+        let known = providers.compactMap(providerLabel(for:))
+        switch known.count {
+        case 0:
+            return "You already have an account with this email. Please sign in with your original method."
+        case 1:
+            let (name, action) = known[0]
+            return "You already registered with \(name). \(action)"
+        default:
+            let names = known.map(\.0).joined(separator: " or ")
+            return "You already have an account with this email. Sign in with \(names)."
+        }
+    }
+
+    private static func providerLabel(for providerId: String) -> (String, String)? {
+        switch providerId {
+        case "apple.com":
+            return ("Apple", "Tap 'Sign in with Apple' above to continue.")
+        case "google.com":
+            return ("Google", "Tap 'Continue with Google' above to continue.")
+        case "password", "emailLink":
+            return ("email and password", "Sign in with your email and password below.")
+        default:
+            return nil
         }
     }
 }

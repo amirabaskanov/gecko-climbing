@@ -46,16 +46,20 @@ struct SignUpView: View {
                                     let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
                                     let tokenData = credential.identityToken,
                                     let idToken = String(data: tokenData, encoding: .utf8)
-                                else { return }
+                                else {
+                                    authViewModel.handleAppleTokenMissing()
+                                    return
+                                }
+                                let nonce = currentNonce
                                 Task {
                                     await authViewModel.signInWithApple(
                                         idToken: idToken,
-                                        rawNonce: currentNonce,
+                                        rawNonce: nonce,
                                         fullName: credential.fullName
                                     )
                                 }
-                            case .failure:
-                                break
+                            case .failure(let error):
+                                authViewModel.handleAppleAuthorizationFailure(error)
                             }
                         }
                         .signInWithAppleButtonStyle(.black)
@@ -74,7 +78,7 @@ struct SignUpView: View {
                             }
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.white)
+                            .background(Color.geckoCard)
                             .foregroundStyle(.primary)
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                             .shadow(color: .black.opacity(0.10), radius: 4, x: 0, y: 2)
@@ -119,7 +123,7 @@ struct SignUpView: View {
                             }
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(canSubmit ? Color.geckoPrimary : Color.gray.opacity(0.4))
+                            .background(canSubmit ? Color.geckoPrimary : Color.geckoSecondaryText.opacity(0.4))
                             .foregroundStyle(.white)
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                         }
@@ -156,7 +160,7 @@ struct SignUpView: View {
             TextField(placeholder, text: text)
         }
         .padding()
-        .background(Color.white)
+        .background(Color.geckoInputBackground)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
@@ -172,7 +176,7 @@ struct SignUpView: View {
             SecureField(placeholder, text: text)
         }
         .padding()
-        .background(Color.white)
+        .background(Color.geckoInputBackground)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)

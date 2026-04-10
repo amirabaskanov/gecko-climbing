@@ -2,6 +2,10 @@ import Foundation
 import Observation
 import UIKit
 import GoogleSignIn
+import AuthenticationServices
+import OSLog
+
+private let authVMLog = Logger(subsystem: "com.geckoclimbing.app", category: "AuthVM")
 
 @Observable @MainActor
 final class AuthViewModel {
@@ -40,6 +44,7 @@ final class AuthViewModel {
             try await authRepository.signIn(email: email, password: password)
             AnalyticsService.capture(.signIn, properties: ["method": "email"])
         } catch {
+            trackSignInFailure(method: "email", error: error)
             self.error = error
         }
         isLoading = false
@@ -58,6 +63,7 @@ final class AuthViewModel {
             try await authRepository.signUp(email: email, password: password, username: username, displayName: displayName)
             AnalyticsService.capture(.signUp, properties: ["method": "email"])
         } catch {
+            trackSignInFailure(method: "email_signup", error: error)
             self.error = error
         }
         isLoading = false
@@ -91,6 +97,7 @@ final class AuthViewModel {
         } catch let gidError as GIDSignInError where gidError.code == .canceled {
             // User cancelled — no error shown
         } catch {
+            trackSignInFailure(method: "google", error: error)
             self.error = error
         }
         isLoading = false
@@ -103,9 +110,59 @@ final class AuthViewModel {
             try await authRepository.signInWithApple(idToken: idToken, rawNonce: rawNonce, fullName: fullName)
             AnalyticsService.capture(.signIn, properties: ["method": "apple"])
         } catch {
+            authVMLog.error("signInWithApple threw: \(String(describing: error), privacy: .public)")
+            trackSignInFailure(method: "apple", error: error)
             self.error = error
         }
         isLoading = false
+    }
+
+    private func trackSignInFailure(method: String, error: Error) {
+        var props: [String: Any] = ["method": method, "reason": String(describing: type(of: error))]
+        if let authError = error as? AuthError {
+            switch authError {
+            case .accountExistsWithDifferentCredential(_, let providers):
+                props["reason"] = "account_exists_with_different_credential"
+                props["existing_providers"] = providers
+            case .providerNotEnabled:
+                props["reason"] = "provider_not_enabled"
+            case .appleAuthorizationFailed:
+                props["reason"] = "apple_authorization_failed"
+            case .tokenMissing:
+                props["reason"] = "token_missing"
+            case .networkError:
+                props["reason"] = "network_error"
+            case .invalidCredentials:
+                props["reason"] = "invalid_credentials"
+            case .unknown(let message):
+                props["reason"] = "unknown"
+                props["message"] = message
+            default:
+                break
+            }
+        }
+        AnalyticsService.capture(.signInFailed, properties: props)
+    }
+
+    /// Call from ASAuthorizationController completion when the authorization itself fails
+    /// (i.e. before we ever hit Firebase). Filters user-cancel so we don't nag them.
+    func handleAppleAuthorizationFailure(_ error: Error) {
+        if let authError = error as? ASAuthorizationError {
+            authVMLog.error("ASAuthorizationError code=\(authError.errorCode, privacy: .public) desc=\(authError.localizedDescription, privacy: .public)")
+            if authError.code == .canceled {
+                return
+            }
+            self.error = AuthError.appleAuthorizationFailed(authError.localizedDescription)
+        } else {
+            authVMLog.error("Apple authorization failed (non-ASAuthorizationError): \(String(describing: error), privacy: .public)")
+            self.error = AuthError.appleAuthorizationFailed(error.localizedDescription)
+        }
+    }
+
+    /// Call when Apple returns success but the identity token is missing/undecodable.
+    func handleAppleTokenMissing() {
+        authVMLog.error("Apple Sign-In success but identityToken was missing or not UTF-8 decodable")
+        self.error = AuthError.tokenMissing
     }
 
     func clearError() {
