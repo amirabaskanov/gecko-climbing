@@ -65,5 +65,15 @@ service cloud.firestore {
     match /feedback/{feedbackId} {
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }
+
+    // Server-only collections — notifications backend (Cloud Functions)
+    // Admin SDK bypasses these rules; clients must never touch these.
+    match /notificationBatches/{bucketKey} {
+      allow read, write: if false;
+    }
+
+    match /rateLimits/{uid} {
+      allow read, write: if false;
+    }
   }
 }
