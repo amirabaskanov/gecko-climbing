@@ -2,12 +2,15 @@ import CryptoKit
 import Foundation
 
 enum AppleSignInHelper {
-    /// Generates a cryptographically random nonce string.
-    static func randomNonce() -> String {
+    /// Generates a cryptographically random nonce string. Throws
+    /// `AuthError.nonceGenerationFailed` if the underlying CSPRNG call fails
+    /// (a rare condition that should propagate as a normal error rather than
+    /// crash the app).
+    static func randomNonce() throws -> String {
         var bytes = [UInt8](repeating: 0, count: 32)
         let result = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
         guard result == errSecSuccess else {
-            fatalError("Unable to generate nonce: \(result)")
+            throw AuthError.nonceGenerationFailed(Int(result))
         }
         return Data(bytes).base64EncodedString()
             .replacingOccurrences(of: "+", with: "-")

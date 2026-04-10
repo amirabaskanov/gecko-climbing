@@ -138,6 +138,8 @@ final class AuthViewModel {
                 props["reason"] = "provider_not_enabled"
             case .appleAuthorizationFailed:
                 props["reason"] = "apple_authorization_failed"
+            case .nonceGenerationFailed:
+                props["reason"] = "nonce_generation_failed"
             case .tokenMissing:
                 props["reason"] = "token_missing"
             case .networkError:
@@ -166,6 +168,19 @@ final class AuthViewModel {
         } else {
             authVMLog.error("Apple authorization failed (non-ASAuthorizationError): \(String(describing: error), privacy: .public)")
             self.error = AuthError.appleAuthorizationFailed(error.localizedDescription)
+        }
+    }
+
+    /// Call when nonce generation for Apple Sign-In fails before we ever start
+    /// the authorization request. Surfaces the failure through the normal
+    /// error path so the view's `.errorAlert` shows it.
+    func handleAppleNonceFailure(_ error: Error) {
+        authVMLog.error("Apple Sign-In nonce generation failed: \(String(describing: error), privacy: .public)")
+        trackSignInFailure(method: "apple", error: error)
+        if let authError = error as? AuthError {
+            self.error = authError
+        } else {
+            self.error = AuthError.nonceGenerationFailed(-1)
         }
     }
 

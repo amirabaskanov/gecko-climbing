@@ -35,10 +35,16 @@ struct SignUpView: View {
                     // Social sign-up buttons
                     VStack(spacing: 12) {
                         SignInWithAppleButton(.signUp) { request in
-                            let nonce = AppleSignInHelper.randomNonce()
-                            currentNonce = nonce
-                            request.requestedScopes = [.fullName, .email]
-                            request.nonce = AppleSignInHelper.sha256(nonce)
+                            do {
+                                let nonce = try AppleSignInHelper.randomNonce()
+                                currentNonce = nonce
+                                request.requestedScopes = [.fullName, .email]
+                                request.nonce = AppleSignInHelper.sha256(nonce)
+                            } catch {
+                                currentNonce = ""
+                                request.requestedScopes = [.fullName, .email]
+                                authViewModel.handleAppleNonceFailure(error)
+                            }
                         } onCompletion: { result in
                             switch result {
                             case .success(let authorization):

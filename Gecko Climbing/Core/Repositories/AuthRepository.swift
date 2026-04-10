@@ -113,6 +113,7 @@ enum AuthError: LocalizedError {
     case accountExistsWithDifferentCredential(email: String?, existingProviders: [String])
     case providerNotEnabled
     case appleAuthorizationFailed(String)
+    case nonceGenerationFailed(Int)
     case unknown(String)
 
     var errorDescription: String? {
@@ -128,6 +129,8 @@ enum AuthError: LocalizedError {
             return "Apple Sign-In isn't enabled for this app yet. Please try Google or email."
         case .appleAuthorizationFailed(let message):
             return "Apple Sign-In failed: \(message)"
+        case .nonceGenerationFailed:
+            return "Couldn't start Apple Sign-In securely. Please try again."
         case .unknown(let message):
             return message
         }
