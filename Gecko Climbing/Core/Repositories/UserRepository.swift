@@ -15,6 +15,7 @@ protocol UserRepositoryProtocol: AnyObject {
     func fetchNotificationPrefs(for userId: String) async throws -> NotificationPrefs
     func updateNotificationPrefs(_ prefs: NotificationPrefs, for userId: String) async throws
     func registerFCMToken(_ token: String, for userId: String) async throws
+    func updateTimeZone(_ identifier: String, for userId: String) async throws
 }
 
 // MARK: - Mock Implementation
@@ -110,6 +111,8 @@ final class MockUserRepository: UserRepositoryProtocol, @unchecked Sendable {
     }
 
     func registerFCMToken(_ token: String, for userId: String) async throws {}
+
+    func updateTimeZone(_ identifier: String, for userId: String) async throws {}
 
     private static func makeSeedUsers(currentUserId: String) -> [UserModel] {
         let seedUsers: [(String, String, String, Int, Int, String, Int)] = [

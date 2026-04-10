@@ -67,6 +67,7 @@ final class NotificationService: NSObject {
             await cancelAllLocalReminders()
             return
         }
+        await syncTimeZone(for: uid)
         let remindersEnabled: Bool
         do {
             let prefs = try await userRepository.fetchNotificationPrefs(for: uid)
@@ -80,6 +81,14 @@ final class NotificationService: NSObject {
         }
         await scheduleWeeklyRecap(for: uid)
         await rescheduleDormantComeback(for: uid)
+    }
+
+    private func syncTimeZone(for userId: String) async {
+        do {
+            try await userRepository.updateTimeZone(TimeZone.current.identifier, for: userId)
+        } catch {
+            print("[NotificationService] Failed to sync timezone: \(error.localizedDescription)")
+        }
     }
 
     func cancelAllLocalReminders() async {

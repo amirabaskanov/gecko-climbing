@@ -177,6 +177,13 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
         )
     }
 
+    func updateTimeZone(_ identifier: String, for userId: String) async throws {
+        try await usersRef.document(userId).setData(
+            ["timeZone": identifier],
+            merge: true
+        )
+    }
+
     // MARK: - Search
 
     func searchUsers(query: String) async throws -> [UserModel] {
