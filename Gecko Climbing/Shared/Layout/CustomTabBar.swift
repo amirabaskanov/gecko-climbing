@@ -30,8 +30,6 @@ struct CustomTabBar: View {
     let onLogTap: () -> Void
     var onFinishTap: (() -> Void)?
 
-    @State private var logPulse = false
-
     private var isOnLogTab: Bool { selectedTab == .log }
     private var hasClimbs: Bool { logClimbCount > 0 }
 
@@ -88,32 +86,35 @@ struct CustomTabBar: View {
                 onLogTap()
             }
         } label: {
-            ZStack {
-                Circle()
-                    .fill(centerButtonColor)
-                    .frame(width: 56, height: 56)
-                    .shadow(
-                        color: centerButtonColor.opacity(isOnLogTab && !hasClimbs ? 0.15 : (logPulse ? 0.4 : 0.2)),
-                        radius: logPulse && !isOnLogTab ? 10 : 6,
-                        x: 0, y: 3
-                    )
+            // TimelineView drives the pulse from wall-clock time so it pauses
+            // automatically when the tab bar is off-screen, unlike a
+            // `withAnimation(.repeatForever)` loop, which keeps running until
+            // the view is torn down regardless of `.task` cancellation.
+            TimelineView(.animation) { context in
+                let t = context.date.timeIntervalSinceReferenceDate
+                // 4s period, eased between 0 and 1 via cosine.
+                let pulse = (1 - cos(t * .pi / 2.0)) / 2
+                let pulseShadowOpacity = 0.2 + 0.2 * pulse
+                let pulseShadowRadius = 6.0 + 4.0 * pulse
 
-                Image(systemName: centerButtonIcon)
-                    .font(.system(size: isOnLogTab ? 22 : 26, weight: .bold))
-                    .foregroundStyle(.white)
-                    .contentTransition(.symbolEffect(.replace))
-            }
-            .offset(y: -18)
-            .task {
-                // Re-kick the pulse each time the tab bar attaches; the
-                // animation cancels cleanly when the bar leaves the tree.
-                logPulse = false
-                withAnimation(
-                    .easeInOut(duration: 2.0)
-                    .repeatForever(autoreverses: true)
-                ) {
-                    logPulse = true
+                ZStack {
+                    Circle()
+                        .fill(centerButtonColor)
+                        .frame(width: 56, height: 56)
+                        .shadow(
+                            color: centerButtonColor.opacity(
+                                isOnLogTab && !hasClimbs ? 0.15 : (isOnLogTab ? 0.2 : pulseShadowOpacity)
+                            ),
+                            radius: isOnLogTab ? 6 : pulseShadowRadius,
+                            x: 0, y: 3
+                        )
+
+                    Image(systemName: centerButtonIcon)
+                        .font(.system(size: isOnLogTab ? 22 : 26, weight: .bold))
+                        .foregroundStyle(.white)
+                        .contentTransition(.symbolEffect(.replace))
                 }
+                .offset(y: -18)
             }
         }
         .frame(maxWidth: .infinity)

@@ -9,11 +9,13 @@ struct FollowersListView: View {
 
     @State private var users: [UserModel] = []
     @State private var isLoading = true
+    @State private var error: Error?
 
     var body: some View {
         content
             .background(Color.geckoBackground)
         .navigationTitle(mode == .followers ? "Followers" : "Following")
+        .errorAlert(error: $error)
         .task {
             do {
                 if mode == .followers {
@@ -21,7 +23,9 @@ struct FollowersListView: View {
                 } else {
                     users = try await appEnv.userRepository.fetchFollowing(uid: uid)
                 }
-            } catch {}
+            } catch {
+                self.error = error
+            }
             isLoading = false
         }
     }

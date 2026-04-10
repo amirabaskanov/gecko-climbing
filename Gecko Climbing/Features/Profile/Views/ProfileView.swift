@@ -47,6 +47,10 @@ struct ProfileView: View {
                 EditProfileView(viewModel: vm)
             }
         }
+        .errorAlert(error: Binding(
+            get: { viewModel?.error },
+            set: { viewModel?.error = $0 }
+        ))
         .onAppear {
             if viewModel == nil {
                 let vm = ProfileViewModel(

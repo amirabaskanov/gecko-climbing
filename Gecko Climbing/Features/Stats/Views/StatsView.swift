@@ -19,6 +19,10 @@ struct StatsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(Color.geckoBackground, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
+        .errorAlert(error: Binding(
+            get: { viewModel?.error },
+            set: { viewModel?.error = $0 }
+        ))
         .onAppear {
             if viewModel == nil {
                 let vm = StatsViewModel(

@@ -32,6 +32,10 @@ struct SocialView: View {
                 }
             }
         }
+        .errorAlert(error: Binding(
+            get: { viewModel?.error },
+            set: { viewModel?.error = $0 }
+        ))
         .onAppear {
             if viewModel == nil {
                 viewModel = SocialViewModel(

@@ -12,30 +12,33 @@ private extension Color {
 
 // MARK: - Shimmer Effect
 
-/// Sweeping highlight used on top of skeleton placeholders. Uses `.task` so the
-/// looping animation is torn down when the view leaves the hierarchy, instead
-/// of the old `onAppear { repeatForever }` which would keep burning CPU on
-/// off-screen skeletons.
+/// Sweeping highlight used on top of skeleton placeholders. Driven by
+/// `TimelineView(.animation)` so the shimmer pauses automatically when the
+/// view leaves the hierarchy or is off-screen — unlike a
+/// `withAnimation(.repeatForever)` loop, which is decoupled from view/task
+/// lifetime and keeps burning CPU until the view itself is torn down.
 struct ShimmerModifier: ViewModifier {
-    @State private var phase: CGFloat = -1
+    /// Seconds per shimmer sweep.
+    private let period: Double = 1.2
 
     func body(content: Content) -> some View {
         content
             .overlay(
-                LinearGradient(
-                    colors: [.clear, Color.skeletonHighlight.opacity(0.9), .clear],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-                .offset(x: phase * 200)
-                .mask(content)
-            )
-            .task {
-                phase = -1
-                withAnimation(.linear(duration: 1.2).repeatForever(autoreverses: false)) {
-                    phase = 1
+                TimelineView(.animation) { context in
+                    let t = context.date.timeIntervalSinceReferenceDate
+                    // Phase ramps from -1 to +1 over `period` seconds, then wraps.
+                    let normalized = (t.truncatingRemainder(dividingBy: period)) / period
+                    let phase = CGFloat(normalized * 2 - 1)
+
+                    LinearGradient(
+                        colors: [.clear, Color.skeletonHighlight.opacity(0.9), .clear],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    .offset(x: phase * 200)
+                    .mask(content)
                 }
-            }
+            )
     }
 }
 
