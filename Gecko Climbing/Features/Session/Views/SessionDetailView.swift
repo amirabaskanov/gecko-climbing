@@ -250,7 +250,10 @@ struct EditClimbSheet: View {
 
                     // Attempt selector
                     if selectedOutcome != .flash {
-                        AttemptBubbleSelector(accentColor: selectedOutcome.color) { count in
+                        AttemptBubbleSelector(
+                            accentColor: selectedOutcome.color,
+                            minimumAttempts: selectedOutcome == .attempt ? 1 : 2
+                        ) { count in
                             attempts = count
                         }
                         .padding(.horizontal, 16)
@@ -363,7 +366,7 @@ struct EditSessionSheet: View {
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 14)
-                        .background(Color.geckoBackground)
+                        .background(Color.geckoInputBackground)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                         .overlay(
                             RoundedRectangle(cornerRadius: 14)
@@ -380,7 +383,7 @@ struct EditSessionSheet: View {
                             .datePickerStyle(.compact)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 10)
-                            .background(Color.geckoBackground)
+                            .background(Color.geckoInputBackground)
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
 
@@ -392,7 +395,7 @@ struct EditSessionSheet: View {
                         TextField("How was the session?", text: $notes, axis: .vertical)
                             .lineLimit(4, reservesSpace: true)
                             .padding(16)
-                            .background(Color.geckoBackground)
+                            .background(Color.geckoInputBackground)
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 14)

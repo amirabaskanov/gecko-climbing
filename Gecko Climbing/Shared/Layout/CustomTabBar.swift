@@ -104,7 +104,10 @@ struct CustomTabBar: View {
                     .contentTransition(.symbolEffect(.replace))
             }
             .offset(y: -18)
-            .onAppear {
+            .task {
+                // Re-kick the pulse each time the tab bar attaches; the
+                // animation cancels cleanly when the bar leaves the tree.
+                logPulse = false
                 withAnimation(
                     .easeInOut(duration: 2.0)
                     .repeatForever(autoreverses: true)
@@ -114,8 +117,16 @@ struct CustomTabBar: View {
             }
         }
         .frame(maxWidth: .infinity)
+        .accessibilityLabel(centerButtonAccessibilityLabel)
         .animation(.geckoSpring, value: isOnLogTab)
         .animation(.geckoSpring, value: hasClimbs)
+    }
+
+    private var centerButtonAccessibilityLabel: String {
+        if isOnLogTab {
+            return hasClimbs ? "Finish session" : "Cancel logging"
+        }
+        return "Log a climb"
     }
 
     private var centerButtonIcon: String {

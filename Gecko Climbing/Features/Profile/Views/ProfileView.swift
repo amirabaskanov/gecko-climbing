@@ -80,7 +80,7 @@ struct ProfileView: View {
             .padding(.bottom, 32)
         }
         .contentMargins(.bottom, 48)
-        .background(Color.surfaceBackground)
+        .background(Color.geckoBackground)
         .refreshable { await vm.load() }
     }
 
@@ -171,9 +171,9 @@ struct ProfileView: View {
             }
             .padding(.vertical, 16)
             .frame(maxWidth: .infinity)
-            .background(Color.white)
+            .background(Color.geckoCard)
             .clipShape(RoundedRectangle(cornerRadius: 14))
-            .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 2)
+            .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 2)
         }
         .buttonStyle(.plain)
         .bouncePress()

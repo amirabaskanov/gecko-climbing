@@ -17,7 +17,7 @@ struct AsyncImageView: View {
                 case .empty:
                     ProgressView()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.gray.opacity(0.08))
+                        .background(Color.geckoInputBackground)
                 @unknown default:
                     placeholderView
                 }
@@ -29,10 +29,10 @@ struct AsyncImageView: View {
 
     private var placeholderView: some View {
         Rectangle()
-            .fill(Color.gray.opacity(0.15))
+            .fill(Color.geckoInputBackground)
             .overlay(
                 Image(systemName: "photo")
-                    .foregroundStyle(.gray.opacity(0.4))
+                    .foregroundStyle(.secondary)
                     .font(.title2)
             )
     }

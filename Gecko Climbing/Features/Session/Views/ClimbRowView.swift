@@ -55,9 +55,9 @@ struct ClimbRowView: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
         }
-        .background(Color.surface)
+        .background(Color.geckoCard)
         .clipShape(RoundedRectangle(cornerRadius: 14))
-        .shadow(color: .black.opacity(0.03), radius: 1, x: 0, y: 1)
-        .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .shadow(color: .black.opacity(0.06), radius: 1, x: 0, y: 1)
+        .shadow(color: .black.opacity(0.10), radius: 4, x: 0, y: 2)
     }
 }

@@ -42,7 +42,7 @@ struct GradeChip: View {
                 .frame(minHeight: 52)
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(isSelected ? color : Color.surface)
+                        .fill(isSelected ? color : Color.geckoCard)
                         .overlay(
                             isSelected ?
                                 AnyView(
@@ -99,7 +99,7 @@ struct GradeBadge: View {
     }
 
     private var numeric: Int { VGrade.numeric(for: grade) }
-    private var color: Color { isCompleted ? Color.gradeColor(for: numeric) : Color(hex: "#9E9E9E") }
+    private var color: Color { isCompleted ? Color.gradeColor(for: numeric) : Color.geckoSecondaryText }
 
     var body: some View {
         Text(grade)

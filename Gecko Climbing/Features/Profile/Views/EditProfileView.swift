@@ -58,7 +58,7 @@ struct EditProfileView: View {
                                     .focused($focusedField, equals: .name)
                             }
                             .padding(14)
-                            .background(Color.white)
+                            .background(Color.geckoInputBackground)
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 14)
@@ -90,7 +90,7 @@ struct EditProfileView: View {
                                     .focused($focusedField, equals: .bio)
                             }
                             .padding(14)
-                            .background(Color.white)
+                            .background(Color.geckoInputBackground)
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 14)

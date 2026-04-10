@@ -28,7 +28,10 @@ struct QuickAddClimbSheet: View {
 
                     // Attempt selector (for sent/attempt)
                     if showAttemptSelector {
-                        AttemptBubbleSelector(accentColor: selectedOutcome.color) { count in
+                        AttemptBubbleSelector(
+                            accentColor: selectedOutcome.color,
+                            minimumAttempts: selectedOutcome == .attempt ? 1 : 2
+                        ) { count in
                             withAnimation(.geckoSnappy) {
                                 showAttemptSelector = false
                             }

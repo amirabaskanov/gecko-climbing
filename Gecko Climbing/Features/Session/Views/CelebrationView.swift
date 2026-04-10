@@ -37,7 +37,7 @@ struct CelebrationView: View {
             // Gradient background
             LinearGradient(
                 colors: showDetailsForm
-                    ? [Color.surfaceBackground, Color.surfaceBackground]
+                    ? [Color.geckoBackground, Color.geckoBackground]
                     : [Color.geckoPrimary, Color.geckoPrimaryDark],
                 startPoint: .top,
                 endPoint: .bottom
@@ -122,38 +122,16 @@ struct CelebrationView: View {
 
             // Stats cards with animated counters
             HStack(spacing: 10) {
-                celebrationStat(
-                    target: session.totalClimbs,
-                    label: "Climbs",
-                    delay: 0.5
-                )
+                celebrationStat(label: "Climbs", delay: 0.5, count: session.totalClimbs)
                 if session.flashCount > 0 {
-                    celebrationStat(
-                        target: session.flashCount,
-                        label: "Flashes",
-                        delay: 0.6,
-                        accentColor: .geckoFlashGold
-                    )
+                    celebrationStat(label: "Flashes", delay: 0.6, accentColor: .geckoFlashGold, count: session.flashCount)
                 }
-                celebrationStat(
-                    target: session.completedClimbs,
-                    label: "Sends",
-                    delay: 0.7,
-                    accentColor: .geckoSentGreenLight
-                )
+                celebrationStat(label: "Sends", delay: 0.7, accentColor: .geckoSentGreenLight, count: session.completedClimbs)
                 if viewModel.elapsedMinutes > 0 {
-                    celebrationStatText(
-                        value: viewModel.elapsedMinutes.durationFormatted,
-                        label: "Duration",
-                        delay: 0.75
-                    )
+                    celebrationStat(label: "Duration", delay: 0.75, text: viewModel.elapsedMinutes.durationFormatted)
                 }
                 if !session.highestGrade.isEmpty {
-                    celebrationStatText(
-                        value: session.highestGrade,
-                        label: "Top Send",
-                        delay: 0.8
-                    )
+                    celebrationStat(label: "Top Send", delay: 0.8, text: session.highestGrade)
                 }
             }
             .padding(.horizontal, 8)
@@ -191,36 +169,31 @@ struct CelebrationView: View {
         }
     }
 
-    private func celebrationStat(target: Int, label: String, delay: Double, accentColor: Color = .white) -> some View {
+    /// Stat chip in the celebration screen. Pass `count` for numeric stats
+    /// (animated counter) or `text` for string values like a grade or duration.
+    @ViewBuilder
+    private func celebrationStat(label: String,
+                                 delay: Double,
+                                 accentColor: Color = .white,
+                                 count: Int? = nil,
+                                 text: String? = nil) -> some View {
         VStack(spacing: 4) {
-            AnimatedCounter(
-                target: target,
-                duration: 0.8,
-                delay: delay,
-                font: .system(size: 18, weight: .black, design: .rounded),
-                color: accentColor
-            )
-            Text(label)
-                .font(.caption2)
-                .foregroundStyle(.white.opacity(0.75))
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(Color.white.opacity(0.15))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .opacity(animateIn ? 1 : 0)
-        .offset(y: animateIn ? 0 : 16)
-        .animation(.geckoSpring.delay(delay), value: animateIn)
-    }
-
-    private func celebrationStatText(value: String, label: String, delay: Double) -> some View {
-        VStack(spacing: 4) {
-            AnimatedCounterText(
-                value: value,
-                delay: delay,
-                font: .system(size: 18, weight: .black, design: .rounded),
-                color: .white
-            )
+            if let count {
+                AnimatedCounter(
+                    target: count,
+                    duration: 0.8,
+                    delay: delay,
+                    font: .system(size: 18, weight: .black, design: .rounded),
+                    color: accentColor
+                )
+            } else if let text {
+                AnimatedCounterText(
+                    value: text,
+                    delay: delay,
+                    font: .system(size: 18, weight: .black, design: .rounded),
+                    color: accentColor
+                )
+            }
             Text(label)
                 .font(.caption2)
                 .foregroundStyle(.white.opacity(0.75))
@@ -265,12 +238,16 @@ struct CelebrationView: View {
                     }
                 }
 
-                let completedClimbs = saved.climbs.filter { $0.climbOutcome.isCompleted }
+                // Chronological (oldest → newest) so the feed renders in logging order.
+                let orderedClimbs = saved.climbs.sorted { $0.loggedAt < $1.loggedAt }
+                let completedClimbs = orderedClimbs.filter { $0.climbOutcome.isCompleted }
                 let gradeCounts = Dictionary(
                     grouping: completedClimbs,
                     by: { $0.grade }
                 ).mapValues { $0.count }
-                let gradeSequence = completedClimbs.map(\.grade)
+                // Include attempts too so the feed can render them with a different texture.
+                let gradeSequence = orderedClimbs.map(\.grade)
+                let outcomeSequence = orderedClimbs.map { $0.climbOutcome.rawValue }
 
                 let post = PostModel(
                     userId: saved.userId,
@@ -285,7 +262,8 @@ struct CelebrationView: View {
                     topGradeNumeric: saved.highestGradeNumeric,
                     totalClimbs: saved.totalClimbs,
                     gradeCounts: gradeCounts,
-                    gradeSequence: gradeSequence
+                    gradeSequence: gradeSequence,
+                    outcomeSequence: outcomeSequence
                 )
                 onDone(saved, post)
             }

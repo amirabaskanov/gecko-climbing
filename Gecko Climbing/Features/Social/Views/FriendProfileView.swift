@@ -56,7 +56,7 @@ struct FriendProfileView: View {
             }
             .padding(.bottom, 24)
         }
-        .background(Color.surfaceBackground)
+        .background(Color.geckoBackground)
         .navigationTitle(vm.user?.displayName ?? "Profile")
         .navigationBarTitleDisplayMode(.inline)
         .errorAlert(error: Binding(get: { vm.error }, set: { vm.error = $0 }))
@@ -101,10 +101,16 @@ struct FriendProfileView: View {
             } label: {
                 Text(vm.isFollowing ? "Following" : "Follow")
                     .font(.subheadline.weight(.semibold))
-                    .frame(width: 140)
+                    .frame(minWidth: 140)
+                    .padding(.horizontal, 20)
                     .padding(.vertical, 10)
-                    .background(vm.isFollowing ? Color.gray.opacity(0.15) : Color.geckoPrimary)
+                    .background(
+                        vm.isFollowing ? AnyShapeStyle(Color.geckoInputBackground) : AnyShapeStyle(Color.geckoPrimary)
+                    )
                     .foregroundStyle(vm.isFollowing ? Color.primary : Color.white)
+                    .overlay(
+                        Capsule().stroke(Color.geckoDivider, lineWidth: vm.isFollowing ? 1 : 0)
+                    )
                     .clipShape(Capsule())
             }
         }

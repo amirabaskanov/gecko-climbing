@@ -1,7 +1,21 @@
 import SwiftUI
 
+// MARK: - Skeleton Palette
+
+private extension Color {
+    /// Dull base fill for skeleton bones. Slightly darker than the card in light mode,
+    /// slightly lighter than the card in dark mode, so bones read in both.
+    static let skeletonBase = Color.dynamic(light: "#E8E4DD", dark: "#2B3732")
+    /// Highlight that sweeps across during the shimmer animation.
+    static let skeletonHighlight = Color.dynamic(light: "#F7F4EE", dark: "#3C4A44")
+}
+
 // MARK: - Shimmer Effect
 
+/// Sweeping highlight used on top of skeleton placeholders. Uses `.task` so the
+/// looping animation is torn down when the view leaves the hierarchy, instead
+/// of the old `onAppear { repeatForever }` which would keep burning CPU on
+/// off-screen skeletons.
 struct ShimmerModifier: ViewModifier {
     @State private var phase: CGFloat = -1
 
@@ -9,14 +23,15 @@ struct ShimmerModifier: ViewModifier {
         content
             .overlay(
                 LinearGradient(
-                    colors: [.clear, .white.opacity(0.4), .clear],
+                    colors: [.clear, Color.skeletonHighlight.opacity(0.9), .clear],
                     startPoint: .leading,
                     endPoint: .trailing
                 )
                 .offset(x: phase * 200)
                 .mask(content)
             )
-            .onAppear {
+            .task {
+                phase = -1
                 withAnimation(.linear(duration: 1.2).repeatForever(autoreverses: false)) {
                     phase = 1
                 }
@@ -38,7 +53,7 @@ struct SkeletonLine: View {
 
     var body: some View {
         RoundedRectangle(cornerRadius: height / 2)
-            .fill(Color.gray.opacity(0.12))
+            .fill(Color.skeletonBase)
             .frame(width: width, height: height)
             .shimmer()
     }
@@ -49,7 +64,7 @@ struct SkeletonCircle: View {
 
     var body: some View {
         Circle()
-            .fill(Color.gray.opacity(0.12))
+            .fill(Color.skeletonBase)
             .frame(width: size, height: size)
             .shimmer()
     }
@@ -61,7 +76,7 @@ struct SkeletonRect: View {
 
     var body: some View {
         RoundedRectangle(cornerRadius: cornerRadius)
-            .fill(Color.gray.opacity(0.12))
+            .fill(Color.skeletonBase)
             .frame(height: height)
             .shimmer()
     }

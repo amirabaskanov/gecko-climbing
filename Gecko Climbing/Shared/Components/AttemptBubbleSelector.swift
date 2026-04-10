@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AttemptBubbleSelector: View {
     var accentColor: Color = .geckoPrimary
+    var minimumAttempts: Int = 2
     let onSelect: (Int) -> Void
 
     @State private var selectedNumber: Int = 2
@@ -9,8 +10,15 @@ struct AttemptBubbleSelector: View {
     @State private var customText = ""
     @FocusState private var customFieldFocused: Bool
 
-    private let bubbleNumbers = [2, 3, 4, 5, 6]
     private let bubbleSize: CGFloat = 44
+
+    private var bubbleNumbers: [Int] {
+        Array(minimumAttempts..<(minimumAttempts + 5))
+    }
+
+    private var overflowStart: Int {
+        minimumAttempts + 5
+    }
 
     var body: some View {
         VStack(spacing: 12) {
@@ -46,17 +54,17 @@ struct AttemptBubbleSelector: View {
                 bubbleButton(number: number)
             }
 
-            // 7+ button
+            // Overflow button (e.g. 7+ or 6+)
             Button {
                 withAnimation(.geckoSnappy) {
                     showCustomField = true
-                    customText = "7"
+                    customText = "\(overflowStart)"
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     customFieldFocused = true
                 }
             } label: {
-                Text("7+")
+                Text("\(overflowStart)+")
                     .font(.system(size: 16, weight: .bold, design: .rounded))
                     .foregroundStyle(accentColor)
                     .frame(width: bubbleSize, height: bubbleSize)
@@ -75,7 +83,7 @@ struct AttemptBubbleSelector: View {
     }
 
     private func bubbleButton(number: Int) -> some View {
-        let isDefault = number == 2
+        let isDefault = number == minimumAttempts
 
         return Button {
             selectedNumber = number
@@ -114,8 +122,8 @@ struct AttemptBubbleSelector: View {
                 .focused($customFieldFocused)
 
             Button {
-                let count = Int(customText) ?? 7
-                onSelect(max(count, 2))
+                let count = Int(customText) ?? overflowStart
+                onSelect(max(count, minimumAttempts))
             } label: {
                 Text("Log")
                     .font(.callout.weight(.bold))

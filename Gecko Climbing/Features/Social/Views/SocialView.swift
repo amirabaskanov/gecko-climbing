@@ -19,7 +19,7 @@ struct SocialView: View {
             }
             .navigationTitle("Friends")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color.surfaceBackground, for: .navigationBar)
+            .toolbarBackground(Color.geckoBackground, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .navigationDestination(for: SocialRoute.self) { route in
                 switch route {
@@ -90,7 +90,7 @@ struct SocialView: View {
         .scrollContentBackground(.hidden)
         .contentMargins(.bottom, 48)
         .searchable(text: Binding(get: { vm.searchQuery }, set: { vm.searchQuery = $0 }), prompt: "Search climbers...")
-        .background(Color.surfaceBackground)
+        .background(Color.geckoBackground)
         .refreshable { await vm.loadFollowing() }
         .onAppear {
             withAnimation { appeared = true }

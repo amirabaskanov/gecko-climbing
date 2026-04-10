@@ -106,7 +106,7 @@ struct CommentsView: View {
                 commentInput
             }
         }
-        .background(Color.surfaceBackground)
+        .background(Color.geckoBackground)
         .task {
             await viewModel.loadComments()
             withAnimation(.geckoSpring) { appeared = true }
@@ -364,7 +364,7 @@ struct MentionText: View {
                 // The mention itself
                 result = result + Text("@\(match.name)")
                     .fontWeight(.semibold)
-                    .foregroundColor(.geckoPrimary)
+                    .foregroundStyle(Color.geckoPrimary)
 
                 remaining = String(remaining[match.range.upperBound...])
             } else {

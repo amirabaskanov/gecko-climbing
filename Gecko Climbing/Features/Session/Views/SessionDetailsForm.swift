@@ -59,7 +59,7 @@ struct SessionDetailsForm: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 14)
-                .background(Color.surfaceBackground)
+                .background(Color.geckoInputBackground)
                 .clipShape(RoundedRectangle(cornerRadius: 14))
                 .overlay(
                     RoundedRectangle(cornerRadius: 14)
@@ -116,7 +116,7 @@ struct SessionDetailsForm: View {
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
                     .frame(maxWidth: .infinity)
-                    .background(Color.surfaceBackground)
+                    .background(Color.geckoInputBackground)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
 
@@ -134,7 +134,7 @@ struct SessionDetailsForm: View {
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
                     .frame(maxWidth: .infinity)
-                    .background(Color.surfaceBackground)
+                    .background(Color.geckoInputBackground)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
             }
@@ -181,7 +181,7 @@ struct SessionDetailsForm: View {
                         .lineLimit(3, reservesSpace: true)
                         .font(.subheadline)
                         .padding(12)
-                        .background(Color.surfaceBackground)
+                        .background(Color.geckoInputBackground)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .transition(.scale(scale: 0.95).combined(with: .opacity))
                 } else {
@@ -249,7 +249,7 @@ struct SessionDetailsForm: View {
                                 }
                                 .foregroundStyle(.secondary)
                                 .frame(width: 80, height: 80)
-                                .background(Color.surfaceBackground, in: RoundedRectangle(cornerRadius: 10))
+                                .background(Color.geckoInputBackground, in: RoundedRectangle(cornerRadius: 10))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 10)
                                         .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [6]))
@@ -272,7 +272,7 @@ struct SessionDetailsForm: View {
                     .lineLimit(3, reservesSpace: false)
                     .font(.subheadline)
                     .padding(12)
-                    .background(Color.surfaceBackground)
+                    .background(Color.geckoInputBackground)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .opacity(appeared ? 1 : 0)
@@ -297,7 +297,7 @@ struct SessionDetailsForm: View {
                 .frame(height: 56)
                 .background(
                     isButtonDisabled
-                        ? AnyShapeStyle(Color.gray.opacity(0.2))
+                        ? AnyShapeStyle(Color.geckoInputBackground)
                         : AnyShapeStyle(Color.geckoPrimaryGradient)
                 )
                 .foregroundStyle(isButtonDisabled ? Color.secondary : Color.white)

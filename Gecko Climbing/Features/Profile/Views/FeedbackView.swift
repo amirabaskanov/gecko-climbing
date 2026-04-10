@@ -75,7 +75,7 @@ struct FeedbackView: View {
                         .focused($isMessageFocused)
                         .font(.body)
                         .padding(16)
-                        .background(Color.white)
+                        .background(Color.geckoInputBackground)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                         .overlay(
                             RoundedRectangle(cornerRadius: 14)
@@ -106,10 +106,12 @@ struct FeedbackView: View {
             .padding(.top, 16)
             .padding(.bottom, 32)
         }
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                isMessageFocused = true
-            }
+        .task {
+            // Wait for the sheet's presentation animation to settle before
+            // grabbing focus, otherwise the keyboard races the sheet and
+            // the field appears jumpy.
+            try? await Task.sleep(for: .milliseconds(350))
+            isMessageFocused = true
         }
     }
 
@@ -136,8 +138,8 @@ struct FeedbackView: View {
                     .padding(.vertical, 14)
                     .background(
                         isSelected
-                            ? Color.geckoPrimary.opacity(0.1)
-                            : Color.white
+                            ? Color.geckoPrimary.opacity(0.12)
+                            : Color.geckoCard
                     )
                     .foregroundStyle(
                         isSelected ? Color.geckoPrimary : .secondary

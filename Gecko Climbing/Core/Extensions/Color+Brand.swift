@@ -1,31 +1,39 @@
 import SwiftUI
+import UIKit
 
 extension Color {
-    // MARK: - Brand Colors (Vibrant Forest)
-    static let geckoPrimary = Color(hex: "#2A6B55")
-    static let geckoPrimaryLight = Color(hex: "#3D8A6E")
-    static let geckoPrimaryDark = Color(hex: "#1F5242")
-    static let geckoMint = Color(hex: "#B8DFD0")
-    static let geckoDeepForest = Color(hex: "#132E25")
+    // MARK: - Brand Colors (Adaptive Forest)
+    /// Primary brand. Deep forest green in light mode, brighter mint-forest in dark mode
+    /// so it remains legible against dark surfaces while still reading as "Gecko green."
+    static let geckoPrimary = Color.dynamic(light: "#2A6B55", dark: "#3FA07F")
+    static let geckoPrimaryLight = Color.dynamic(light: "#3D8A6E", dark: "#5FB898")
+    static let geckoPrimaryDark = Color.dynamic(light: "#1F5242", dark: "#2F8566")
+    static let geckoMint = Color.dynamic(light: "#B8DFD0", dark: "#7FD1B0")
+    static let geckoDeepForest = Color.dynamic(light: "#132E25", dark: "#0A1713")
 
     // MARK: - Outcome Colors
+    // These are vivid accents and work well in both modes; they stay fixed so
+    // "gold flash" / "green sent" etc. read consistently across screens.
     static let geckoSentGreen = Color(hex: "#4CAF50")
     static let geckoSentGreenLight = Color(hex: "#81C784")
-    static let geckoFlashGold = Color(hex: "#E6AC00")
+    static let geckoFlashGold = Color.dynamic(light: "#E6AC00", dark: "#FFC933")
     static let geckoFlashGoldLight = Color(hex: "#FFD700")
-    static let geckoAttemptBlue = Color(hex: "#42A5F5")
+    static let geckoAttemptBlue = Color.dynamic(light: "#42A5F5", dark: "#64B5F6")
     static let geckoOrange = Color(hex: "#FF6B6B")
 
-    // MARK: - Surface System
-    static let geckoBackground = Color(hex: "#FAF8F5")
-    static let geckoCard = Color.white
-    static let geckoSecondaryText = Color(hex: "#9E9E9E")
-    static let geckoSurfaceElevated = Color(hex: "#FAFAF7")
-
-    // Legacy aliases — prefer semantic names above
-    static let surface = geckoCard
-    static let surfaceElevated = geckoSurfaceElevated
-    static let surfaceBackground = geckoBackground
+    // MARK: - Surface System (fully adaptive)
+    /// Main screen background. Warm cream in light, near-black forest in dark.
+    static let geckoBackground = Color.dynamic(light: "#FAF8F5", dark: "#0E1512")
+    /// Card / elevated surface. Pure white in light, tinted charcoal in dark.
+    static let geckoCard = Color.dynamic(light: "#FFFFFF", dark: "#1A2420")
+    /// Slightly raised surface (modals, grouped cells).
+    static let geckoSurfaceElevated = Color.dynamic(light: "#FAFAF7", dark: "#222E29")
+    /// Input field fill — subtly tinted vs the main background.
+    static let geckoInputBackground = Color.dynamic(light: "#F3F0EB", dark: "#1F2925")
+    /// Hairline divider / border.
+    static let geckoDivider = Color.dynamic(light: "#E8E4DD", dark: "#2B3732")
+    /// Secondary / supporting text. Darker in light mode for AA contrast, softer in dark.
+    static let geckoSecondaryText = Color.dynamic(light: "#6B6B6B", dark: "#A8B0AC")
 
     // MARK: - Gradients
     static var geckoPrimaryGradient: LinearGradient {
@@ -56,7 +64,7 @@ extension Color {
         case 5...6:  return Color(hex: "#FF9800") // Orange
         case 7...8:  return Color(hex: "#F44336") // Red
         case 9...11: return Color(hex: "#9C27B0") // Purple
-        default:     return Color(hex: "#212121") // Black
+        default:     return Color.dynamic(light: "#212121", dark: "#E0E0E0")
         }
     }
 
@@ -72,6 +80,17 @@ extension Color {
             startPoint: .top,
             endPoint: .bottom
         )
+    }
+
+    // MARK: - Dynamic color helper
+    /// Builds a `Color` that resolves to the `light` hex in light mode and the `dark`
+    /// hex in dark mode, following the system trait collection automatically.
+    static func dynamic(light: String, dark: String) -> Color {
+        Color(uiColor: UIColor { trait in
+            trait.userInterfaceStyle == .dark
+                ? UIColor(hex: dark)
+                : UIColor(hex: light)
+        })
     }
 
     // MARK: - Hex initializer
@@ -96,6 +115,32 @@ extension Color {
             green: Double(g) / 255,
             blue: Double(b) / 255,
             opacity: Double(a) / 255
+        )
+    }
+}
+
+// MARK: - UIColor hex helper (used by dynamic providers)
+private extension UIColor {
+    convenience init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3:
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6:
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8:
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (1, 1, 1, 0)
+        }
+        self.init(
+            red: CGFloat(r) / 255,
+            green: CGFloat(g) / 255,
+            blue: CGFloat(b) / 255,
+            alpha: CGFloat(a) / 255
         )
     }
 }

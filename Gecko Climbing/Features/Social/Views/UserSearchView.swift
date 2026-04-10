@@ -57,15 +57,20 @@ struct UserSearchView: View {
                     .font(.caption.weight(.semibold))
                     .padding(.horizontal, 16)
                     .padding(.vertical, 7)
-                    .background(following ? Color.gray.opacity(0.15) : Color.geckoPrimary)
+                    .background(
+                        following ? AnyShapeStyle(Color.geckoInputBackground) : AnyShapeStyle(Color.geckoPrimary)
+                    )
                     .foregroundStyle(following ? Color.primary : Color.white)
+                    .overlay(
+                        Capsule().stroke(Color.geckoDivider, lineWidth: following ? 1 : 0)
+                    )
                     .clipShape(Capsule())
             }
             .buttonStyle(.plain)
         }
         .padding()
-        .background(Color.white)
+        .background(Color.geckoCard)
         .clipShape(RoundedRectangle(cornerRadius: 14))
-        .shadow(color: .black.opacity(0.06), radius: 4)
+        .shadow(color: .black.opacity(0.08), radius: 4)
     }
 }

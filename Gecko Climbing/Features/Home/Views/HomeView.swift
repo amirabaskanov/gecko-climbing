@@ -20,7 +20,7 @@ struct HomeView: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color.surfaceBackground, for: .navigationBar)
+            .toolbarBackground(Color.geckoBackground, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .principal) {
@@ -87,7 +87,7 @@ struct HomeView: View {
                     }
                     .padding(.vertical, 12)
                 }
-                .background(Color.surfaceBackground)
+                .background(Color.geckoBackground)
             } else if vm.posts.isEmpty {
                 ScrollView {
                     EmptyStateView(
@@ -119,14 +119,14 @@ struct HomeView: View {
                     .padding(.bottom, 24)
                 }
                 .contentMargins(.bottom, 48)
-                .background(Color.surfaceBackground)
+                .background(Color.geckoBackground)
                 .refreshable { await vm.loadFeed() }
                 .onAppear {
                     withAnimation { appeared = true }
                 }
             }
         }
-        .background(Color.surfaceBackground)
+        .background(Color.geckoBackground)
         .errorAlert(error: Binding(get: { vm.error }, set: { vm.error = $0 })) {
             Task { await vm.loadFeed() }
         }

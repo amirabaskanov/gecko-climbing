@@ -6,6 +6,37 @@ extension String: @retroactive Identifiable {
     public var id: String { self }
 }
 
+// MARK: - CardStyleModifier
+
+/// Shared card chrome that adapts shadows + border to the current color scheme.
+/// In light mode we use soft black shadows for lift; in dark mode shadows are
+/// invisible, so we lean on a subtle border + slightly stronger shadow to keep
+/// the card distinct from the background.
+private struct CardStyleModifier: ViewModifier {
+    let cornerRadius: CGFloat
+    let elevated: Bool
+    @Environment(\.colorScheme) private var colorScheme
+
+    func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        let isDark = colorScheme == .dark
+        let shadowOpacity1 = isDark ? 0.35 : (elevated ? 0.04 : 0.04)
+        let shadowOpacity2 = isDark ? 0.45 : (elevated ? 0.08 : 0.06)
+        let strokeOpacity = isDark ? 0.18 : (elevated ? 0.10 : 0.06)
+        let strokeColor = isDark ? Color.white.opacity(strokeOpacity)
+                                 : Color.geckoPrimary.opacity(strokeOpacity)
+
+        return content
+            .background(Color.geckoCard)
+            .clipShape(shape)
+            .overlay(shape.stroke(strokeColor, lineWidth: 1))
+            .shadow(color: .black.opacity(shadowOpacity1),
+                    radius: elevated ? 2 : 1, x: 0, y: 1)
+            .shadow(color: .black.opacity(shadowOpacity2),
+                    radius: elevated ? 12 : 8, x: 0, y: elevated ? 6 : 4)
+    }
+}
+
 // MARK: - BounceButtonStyle
 
 struct BounceButtonStyle: ButtonStyle {
@@ -50,23 +81,11 @@ extension View {
     }
 
     func cardStyle(cornerRadius: CGFloat = 16) -> some View {
-        self
-            .background(Color.surface)
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-            .shadow(color: .black.opacity(0.04), radius: 1, x: 0, y: 1)
-            .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 4)
+        modifier(CardStyleModifier(cornerRadius: cornerRadius, elevated: false))
     }
 
     func cardStyleElevated(cornerRadius: CGFloat = 16) -> some View {
-        self
-            .background(Color.surface)
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(Color.geckoPrimary.opacity(0.1), lineWidth: 1)
-            )
-            .shadow(color: .black.opacity(0.04), radius: 2, x: 0, y: 1)
-            .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: 6)
+        modifier(CardStyleModifier(cornerRadius: cornerRadius, elevated: true))
     }
 
     func bouncePress() -> some View {

@@ -12,7 +12,7 @@ struct FollowersListView: View {
 
     var body: some View {
         content
-            .background(Color.surfaceBackground)
+            .background(Color.geckoBackground)
         .navigationTitle(mode == .followers ? "Followers" : "Following")
         .task {
             do {
