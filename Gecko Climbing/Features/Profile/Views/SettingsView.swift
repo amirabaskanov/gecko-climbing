@@ -11,6 +11,26 @@ struct SettingsView: View {
         ScrollView {
             VStack(spacing: 20) {
 
+                // MARK: - Preferences
+
+                VStack(alignment: .leading, spacing: 12) {
+                    sectionHeader("Preferences")
+
+                    NavigationLink {
+                        NotificationSettingsView()
+                    } label: {
+                        settingsRowContent(
+                            icon: "bell.badge",
+                            title: "Notifications",
+                            subtitle: "Manage push alerts",
+                            iconColor: .geckoPrimary
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .bouncePress()
+                }
+                .staggeredAppear(index: 0, appeared: appeared)
+
                 // MARK: - Support
 
                 VStack(alignment: .leading, spacing: 12) {
@@ -25,7 +45,7 @@ struct SettingsView: View {
                         showFeedback = true
                     }
                 }
-                .staggeredAppear(index: 0, appeared: appeared)
+                .staggeredAppear(index: 1, appeared: appeared)
 
                 // MARK: - Account
 
@@ -41,7 +61,7 @@ struct SettingsView: View {
                         showSignOutConfirm = true
                     }
                 }
-                .staggeredAppear(index: 1, appeared: appeared)
+                .staggeredAppear(index: 2, appeared: appeared)
 
                 // MARK: - About
 
@@ -64,7 +84,7 @@ struct SettingsView: View {
                     }
                     .padding(.top, 4)
                 }
-                .staggeredAppear(index: 2, appeared: appeared)
+                .staggeredAppear(index: 3, appeared: appeared)
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
@@ -104,36 +124,50 @@ struct SettingsView: View {
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
-            HStack(spacing: 14) {
-                Image(systemName: icon)
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundStyle(iconColor)
-                    .frame(width: 36, height: 36)
-                    .background(iconColor.opacity(0.1))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .font(.body.weight(.medium))
-                        .foregroundStyle(iconColor == .red ? .red : .primary)
-
-                    if let subtitle {
-                        Text(subtitle)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                Spacer()
-
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.quaternary)
-            }
-            .padding(14)
-            .cardStyle()
+            settingsRowContent(
+                icon: icon,
+                title: title,
+                subtitle: subtitle,
+                iconColor: iconColor
+            )
         }
         .bouncePress()
+    }
+
+    private func settingsRowContent(
+        icon: String,
+        title: String,
+        subtitle: String?,
+        iconColor: Color
+    ) -> some View {
+        HStack(spacing: 14) {
+            Image(systemName: icon)
+                .font(.system(size: 18, weight: .medium))
+                .foregroundStyle(iconColor)
+                .frame(width: 36, height: 36)
+                .background(iconColor.opacity(0.1))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.body.weight(.medium))
+                    .foregroundStyle(iconColor == .red ? .red : .primary)
+
+                if let subtitle {
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.quaternary)
+        }
+        .padding(14)
+        .cardStyle()
     }
 
     private func aboutRow(label: String, value: String) -> some View {

@@ -33,10 +33,22 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
             return decodeUser(from: data, uid: uid)
         }
 
-        // First sign-in — create user document from Firebase Auth profile
-        let displayName = authRepository.currentUserDisplayName.isEmpty
-            ? "Gecko Climber"
-            : authRepository.currentUserDisplayName
+        // First sign-in — create user document from Firebase Auth profile.
+        // Apple returns fullName only on the very first authorization per (Apple ID, bundle ID);
+        // if the Firebase Auth displayName ended up empty, fall back to the Firebase email
+        // local-part before resorting to a generic placeholder.
+        let authDisplayName = authRepository.currentUserDisplayName
+        let emailLocal: String? = {
+            guard let email = Auth.auth().currentUser?.email,
+                  !email.contains("@privaterelay.appleid.com"),
+                  let local = email.split(separator: "@").first else { return nil }
+            return String(local)
+        }()
+        let displayName: String = {
+            if !authDisplayName.isEmpty { return authDisplayName }
+            if let emailLocal, !emailLocal.isEmpty { return emailLocal }
+            return "Climber"
+        }()
         let base = displayName
             .lowercased()
             .replacingOccurrences(of: " ", with: "_")
@@ -141,6 +153,28 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
             .getDocuments()
 
         return try await fetchUsers(byIds: snapshot.documents.map(\.documentID))
+    }
+
+    // MARK: - Notification Preferences
+
+    func fetchNotificationPrefs(for userId: String) async throws -> NotificationPrefs {
+        let snapshot = try await usersRef.document(userId).getDocument()
+        let data = snapshot.data()
+        return NotificationPrefs(dictionary: data?["notificationPrefs"] as? [String: Any])
+    }
+
+    func updateNotificationPrefs(_ prefs: NotificationPrefs, for userId: String) async throws {
+        try await usersRef.document(userId).setData(
+            ["notificationPrefs": prefs.asDictionary],
+            merge: true
+        )
+    }
+
+    func registerFCMToken(_ token: String, for userId: String) async throws {
+        try await usersRef.document(userId).setData(
+            ["fcmTokens": FieldValue.arrayUnion([token])],
+            merge: true
+        )
     }
 
     // MARK: - Search

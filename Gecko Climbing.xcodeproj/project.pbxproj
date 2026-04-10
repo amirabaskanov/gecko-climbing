@@ -93,6 +93,14 @@
 		BB000012 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = CC000003 /* GoogleSignIn */; };
 		BB000013 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = CC000004 /* FirebaseFirestore */; };
 		BB000014 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = CC000005 /* FirebaseStorage */; };
+		BB000015 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = CC000006 /* FirebaseMessaging */; };
+		AA000401 /* GeckoAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000301 /* GeckoAppDelegate.swift */; };
+		AA000402 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000302 /* NotificationService.swift */; };
+		AA000403 /* DeepLinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000303 /* DeepLinkRouter.swift */; };
+		AA000404 /* NotificationPrefs.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000304 /* NotificationPrefs.swift */; };
+		AA000405 /* NotificationSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000305 /* NotificationSettingsViewModel.swift */; };
+		AA000406 /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000306 /* NotificationSettingsView.swift */; };
+		AA000407 /* NotificationPrePromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000307 /* NotificationPrePromptView.swift */; };
 		BB00F101 /* GradeBarrelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F001 /* GradeBarrelView.swift */; };
 		BB00F102 /* AttemptBubbleSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F002 /* AttemptBubbleSelector.swift */; };
 		BB00F103 /* ClimbPillView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F003 /* ClimbPillView.swift */; };
@@ -212,6 +220,13 @@
 		AA00F102 /* QuickAddClimbSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddClimbSheet.swift; sourceTree = "<group>"; };
 		AA00F103 /* CustomTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabBar.swift; sourceTree = "<group>"; };
 		AA00F200 /* Gecko Climbing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Gecko Climbing.entitlements"; sourceTree = "<group>"; };
+		AA000301 /* GeckoAppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeckoAppDelegate.swift; sourceTree = "<group>"; };
+		AA000302 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		AA000303 /* DeepLinkRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLinkRouter.swift; sourceTree = "<group>"; };
+		AA000304 /* NotificationPrefs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPrefs.swift; sourceTree = "<group>"; };
+		AA000305 /* NotificationSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsViewModel.swift; sourceTree = "<group>"; };
+		AA000306 /* NotificationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsView.swift; sourceTree = "<group>"; };
+		AA000307 /* NotificationPrePromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPrePromptView.swift; sourceTree = "<group>"; };
 		B790BE74001032A61D76F858 /* FeedbackViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedbackViewModel.swift; sourceTree = "<group>"; };
 		BB00F001 /* GradeBarrelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradeBarrelView.swift; sourceTree = "<group>"; };
 		BB00F002 /* AttemptBubbleSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttemptBubbleSelector.swift; sourceTree = "<group>"; };
@@ -243,6 +258,7 @@
 				293972122F6DD7250094ED7B /* PostHog in Frameworks */,
 				BB000013 /* FirebaseFirestore in Frameworks */,
 				BB000014 /* FirebaseStorage in Frameworks */,
+				BB000015 /* FirebaseMessaging in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -290,6 +306,7 @@
 			isa = PBXGroup;
 			children = (
 				A2000001 /* GeckoClimbingApp.swift */,
+				AA000301 /* GeckoAppDelegate.swift */,
 				A2000002 /* ContentView.swift */,
 				AA000101 /* TabRoutes.swift */,
 				AA000102 /* AppRouter.swift */,
@@ -323,6 +340,7 @@
 				AA00F101 /* ClimbOutcome.swift */,
 				CA9370EA6F1FE7C0E87273E7 /* CommentModel.swift */,
 				5F7C51D1DCBA17F7391C88F8 /* SessionInsight.swift */,
+				AA000304 /* NotificationPrefs.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -365,6 +383,8 @@
 			children = (
 				D7952659A9D0EC939FB359ED /* AnalyticsService.swift */,
 				8B01C78180CA4BDBE4B9C796 /* SessionInsightsEngine.swift */,
+				AA000302 /* NotificationService.swift */,
+				AA000303 /* DeepLinkRouter.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -580,6 +600,8 @@
 				AA000156 /* SettingsView.swift */,
 				AA000157 /* ProfileView.swift */,
 				BEC94383047E32B70E58063C /* FeedbackView.swift */,
+				AA000306 /* NotificationSettingsView.swift */,
+				AA000307 /* NotificationPrePromptView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -589,6 +611,7 @@
 			children = (
 				AA000154 /* ProfileViewModel.swift */,
 				B790BE74001032A61D76F858 /* FeedbackViewModel.swift */,
+				AA000305 /* NotificationSettingsViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -680,6 +703,7 @@
 				CC000003 /* GoogleSignIn */,
 				CC000004 /* FirebaseFirestore */,
 				CC000005 /* FirebaseStorage */,
+				CC000006 /* FirebaseMessaging */,
 				293972112F6DD7250094ED7B /* PostHog */,
 			);
 			productName = "Gecko Climbing";
@@ -893,6 +917,13 @@
 				155CF285E35379EEA3714D11 /* CommentsViewModel.swift in Sources */,
 				FCDC53FADBE63D6F59D1BE5A /* SessionInsight.swift in Sources */,
 				B7DE19698BB9C07FCB5D0B50 /* SessionInsightsEngine.swift in Sources */,
+				AA000401 /* GeckoAppDelegate.swift in Sources */,
+				AA000402 /* NotificationService.swift in Sources */,
+				AA000403 /* DeepLinkRouter.swift in Sources */,
+				AA000404 /* NotificationPrefs.swift in Sources */,
+				AA000405 /* NotificationSettingsViewModel.swift in Sources */,
+				AA000406 /* NotificationSettingsView.swift in Sources */,
+				AA000407 /* NotificationPrePromptView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1055,6 +1086,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Gecko Climbing/Gecko Climbing.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
@@ -1070,6 +1102,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.geckoapp.geckoClimbing;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1082,6 +1115,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Gecko Climbing/Gecko Climbing.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
@@ -1097,6 +1131,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.geckoapp.geckoClimbing;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1271,6 +1306,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = BB000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseStorage;
+		};
+		CC000006 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BB000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

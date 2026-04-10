@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MainTabView: View {
     @Environment(AppEnvironment.self) private var appEnv
+    @Environment(DeepLinkRouter.self) private var deepLinkRouter
     @State private var selectedTab: AppTab = .feed
     @State private var previousTab: AppTab = .feed
     @State private var sessionKey = UUID()
@@ -76,6 +77,14 @@ struct MainTabView: View {
                 feedRefreshToken = UUID()
             }
         }
+        .onChange(of: deepLinkRouter.pendingRoute) { _, newRoute in
+            guard let newRoute else { return }
+            handleNotificationRoute(newRoute)
+        }
     }
 
+    private func handleNotificationRoute(_ route: NotificationRoute) {
+        // TODO: Phase 2 — dispatch NotificationRoute to correct tab NavigationStack
+        deepLinkRouter.pendingRoute = nil
+    }
 }

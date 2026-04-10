@@ -26,6 +26,21 @@ final class MockAuthRepository: AuthRepositoryProtocol, @unchecked Sendable {
         "user2@test.com": ("user2@test.com", "password123", "Sam Rocks")
     ]
 
+    init() {}
+
+    #if DEBUG
+    /// Preview-only: start out signed in as a fake user so previews land on the
+    /// authenticated UI without needing to run through sign-in flow first.
+    static func previewAuthenticated(userId: String = "preview_user",
+                                     displayName: String = "Preview Climber") -> MockAuthRepository {
+        let repo = MockAuthRepository()
+        repo.currentUserId = userId
+        repo.currentUserDisplayName = displayName
+        repo.isAuthenticated = true
+        return repo
+    }
+    #endif
+
     func signIn(email: String, password: String) async throws {
         try await Task.sleep(nanoseconds: 500_000_000)
         guard let user = mockUsers[email], user.password == password else {

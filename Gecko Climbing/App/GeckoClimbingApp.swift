@@ -6,9 +6,12 @@ import PostHog
 
 @main
 struct GeckoClimbingApp: App {
+    @UIApplicationDelegateAdaptor(GeckoAppDelegate.self) private var appDelegate
     let modelContainer: ModelContainer
     @State private var appEnv: AppEnvironment
     @State private var authViewModel: AuthViewModel
+    @State private var notificationService: NotificationService
+    @State private var deepLinkRouter: DeepLinkRouter
 
     init() {
         if Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist") != nil {
@@ -26,10 +29,19 @@ struct GeckoClimbingApp: App {
                      PostModel.self
             )
             modelContainer = container
-            let env = AppEnvironment(modelContext: container.mainContext)
+            let env = AppEnvironment()
             let auth = AuthViewModel(authRepository: env.authRepository)
+            let service = NotificationService(
+                userRepository: env.userRepository,
+                authRepository: env.authRepository
+            )
+            let router = DeepLinkRouter()
+            NotificationService.shared = service
+            DeepLinkRouter.shared = router
             _appEnv = State(initialValue: env)
             _authViewModel = State(initialValue: auth)
+            _notificationService = State(initialValue: service)
+            _deepLinkRouter = State(initialValue: router)
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")
         }
@@ -40,6 +52,8 @@ struct GeckoClimbingApp: App {
             AppRootView()
                 .environment(appEnv)
                 .environment(authViewModel)
+                .environment(notificationService)
+                .environment(deepLinkRouter)
                 .modelContainer(modelContainer)
                 .tint(Color.geckoPrimary)
                 .onOpenURL { url in

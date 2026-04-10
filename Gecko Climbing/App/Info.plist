@@ -58,5 +58,9 @@
 	<string>Gecko Climbing accesses your photo library to attach photos to your sessions and climbs.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Gecko Climbing saves session photos to your photo library.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>

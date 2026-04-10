@@ -12,6 +12,9 @@ protocol UserRepositoryProtocol: AnyObject {
     func fetchFollowing(uid: String) async throws -> [UserModel]
     func searchUsers(query: String) async throws -> [UserModel]
     func reconcileFollowCounts(uid: String) async throws
+    func fetchNotificationPrefs(for userId: String) async throws -> NotificationPrefs
+    func updateNotificationPrefs(_ prefs: NotificationPrefs, for userId: String) async throws
+    func registerFCMToken(_ token: String, for userId: String) async throws
 }
 
 // MARK: - Mock Implementation
@@ -93,6 +96,20 @@ final class MockUserRepository: UserRepositoryProtocol, @unchecked Sendable {
     func reconcileFollowCounts(uid: String) async throws {
         // No-op for mock
     }
+
+    private var notificationPrefsStore: [String: NotificationPrefs] = [:]
+
+    func fetchNotificationPrefs(for userId: String) async throws -> NotificationPrefs {
+        try await Task.sleep(nanoseconds: 100_000_000)
+        return notificationPrefsStore[userId] ?? .default
+    }
+
+    func updateNotificationPrefs(_ prefs: NotificationPrefs, for userId: String) async throws {
+        try await Task.sleep(nanoseconds: 100_000_000)
+        notificationPrefsStore[userId] = prefs
+    }
+
+    func registerFCMToken(_ token: String, for userId: String) async throws {}
 
     private static func makeSeedUsers(currentUserId: String) -> [UserModel] {
         let seedUsers: [(String, String, String, Int, Int, String, Int)] = [
