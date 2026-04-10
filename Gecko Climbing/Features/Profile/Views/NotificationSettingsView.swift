@@ -138,11 +138,21 @@ struct NotificationSettingsView: View {
             Divider().padding(.leading, 14)
             categoryRow(
                 title: "Friends",
-                subtitle: "When friends log a new PR or share a session",
+                subtitle: "New PRs from people you follow",
                 isOn: Binding(
                     get: { vm.prefs.friends },
                     set: { newValue in Task { await vm.updateFriends(newValue) } }
                 )
+            )
+            Divider().padding(.leading, 38)
+            subCategoryRow(
+                title: "Friend posts",
+                subtitle: "When friends share a new session",
+                isOn: Binding(
+                    get: { vm.prefs.friendPosts },
+                    set: { newValue in Task { await vm.updateFriendPosts(newValue) } }
+                ),
+                enabled: vm.prefs.friends
             )
             Divider().padding(.leading, 14)
             categoryRow(
@@ -176,5 +186,24 @@ struct NotificationSettingsView: View {
         }
         .tint(Color.geckoPrimary)
         .padding(14)
+    }
+
+    private func subCategoryRow(title: String, subtitle: String, isOn: Binding<Bool>, enabled: Bool) -> some View {
+        Toggle(isOn: isOn) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.subheadline.weight(.medium))
+                    .fontDesign(.rounded)
+                    .foregroundStyle(enabled ? .primary : .secondary)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .tint(Color.geckoPrimary)
+        .padding(.vertical, 12)
+        .padding(.leading, 38)
+        .padding(.trailing, 14)
+        .disabled(!enabled)
     }
 }

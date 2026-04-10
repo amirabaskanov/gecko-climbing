@@ -46,8 +46,19 @@ final class NotificationSettingsViewModel {
         await persist(next)
     }
 
+    func updateFriendPosts(_ value: Bool) async {
+        var next = prefs
+        next.friendPosts = value
+        await persist(next)
+    }
+
     func setAll(_ value: Bool) async {
-        await persist(NotificationPrefs(social: value, friends: value, reminders: value))
+        await persist(NotificationPrefs(
+            social: value,
+            friends: value,
+            reminders: value,
+            friendPosts: value ? prefs.friendPosts : false
+        ))
     }
 
     var masterEnabled: Bool {

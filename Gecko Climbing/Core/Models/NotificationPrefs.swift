@@ -4,8 +4,9 @@ struct NotificationPrefs: Codable, Equatable, Sendable {
     var social: Bool
     var friends: Bool
     var reminders: Bool
+    var friendPosts: Bool
 
-    static let `default` = NotificationPrefs(social: true, friends: true, reminders: true)
+    static let `default` = NotificationPrefs(social: true, friends: true, reminders: true, friendPosts: false)
 }
 
 extension NotificationPrefs {
@@ -17,13 +18,15 @@ extension NotificationPrefs {
         self.social = dictionary["social"] as? Bool ?? true
         self.friends = dictionary["friends"] as? Bool ?? true
         self.reminders = dictionary["reminders"] as? Bool ?? true
+        self.friendPosts = dictionary["friendPosts"] as? Bool ?? false
     }
 
     var asDictionary: [String: Any] {
         [
             "social": social,
             "friends": friends,
-            "reminders": reminders
+            "reminders": reminders,
+            "friendPosts": friendPosts
         ]
     }
 }
