@@ -11,6 +11,7 @@ export interface NotificationPrefs {
   social: boolean;
   friends: boolean;
   reminders: boolean;
+  friendPosts?: boolean;
 }
 
 export interface SendOptions {
