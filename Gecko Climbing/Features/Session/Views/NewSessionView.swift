@@ -6,10 +6,12 @@ struct NewSessionView: View {
     @Environment(AuthViewModel.self) private var authViewModel
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var viewModel: NewSessionViewModel?
     @State private var finishedSession: SessionModel?
     @State private var showCelebration = false
+    @State private var showRestoredBanner = false
 
     // Inline climb logger state
     @AppStorage("lastSelectedGrade") private var selectedGrade = "V5"
@@ -70,6 +72,7 @@ struct NewSessionView: View {
             }
             .alert("Discard Session?", isPresented: $showCancelConfirmation) {
                 Button("Discard", role: .destructive) {
+                    viewModel?.clearDraft()
                     if let onCancel { onCancel() } else { dismiss() }
                 }
                 Button("Keep Logging", role: .cancel) { }
@@ -79,10 +82,18 @@ struct NewSessionView: View {
         }
         .onAppear {
             if viewModel == nil {
-                viewModel = NewSessionViewModel(
+                let vm = NewSessionViewModel(
                     sessionRepository: appEnv.sessionRepository,
                     userId: authViewModel.currentUserId
                 )
+                if let draft = NewSessionViewModel.loadDraft(), !draft.climbs.isEmpty {
+                    vm.restoreFromDraft(draft)
+                    showRestoredBanner = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 4.5) {
+                        withAnimation(.geckoSnappy) { showRestoredBanner = false }
+                    }
+                }
+                viewModel = vm
             }
             // Fetch user's all-time best for PB detection
             if userAllTimeBestGrade == -1 {
@@ -95,6 +106,11 @@ struct NewSessionView: View {
         }
         .onReceive(timer) { _ in
             timerTick = Date()
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .background || newPhase == .inactive {
+                viewModel?.persistDraft()
+            }
         }
         .onChange(of: viewModel?.climbs.count) { _, newCount in
             climbCount = newCount ?? 0
@@ -149,6 +165,14 @@ struct NewSessionView: View {
                 // Zone B: Climb list + stats
                 ScrollViewReader { proxy in
                     List {
+                        // Restored-session banner (shown briefly after reopen)
+                        if showRestoredBanner {
+                            restoredBanner
+                                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(Color.clear)
+                        }
+
                         // New PB banner
                         if showNewPBBanner {
                             newPBBanner
@@ -157,7 +181,7 @@ struct NewSessionView: View {
                                 .listRowBackground(Color.clear)
                         }
 
-                        // Streak banner
+                        // Climb milestone banner
                         if vm.climbs.count >= 5 {
                             climbMilestoneBanner(count: vm.climbs.count)
                                 .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
@@ -208,7 +232,7 @@ struct NewSessionView: View {
                     }
                     .listStyle(.plain)
                     .scrollContentBackground(.hidden)
-                    .background(Color.surfaceBackground)
+                    .background(Color.geckoBackground)
                     .onChange(of: vm.climbs.count) {
                         if let firstClimb = vm.climbs.first {
                             withAnimation {
@@ -220,7 +244,7 @@ struct NewSessionView: View {
             }
 
         }
-        .background(Color.surfaceBackground)
+        .background(Color.geckoBackground)
         .animation(.geckoSpring, value: vm.climbs.count)
     }
 
@@ -236,7 +260,10 @@ struct NewSessionView: View {
 
             // Attempt selector (Sent or Attempted)
             if showAttemptSelector {
-                AttemptBubbleSelector(accentColor: attemptSelectorOutcome.color) { attempts in
+                AttemptBubbleSelector(
+                    accentColor: attemptSelectorOutcome.color,
+                    minimumAttempts: attemptSelectorOutcome == .attempt ? 1 : 2
+                ) { attempts in
                     withAnimation(.geckoSnappy) {
                         showAttemptSelector = false
                     }
@@ -249,8 +276,8 @@ struct NewSessionView: View {
         .padding(.horizontal, 16)
         .padding(.top, 4)
         .padding(.bottom, 12)
-        .background(Color.surface)
-        .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 4)
+        .background(Color.geckoCard)
+        .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
     }
 
     // MARK: - Three Outcome Buttons
@@ -370,6 +397,35 @@ struct NewSessionView: View {
         .transition(.scale.combined(with: .opacity))
     }
 
+    // MARK: - Restored Session Banner
+
+    private var restoredBanner: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "arrow.counterclockwise.circle.fill")
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(Color.geckoPrimary)
+            Text("Picked up where you left off")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.primary)
+            Spacer(minLength: 0)
+            Button {
+                withAnimation(.geckoSnappy) { showRestoredBanner = false }
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.secondary)
+                    .padding(6)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.vertical, 10)
+        .padding(.horizontal, 16)
+        .frame(maxWidth: .infinity)
+        .background(Color.geckoPrimary.opacity(0.1), in: Capsule())
+        .transition(.scale.combined(with: .opacity))
+    }
+
     // MARK: - New PB Banner
 
     private var newPBBanner: some View {
@@ -480,13 +536,16 @@ struct NewSessionView: View {
             durationMinutes: vm.elapsedMinutes,
             startedAt: vm.sessionStartedAt
         )
+        // Preserve loggedAt so the celebration summary and the resulting feed
+        // post see the climbs in the order they were actually logged.
         for climb in vm.climbs {
             let c = ClimbModel(
                 sessionId: tempSession.sessionId,
                 grade: climb.grade,
                 gradeNumeric: climb.gradeNumeric,
                 outcome: climb.climbOutcome,
-                attempts: climb.attempts
+                attempts: climb.attempts,
+                loggedAt: climb.loggedAt
             )
             tempSession.climbs.append(c)
         }
