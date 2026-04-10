@@ -99,32 +99,36 @@ final class FirestorePostRepository: PostRepositoryProtocol, @unchecked Sendable
         ])
     }
 
-    func backfillGradeSequence(postId: String, sessionId: String) async throws -> [String]? {
+    func backfillGradeSequence(postId: String, sessionId: String) async throws -> (grades: [String], outcomes: [String])? {
         guard !sessionId.isEmpty else { return nil }
 
-        // Fetch climbs from the linked session, ordered chronologically
+        // Fetch climbs from the linked session, ordered chronologically (oldest → newest)
         let climbsSnapshot = try await db.collection("sessions")
             .document(sessionId)
             .collection("climbs")
             .order(by: "loggedAt")
             .getDocuments()
 
-        let sequence = climbsSnapshot.documents.compactMap { doc -> String? in
+        // Include all climbs — attempts render with a different texture in the feed.
+        var gradeSeq: [String] = []
+        var outcomeSeq: [String] = []
+        for doc in climbsSnapshot.documents {
             let data = doc.data()
-            let outcome = data["outcome"] as? String ?? ""
-            // Only include completed climbs (flash or sent)
-            guard outcome == "flash" || outcome == "sent" else { return nil }
-            return data["grade"] as? String
+            guard let grade = data["grade"] as? String else { continue }
+            let rawOutcome = data["outcome"] as? String ?? ""
+            let outcome = ClimbOutcome.fromString(rawOutcome).rawValue
+            gradeSeq.append(grade)
+            outcomeSeq.append(outcome)
         }
 
-        guard !sequence.isEmpty else { return nil }
+        guard !gradeSeq.isEmpty else { return nil }
 
-        // Update the post in Firestore
         try await postsRef.document(postId).updateData([
-            "gradeSequence": sequence
+            "gradeSequence": gradeSeq,
+            "outcomeSequence": outcomeSeq
         ])
 
-        return sequence
+        return (grades: gradeSeq, outcomes: outcomeSeq)
     }
 
     // MARK: - Comments
@@ -269,6 +273,7 @@ final class FirestorePostRepository: PostRepositoryProtocol, @unchecked Sendable
             totalClimbs: data["totalClimbs"] as? Int ?? 0,
             gradeCounts: data["gradeCounts"] as? [String: Int] ?? [:],
             gradeSequence: data["gradeSequence"] as? [String] ?? [],
+            outcomeSequence: data["outcomeSequence"] as? [String] ?? [],
             visibility: data["visibility"] as? String ?? "followers"
         )
     }

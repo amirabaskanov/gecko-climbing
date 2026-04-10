@@ -10,7 +10,7 @@ protocol PostRepositoryProtocol: AnyObject {
     func deletePostBySessionId(_ sessionId: String) async throws
     func fetchPosts(for userId: String) async throws -> [PostModel]
     func reconcileLikesCount(postId: String) async throws
-    func backfillGradeSequence(postId: String, sessionId: String) async throws -> [String]?
+    func backfillGradeSequence(postId: String, sessionId: String) async throws -> (grades: [String], outcomes: [String])?
     func fetchComments(postId: String) async throws -> [CommentModel]
     func addComment(_ comment: CommentModel) async throws
     func deleteComment(postId: String, commentId: String) async throws
@@ -79,7 +79,7 @@ final class MockPostRepository: PostRepositoryProtocol, @unchecked Sendable {
         // No-op for mock
     }
 
-    func backfillGradeSequence(postId: String, sessionId: String) async throws -> [String]? {
+    func backfillGradeSequence(postId: String, sessionId: String) async throws -> (grades: [String], outcomes: [String])? {
         return nil // No-op for mock
     }
 
@@ -115,6 +115,24 @@ final class MockPostRepository: PostRepositoryProtocol, @unchecked Sendable {
 
         return data.enumerated().map { idx, d in
             let (userId, name, gym, caption, likes, topGrade, topNum, gradeCounts) = d
+
+            // Chronological warm-up → hard climbs, with occasional attempts sprinkled in
+            // to exercise the attempt-texture rendering in mocks.
+            let completed = gradeCounts
+                .sorted { VGrade.numeric(for: $0.key) < VGrade.numeric(for: $1.key) }
+                .flatMap { Array(repeating: $0.key, count: $0.value) }
+            var gradeSeq: [String] = []
+            var outcomeSeq: [String] = []
+            for (i, grade) in completed.enumerated() {
+                // One in four climbs simulated as an attempt at the next grade up
+                if i > 0 && i % 4 == 0 {
+                    gradeSeq.append(grade)
+                    outcomeSeq.append(ClimbOutcome.attempt.rawValue)
+                }
+                gradeSeq.append(grade)
+                outcomeSeq.append(i == 0 ? ClimbOutcome.flash.rawValue : ClimbOutcome.sent.rawValue)
+            }
+
             return PostModel(
                 userId: userId,
                 userDisplayName: name,
@@ -128,10 +146,8 @@ final class MockPostRepository: PostRepositoryProtocol, @unchecked Sendable {
                 topGradeNumeric: topNum,
                 totalClimbs: gradeCounts.values.reduce(0, +),
                 gradeCounts: gradeCounts,
-                gradeSequence: gradeCounts
-                    .sorted { VGrade.numeric(for: $0.key) < VGrade.numeric(for: $1.key) }
-                    .flatMap { Array(repeating: $0.key, count: $0.value) }
-                    .shuffled()
+                gradeSequence: gradeSeq,
+                outcomeSequence: outcomeSeq
             )
         }
     }

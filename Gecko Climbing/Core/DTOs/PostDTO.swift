@@ -19,6 +19,7 @@ struct PostDTO: Codable, Identifiable {
     let totalClimbs: Int
     let gradeCounts: [String: Int]
     let gradeSequence: [String]
+    let outcomeSequence: [String]
     let visibility: String
 
     func asDictionary() -> [String: Any] {
@@ -39,6 +40,7 @@ struct PostDTO: Codable, Identifiable {
             "totalClimbs": totalClimbs,
             "gradeCounts": gradeCounts,
             "gradeSequence": gradeSequence,
+            "outcomeSequence": outcomeSequence,
             "visibility": visibility
         ]
         if let imageURL { dict["imageURL"] = imageURL }
@@ -65,6 +67,7 @@ struct PostDTO: Codable, Identifiable {
             totalClimbs: totalClimbs,
             gradeCounts: gradeCounts,
             gradeSequence: gradeSequence,
+            outcomeSequence: outcomeSequence,
             visibility: visibility
         )
     }
@@ -91,6 +94,7 @@ extension PostModel {
             totalClimbs: totalClimbs,
             gradeCounts: gradeCounts,
             gradeSequence: gradeSequence,
+            outcomeSequence: outcomeSequence,
             visibility: visibility
         )
     }

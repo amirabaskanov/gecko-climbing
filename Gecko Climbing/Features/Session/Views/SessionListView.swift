@@ -26,7 +26,7 @@ struct SessionListView: View {
             }
             .navigationTitle("My Sessions")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color.surfaceBackground, for: .navigationBar)
+            .toolbarBackground(Color.geckoBackground, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
@@ -86,7 +86,7 @@ struct SessionListView: View {
                     }
                     .padding(.vertical, 12)
                 }
-                .background(Color.surfaceBackground)
+                .background(Color.geckoBackground)
             } else if vm.sessions.isEmpty {
                 EmptyStateView(
                     
@@ -117,13 +117,13 @@ struct SessionListView: View {
                 }
                 .listStyle(.plain)
                 .contentMargins(.bottom, 48)
-                .background(Color.surfaceBackground)
+                .background(Color.geckoBackground)
                 .onAppear {
                     withAnimation { appeared = true }
                 }
             }
         }
-        .background(Color.surfaceBackground)
+        .background(Color.geckoBackground)
         .refreshable { await vm.loadSessions() }
         .errorAlert(error: Binding(get: { vm.error }, set: { vm.error = $0 })) {
             Task { await vm.loadSessions() }
@@ -134,15 +134,23 @@ struct SessionListView: View {
 struct SessionRowView: View {
     let session: SessionModel
 
-    /// Completed climbs in chronological order (as logged), grouped into consecutive runs
-    private var gradeChips: [(grade: String, numeric: Int, count: Int)] {
-        let completed = session.climbs.filter { $0.climbOutcome.isCompleted }
-        var chips: [(grade: String, numeric: Int, count: Int)] = []
-        for climb in completed {
-            if let last = chips.last, last.numeric == climb.gradeNumeric {
+    /// All climbs (including attempts) in chronological order, grouped into consecutive
+    /// (grade, outcome) runs so a send and an attempt at the same grade stay in separate chips.
+    private var gradeChips: [(grade: String, numeric: Int, outcome: ClimbOutcome, count: Int, index: Int)] {
+        let ordered = session.climbs.sorted { $0.loggedAt < $1.loggedAt }
+        var chips: [(grade: String, numeric: Int, outcome: ClimbOutcome, count: Int, index: Int)] = []
+        for climb in ordered {
+            let outcome = climb.climbOutcome
+            if let last = chips.last, last.numeric == climb.gradeNumeric, last.outcome == outcome {
                 chips[chips.count - 1].count += 1
             } else {
-                chips.append((grade: climb.grade, numeric: climb.gradeNumeric, count: 1))
+                chips.append((
+                    grade: climb.grade,
+                    numeric: climb.gradeNumeric,
+                    outcome: outcome,
+                    count: 1,
+                    index: chips.count
+                ))
             }
         }
         return chips
@@ -175,8 +183,13 @@ struct SessionRowView: View {
             if !gradeChips.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 6) {
-                        ForEach(gradeChips, id: \.numeric) { chip in
-                            gradeChip(grade: chip.grade, numeric: chip.numeric, count: chip.count)
+                        ForEach(gradeChips, id: \.index) { chip in
+                            gradeChip(
+                                grade: chip.grade,
+                                numeric: chip.numeric,
+                                outcome: chip.outcome,
+                                count: chip.count
+                            )
                         }
                     }
                     .padding(.horizontal, 16)
@@ -219,22 +232,37 @@ struct SessionRowView: View {
 
     // MARK: - Grade Chip
 
-    private func gradeChip(grade: String, numeric: Int, count: Int) -> some View {
+    @ViewBuilder
+    private func gradeChip(grade: String, numeric: Int, outcome: ClimbOutcome, count: Int) -> some View {
         let color = Color.gradeColor(for: numeric)
-        return HStack(spacing: 4) {
+        let isAttempt = outcome == .attempt
+
+        HStack(spacing: 4) {
             Text(grade)
                 .font(.system(size: 12, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
+                .foregroundStyle(isAttempt ? color : .white)
 
             if count > 1 {
                 Text("\u{00D7}\(count)")
                     .font(.system(size: 10, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.8))
+                    .foregroundStyle((isAttempt ? color : .white).opacity(0.8))
             }
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
-        .background(color, in: Capsule())
+        .background {
+            ZStack {
+                Capsule().fill(isAttempt ? color.opacity(0.15) : color)
+                if isAttempt {
+                    DiagonalStripes(spacing: 4, lineWidth: 1.5)
+                        .stroke(color.opacity(0.85), lineWidth: 1.5)
+                        .clipShape(Capsule())
+                }
+            }
+        }
+        .overlay(
+            Capsule().stroke(color.opacity(isAttempt ? 0.85 : 0), lineWidth: 1)
+        )
     }
 
     // MARK: - Mini Stat

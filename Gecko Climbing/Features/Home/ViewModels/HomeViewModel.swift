@@ -33,15 +33,26 @@ final class HomeViewModel {
             AnalyticsService.capture(.feedLoaded, properties: ["post_count": fetched.count])
             print("📰 Feed loaded: \(fetched.count) posts for userId: \(userId)")
 
-            // Backfill gradeSequence for posts that don't have it
-            Task {
-                for post in fetched where post.gradeSequence.isEmpty && !post.sessionId.isEmpty {
-                    if let sequence = try? await postRepository.backfillGradeSequence(
-                        postId: post.postId, sessionId: post.sessionId
-                    ) {
-                        if let currentIdx = posts.firstIndex(where: { $0.postId == post.postId }) {
-                            posts[currentIdx].gradeSequence = sequence
-                        }
+            // Backfill for legacy posts: legacy posts either have no gradeSequence at all
+            // or have only completed climbs (missing attempts) with an empty outcomeSequence.
+            // The backfill re-fetches the session and rebuilds both sequences in chronological order.
+            Task { [weak self] in
+                guard let self else { return }
+                for post in fetched where (post.gradeSequence.isEmpty || post.outcomeSequence.isEmpty) && !post.sessionId.isEmpty {
+                    do {
+                        guard let result = try await self.postRepository.backfillGradeSequence(
+                            postId: post.postId, sessionId: post.sessionId
+                        ) else { continue }
+
+                        guard let currentIdx = self.posts.firstIndex(where: { $0.postId == post.postId }) else { continue }
+                        self.posts[currentIdx].gradeSequence = result.grades
+                        self.posts[currentIdx].outcomeSequence = result.outcomes
+                        // Reassign the array so SwiftUI observers tied to `posts`
+                        // reliably re-render the affected card.
+                        self.posts = self.posts
+                        print("✅ Backfilled post \(post.postId): \(result.grades.count) climbs")
+                    } catch {
+                        print("⚠️ Backfill failed for post \(post.postId): \(error)")
                     }
                 }
             }
