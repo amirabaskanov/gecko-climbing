@@ -105,7 +105,7 @@ struct AttemptBubbleSelector: View {
                 .font(.system(size: 20, weight: .bold, design: .rounded))
                 .multilineTextAlignment(.center)
                 .frame(width: 60, height: 44)
-                .background(Color.surface)
+                .background(Color.geckoInputBackground)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
                 .overlay(
                     RoundedRectangle(cornerRadius: 10)
@@ -135,7 +135,7 @@ struct AttemptBubbleSelector: View {
                     .font(.system(size: 14, weight: .bold))
                     .foregroundStyle(.secondary)
                     .frame(width: 32, height: 32)
-                    .background(Color.surfaceBackground, in: Circle())
+                    .background(Color.geckoInputBackground, in: Circle())
             }
         }
     }

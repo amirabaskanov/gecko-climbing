@@ -122,7 +122,11 @@ struct OutcomeCard: View {
             .padding(.vertical, 14)
             .background(
                 RoundedRectangle(cornerRadius: 14)
-                    .fill(isSelected ? outcome.color : Color.gray.opacity(0.1))
+                    .fill(isSelected ? AnyShapeStyle(outcome.color) : AnyShapeStyle(Color.geckoInputBackground))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Color.geckoDivider, lineWidth: isSelected ? 0 : 1)
             )
             .foregroundStyle(isSelected ? .white : .primary)
             .scaleEffect(isSelected ? 1.03 : 1.0)
