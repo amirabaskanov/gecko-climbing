@@ -28,6 +28,18 @@ Pods/
 # Secrets / keys
 *.plist.bak
 GoogleService-Info-*.plist
+# App Store Connect API keys — NEVER commit these
+*.p8
+AuthKey_*.p8
+# Firebase service accounts
+*-adminsdk-*.json
+serviceAccountKey*.json
+
+# Local scratch / preview files
+color-preview.html
 
 # Claude Code
 .claude/
+.agents/
+.windsurf/
+.cursor/
