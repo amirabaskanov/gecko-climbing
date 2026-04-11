@@ -26,6 +26,7 @@ struct SessionDetailsForm: View {
     @State private var showDatePicker = false
     @State private var showDurationPicker = false
     @State private var appeared = false
+    @State private var saveTrigger = 0
     @FocusState private var gymFieldFocused: Bool
 
     var body: some View {
@@ -281,7 +282,10 @@ struct SessionDetailsForm: View {
             Spacer().frame(height: 4)
 
             // Save & Share
-            Button(action: onSave) {
+            Button {
+                saveTrigger += 1
+                onSave()
+            } label: {
                 HStack(spacing: 8) {
                     if isSaving {
                         ProgressView()
@@ -310,7 +314,7 @@ struct SessionDetailsForm: View {
             }
             .bouncePress()
             .disabled(isButtonDisabled)
-            .sensoryFeedback(.impact(weight: .heavy), trigger: gymName.trimmingCharacters(in: .whitespaces).isEmpty)
+            .sensoryFeedback(.success, trigger: saveTrigger)
             .opacity(appeared ? 1 : 0)
             .offset(y: appeared ? 0 : 10)
             .animation(.geckoSpring.delay(0.45), value: appeared)
