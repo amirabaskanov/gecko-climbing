@@ -315,6 +315,7 @@ struct FeedCardView: View {
                 )
             }
             .buttonStyle(.plain)
+            .sensoryFeedback(.impact(flexibility: .soft, intensity: 0.6), trigger: post.isLikedByCurrentUser)
 
             // Comment button
             Button {
