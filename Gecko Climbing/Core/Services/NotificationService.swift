@@ -105,7 +105,7 @@ final class NotificationService: NSObject {
         content.title = "Your week is in"
         content.body = "See how your climbing shaped up."
         content.sound = .default
-        content.userInfo = ["route": "profile:\(userId)"]
+        content.userInfo = ["route": "weekly-recap"]
 
         var components = DateComponents()
         components.weekday = 1 // Sunday

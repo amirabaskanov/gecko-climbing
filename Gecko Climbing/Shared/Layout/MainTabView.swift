@@ -10,6 +10,7 @@ struct MainTabView: View {
     @State private var feedRefreshToken = UUID()
     @State private var logClimbCount = 0
     @State private var finishTrigger = UUID()
+    @State private var showWeeklySummary = false
 
     var body: some View {
         ZStack {
@@ -89,10 +90,18 @@ struct MainTabView: View {
             guard let newRoute else { return }
             handleNotificationRoute(newRoute)
         }
+        .sheet(isPresented: $showWeeklySummary) {
+            WeeklySummaryView()
+        }
     }
 
     private func handleNotificationRoute(_ route: NotificationRoute) {
-        // TODO: Phase 2 — dispatch NotificationRoute to correct tab NavigationStack
-        deepLinkRouter.pendingRoute = nil
+        defer { deepLinkRouter.pendingRoute = nil }
+        switch route {
+        case .weeklyRecap:
+            showWeeklySummary = true
+        default:
+            break
+        }
     }
 }

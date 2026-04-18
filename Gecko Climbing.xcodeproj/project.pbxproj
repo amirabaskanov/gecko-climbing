@@ -11,6 +11,7 @@
 		155CF285E35379EEA3714D11 /* CommentsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DC52164E07007813F0BE721 /* CommentsViewModel.swift */; };
 		1A7483333D4E1395285CF84B /* FeedbackRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFCFD2EAD0DFCA6B5F175FE /* FeedbackRepository.swift */; };
 		293972122F6DD7250094ED7B /* PostHog in Frameworks */ = {isa = PBXBuildFile; productRef = 293972112F6DD7250094ED7B /* PostHog */; };
+		39656D43252B8C229F59E85F /* WeeklySummaryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65A4DD6F9FD0BA0361398AAB /* WeeklySummaryViewModel.swift */; };
 		55804C2FCF62956FC9CD0313 /* Animation+Gecko.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210A18FB1D170D1A318A5D9D /* Animation+Gecko.swift */; };
 		5F742BB5AECF9030F1A5B2D2 /* AnimatedCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF087C0C87D75CC545532A78 /* AnimatedCounter.swift */; };
 		6164F35BD5F28F338841FB15 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7952659A9D0EC939FB359ED /* AnalyticsService.swift */; };
@@ -83,6 +84,13 @@
 		AA000258 /* WallAnalysisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000158 /* WallAnalysisView.swift */; };
 		AA000260 /* FirebaseAuthRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000160 /* FirebaseAuthRepository.swift */; };
 		AA000261 /* AppleSignInHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000161 /* AppleSignInHelper.swift */; };
+		AA000401 /* GeckoAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000301 /* GeckoAppDelegate.swift */; };
+		AA000402 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000302 /* NotificationService.swift */; };
+		AA000403 /* DeepLinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000303 /* DeepLinkRouter.swift */; };
+		AA000404 /* NotificationPrefs.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000304 /* NotificationPrefs.swift */; };
+		AA000405 /* NotificationSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000305 /* NotificationSettingsViewModel.swift */; };
+		AA000406 /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000306 /* NotificationSettingsView.swift */; };
+		AA000407 /* NotificationPrePromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000307 /* NotificationPrePromptView.swift */; };
 		AA00F111 /* ClimbOutcome.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00F101 /* ClimbOutcome.swift */; };
 		AA00F112 /* QuickAddClimbSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00F102 /* QuickAddClimbSheet.swift */; };
 		AA00F113 /* CustomTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00F103 /* CustomTabBar.swift */; };
@@ -94,13 +102,6 @@
 		BB000013 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = CC000004 /* FirebaseFirestore */; };
 		BB000014 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = CC000005 /* FirebaseStorage */; };
 		BB000015 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = CC000006 /* FirebaseMessaging */; };
-		AA000401 /* GeckoAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000301 /* GeckoAppDelegate.swift */; };
-		AA000402 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000302 /* NotificationService.swift */; };
-		AA000403 /* DeepLinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000303 /* DeepLinkRouter.swift */; };
-		AA000404 /* NotificationPrefs.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000304 /* NotificationPrefs.swift */; };
-		AA000405 /* NotificationSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000305 /* NotificationSettingsViewModel.swift */; };
-		AA000406 /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000306 /* NotificationSettingsView.swift */; };
-		AA000407 /* NotificationPrePromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000307 /* NotificationPrePromptView.swift */; };
 		BB00F101 /* GradeBarrelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F001 /* GradeBarrelView.swift */; };
 		BB00F102 /* AttemptBubbleSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F002 /* AttemptBubbleSelector.swift */; };
 		BB00F103 /* ClimbPillView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00F003 /* ClimbPillView.swift */; };
@@ -114,6 +115,7 @@
 		CC300002 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CC300001 /* PrivacyInfo.xcprivacy */; };
 		DA2F207D235787713C0B17B4 /* CommentModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA9370EA6F1FE7C0E87273E7 /* CommentModel.swift */; };
 		DD00F101 /* GeckoLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD00F001 /* GeckoLogoView.swift */; };
+		F28FF15DB60F2E83E59F5DA6 /* WeeklySummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14054D5E8ADD54268E971351 /* WeeklySummaryView.swift */; };
 		FCDC53FADBE63D6F59D1BE5A /* SessionInsight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F7C51D1DCBA17F7391C88F8 /* SessionInsight.swift */; };
 		FD71D963B30139FE3E88631F /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC94383047E32B70E58063C /* FeedbackView.swift */; };
 		FFD3740A94B2E9425D9A5317 /* CommentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7780164948E9E512E7A7F80F /* CommentsView.swift */; };
@@ -138,12 +140,14 @@
 
 /* Begin PBXFileReference section */
 		0DC52164E07007813F0BE721 /* CommentsViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CommentsViewModel.swift; sourceTree = "<group>"; };
+		14054D5E8ADD54268E971351 /* WeeklySummaryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeeklySummaryView.swift; sourceTree = "<group>"; };
 		210A18FB1D170D1A318A5D9D /* Animation+Gecko.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Animation+Gecko.swift"; sourceTree = "<group>"; };
 		2BD1EBB65F03EABE1DEA6EDC /* FirestoreFeedbackRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FirestoreFeedbackRepository.swift; sourceTree = "<group>"; };
 		34D56FBC16636B26129FD496 /* SkeletonView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SkeletonView.swift; sourceTree = "<group>"; };
 		5DFCE518CEAAC010499D7267 /* ConfettiView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConfettiView.swift; sourceTree = "<group>"; };
 		5F7C51D1DCBA17F7391C88F8 /* SessionInsight.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionInsight.swift; sourceTree = "<group>"; };
 		64954CF733DCF19AFCB1CCF2 /* SessionShareCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionShareCard.swift; sourceTree = "<group>"; };
+		65A4DD6F9FD0BA0361398AAB /* WeeklySummaryViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeeklySummaryViewModel.swift; sourceTree = "<group>"; };
 		7780164948E9E512E7A7F80F /* CommentsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CommentsView.swift; sourceTree = "<group>"; };
 		8B01C78180CA4BDBE4B9C796 /* SessionInsightsEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionInsightsEngine.swift; sourceTree = "<group>"; };
 		A2000000 /* Gecko Climbing.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Gecko Climbing.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -216,10 +220,6 @@
 		AA000158 /* WallAnalysisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallAnalysisView.swift; sourceTree = "<group>"; };
 		AA000160 /* FirebaseAuthRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseAuthRepository.swift; sourceTree = "<group>"; };
 		AA000161 /* AppleSignInHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInHelper.swift; sourceTree = "<group>"; };
-		AA00F101 /* ClimbOutcome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClimbOutcome.swift; sourceTree = "<group>"; };
-		AA00F102 /* QuickAddClimbSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddClimbSheet.swift; sourceTree = "<group>"; };
-		AA00F103 /* CustomTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabBar.swift; sourceTree = "<group>"; };
-		AA00F200 /* Gecko Climbing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Gecko Climbing.entitlements"; sourceTree = "<group>"; };
 		AA000301 /* GeckoAppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeckoAppDelegate.swift; sourceTree = "<group>"; };
 		AA000302 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		AA000303 /* DeepLinkRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLinkRouter.swift; sourceTree = "<group>"; };
@@ -227,6 +227,10 @@
 		AA000305 /* NotificationSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsViewModel.swift; sourceTree = "<group>"; };
 		AA000306 /* NotificationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsView.swift; sourceTree = "<group>"; };
 		AA000307 /* NotificationPrePromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPrePromptView.swift; sourceTree = "<group>"; };
+		AA00F101 /* ClimbOutcome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClimbOutcome.swift; sourceTree = "<group>"; };
+		AA00F102 /* QuickAddClimbSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddClimbSheet.swift; sourceTree = "<group>"; };
+		AA00F103 /* CustomTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTabBar.swift; sourceTree = "<group>"; };
+		AA00F200 /* Gecko Climbing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Gecko Climbing.entitlements"; sourceTree = "<group>"; };
 		B790BE74001032A61D76F858 /* FeedbackViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedbackViewModel.swift; sourceTree = "<group>"; };
 		BB00F001 /* GradeBarrelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradeBarrelView.swift; sourceTree = "<group>"; };
 		BB00F002 /* AttemptBubbleSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttemptBubbleSelector.swift; sourceTree = "<group>"; };
@@ -572,6 +576,7 @@
 				AA000141 /* GradePyramidView.swift */,
 				AA000142 /* ProgressChartView.swift */,
 				AA000143 /* StatsView.swift */,
+				14054D5E8ADD54268E971351 /* WeeklySummaryView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -580,6 +585,7 @@
 			isa = PBXGroup;
 			children = (
 				AA000140 /* StatsViewModel.swift */,
+				65A4DD6F9FD0BA0361398AAB /* WeeklySummaryViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -924,6 +930,8 @@
 				AA000405 /* NotificationSettingsViewModel.swift in Sources */,
 				AA000406 /* NotificationSettingsView.swift in Sources */,
 				AA000407 /* NotificationPrePromptView.swift in Sources */,
+				F28FF15DB60F2E83E59F5DA6 /* WeeklySummaryView.swift in Sources */,
+				39656D43252B8C229F59E85F /* WeeklySummaryViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

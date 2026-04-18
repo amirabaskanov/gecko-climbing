@@ -6,6 +6,7 @@ enum NotificationRoute: Hashable, Sendable {
     case profile(userId: String)
     case session(id: String)
     case comment(postId: String, commentId: String)
+    case weeklyRecap
 }
 
 extension NotificationRoute {
@@ -26,6 +27,8 @@ extension NotificationRoute {
         case "comment":
             guard parts.count == 3 else { return nil }
             self = .comment(postId: String(parts[1]), commentId: String(parts[2]))
+        case "weekly-recap":
+            self = .weeklyRecap
         default:
             return nil
         }
