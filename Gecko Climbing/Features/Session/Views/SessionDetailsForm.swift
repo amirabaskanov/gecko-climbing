@@ -22,6 +22,14 @@ struct SessionDetailsForm: View {
         gymName.trimmingCharacters(in: .whitespaces).isEmpty || isSaving
     }
 
+    private var gymSuggestions: [String] {
+        guard !recentGyms.isEmpty else { return [] }
+        if gymName.isEmpty { return recentGyms }
+        return recentGyms.filter {
+            $0.localizedStandardContains(gymName) && $0 != gymName
+        }
+    }
+
     @State private var showNotes = false
     @State private var showDatePicker = false
     @State private var showDurationPicker = false
@@ -45,10 +53,11 @@ struct SessionDetailsForm: View {
             .animation(.geckoSpring.delay(0.1), value: appeared)
 
             // Gym name field
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 0) {
                 Text("Where did you climb?")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.secondary)
+                    .padding(.bottom, 8)
 
                 HStack(spacing: 8) {
                     Image(systemName: "mappin.circle.fill")
@@ -57,46 +66,65 @@ struct SessionDetailsForm: View {
                     TextField("Gym name", text: $gymName)
                         .font(.body.weight(.medium))
                         .focused($gymFieldFocused)
+                        .textInputAutocapitalization(.words)
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 14)
                 .background(Color.geckoInputBackground)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .clipShape(UnevenRoundedRectangle(cornerRadii: .init(
+                    topLeading: 14, bottomLeading: gymSuggestions.isEmpty ? 14 : 0,
+                    bottomTrailing: gymSuggestions.isEmpty ? 14 : 0, topTrailing: 14
+                )))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 14)
-                        .stroke(gymFieldFocused ? Color.geckoPrimary : Color.geckoPrimary.opacity(0.2), lineWidth: gymFieldFocused ? 2 : 1)
+                    UnevenRoundedRectangle(cornerRadii: .init(
+                        topLeading: 14, bottomLeading: gymSuggestions.isEmpty ? 14 : 0,
+                        bottomTrailing: gymSuggestions.isEmpty ? 14 : 0, topTrailing: 14
+                    ))
+                    .stroke(gymFieldFocused ? Color.geckoPrimary : Color.geckoPrimary.opacity(0.2), lineWidth: gymFieldFocused ? 2 : 1)
                 )
 
-                // Recent gyms chips — show matching or all when empty
-                if !recentGyms.isEmpty {
-                    let filtered = gymName.isEmpty
-                        ? recentGyms
-                        : recentGyms.filter { $0.localizedCaseInsensitiveContains(gymName) && $0 != gymName }
-
-                    if !filtered.isEmpty {
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 8) {
-                                ForEach(filtered, id: \.self) { gym in
-                                    Button {
-                                        withAnimation(.geckoSnappy) { gymName = gym }
-                                    } label: {
-                                        Text(gym)
-                                            .font(.caption.weight(.semibold))
-                                            .foregroundStyle(Color.geckoPrimary)
-                                            .padding(.horizontal, 12)
-                                            .padding(.vertical, 7)
-                                            .background(Color.geckoPrimary.opacity(0.1), in: Capsule())
-                                            .overlay(
-                                                Capsule()
-                                                    .stroke(Color.geckoPrimary.opacity(0.2), lineWidth: 1)
-                                            )
-                                    }
+                if !gymSuggestions.isEmpty {
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(gymSuggestions, id: \.self) { gym in
+                            Button {
+                                withAnimation(.geckoSnappy) {
+                                    gymName = gym
+                                    gymFieldFocused = false
                                 }
+                            } label: {
+                                HStack(spacing: 10) {
+                                    Image(systemName: "clock.arrow.circlepath")
+                                        .font(.system(size: 13))
+                                        .foregroundStyle(.tertiary)
+                                    Text(gym)
+                                        .font(.subheadline.weight(.medium))
+                                        .foregroundStyle(.primary)
+                                    Spacer()
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 12)
+                            }
+                            if gym != gymSuggestions.last {
+                                Divider().padding(.leading, 42)
                             }
                         }
                     }
+                    .background(Color.geckoInputBackground)
+                    .clipShape(UnevenRoundedRectangle(cornerRadii: .init(
+                        topLeading: 0, bottomLeading: 14,
+                        bottomTrailing: 14, topTrailing: 0
+                    )))
+                    .overlay(
+                        UnevenRoundedRectangle(cornerRadii: .init(
+                            topLeading: 0, bottomLeading: 14,
+                            bottomTrailing: 14, topTrailing: 0
+                        ))
+                        .stroke(gymFieldFocused ? Color.geckoPrimary : Color.geckoPrimary.opacity(0.2), lineWidth: gymFieldFocused ? 2 : 1)
+                    )
+                    .transition(.opacity.combined(with: .move(edge: .top)))
                 }
             }
+            .animation(.geckoSnappy, value: gymSuggestions)
             .opacity(appeared ? 1 : 0)
             .offset(y: appeared ? 0 : 10)
             .animation(.geckoSpring.delay(0.2), value: appeared)

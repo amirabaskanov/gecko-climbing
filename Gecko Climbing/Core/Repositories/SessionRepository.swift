@@ -14,6 +14,17 @@ protocol SessionRepositoryProtocol: AnyObject {
     /// post is orphaned (pointing at a missing session) or vice versa. If no
     /// post references the session, only the session is deleted.
     func deleteSessionAndAssociatedPost(sessionId: String, context: ModelContext) async throws
+
+    func fetchRecentGymNames(for userId: String) async throws -> [String]
+}
+
+extension SessionRepositoryProtocol {
+    func fetchRecentGymNames(for userId: String) async throws -> [String] {
+        let sessions = try await fetchSessions(for: userId)
+        let gyms = sessions.sorted { $0.date > $1.date }.map(\.gymName).filter { !$0.isEmpty }
+        var seen = Set<String>()
+        return gyms.filter { seen.insert($0).inserted }
+    }
 }
 
 // MARK: - Mock Implementation

@@ -334,13 +334,20 @@ struct CelebrationView: View {
     }
 
     private func loadRecentGyms() {
-        let descriptor = FetchDescriptor<SessionModel>(
-            sortBy: [SortDescriptor(\.date, order: .reverse)]
-        )
-        if let sessions = try? modelContext.fetch(descriptor) {
-            let gyms = sessions.map(\.gymName).filter { !$0.isEmpty }
-            var seen = Set<String>()
-            recentGyms = gyms.filter { seen.insert($0).inserted }.prefix(5).map { $0 }
+        Task {
+            do {
+                let gyms = try await appEnv.sessionRepository.fetchRecentGymNames(for: session.userId)
+                recentGyms = Array(gyms.prefix(5))
+            } catch {
+                let descriptor = FetchDescriptor<SessionModel>(
+                    sortBy: [SortDescriptor(\.date, order: .reverse)]
+                )
+                if let local = try? modelContext.fetch(descriptor) {
+                    let gyms = local.map(\.gymName).filter { !$0.isEmpty }
+                    var seen = Set<String>()
+                    recentGyms = gyms.filter { seen.insert($0).inserted }.prefix(5).map { $0 }
+                }
+            }
         }
     }
 

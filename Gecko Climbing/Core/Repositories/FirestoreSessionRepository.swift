@@ -173,6 +173,21 @@ final class FirestoreSessionRepository: SessionRepositoryProtocol, @unchecked Se
         }
     }
 
+    func fetchRecentGymNames(for userId: String) async throws -> [String] {
+        let snapshot = try await sessionsRef
+            .whereField("userId", isEqualTo: userId)
+            .order(by: "date", descending: true)
+            .limit(to: 50)
+            .getDocuments()
+
+        var seen = Set<String>()
+        return snapshot.documents.compactMap { doc in
+            let gym = doc.data()["gymName"] as? String ?? ""
+            guard !gym.isEmpty, seen.insert(gym).inserted else { return nil }
+            return gym
+        }
+    }
+
     // MARK: - Private
 
     private func decodeSession(from data: [String: Any], id: String) -> SessionModel {
