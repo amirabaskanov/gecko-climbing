@@ -93,7 +93,11 @@ struct SocialView: View {
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
         .contentMargins(.bottom, 48)
-        .searchable(text: Binding(get: { vm.searchQuery }, set: { vm.searchQuery = $0 }), prompt: "Search climbers...")
+        .searchable(
+            text: Binding(get: { vm.searchQuery }, set: { vm.searchQuery = $0 }),
+            placement: .navigationBarDrawer(displayMode: .always),
+            prompt: "Search climbers..."
+        )
         .background(Color.geckoBackground)
         .refreshable { await vm.loadFollowing() }
         .onAppear {
