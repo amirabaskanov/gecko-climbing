@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>document.documentElement.classList.add('js');</script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gecko Climbing — Track every send.</title>
+<meta name="description" content="The simplest climbing tracker for boulderers. Log every session, track V-grade progress, and share sends with your crew. Free on iOS." />
+<meta name="theme-color" content="#2A6B55" />
+
+<!-- Social -->
+<meta property="og:title" content="Gecko Climbing — Track every send." />
+<meta property="og:description" content="Log every climb, track your V-grade progression, and share sends with your crew. The simplest climbing tracker for boulderers." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://trygecko.app" />
+<meta property="og:image" content="https://trygecko.app/img/og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<!-- Icons -->
+<link rel="icon" type="image/svg+xml" href="/img/gecko-logo.svg" />
+<link rel="apple-touch-icon" href="/img/gecko-logo.svg" />
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+<!-- =====================  HEADER  ===================== -->
+<header class="site-header">
+  <div class="container">
+    <nav>
+      <a href="/" class="brand-mark" aria-label="Gecko Climbing home">
+        <i class="logo-icon" aria-hidden="true"></i>
+        <span>gecko</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#grades">Grades</a>
+        <a href="/support.html">Support</a>
+        <a href="#download" class="btn btn-primary">Download</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- =====================  HERO  ===================== -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-text reveal">
+      <span class="eyebrow">Now on iOS</span>
+      <h1>
+        <span class="line">Train smarter,</span>
+        <span class="line"><em class="brand">climb harder</em>.</span>
+      </h1>
+      <p class="lead">
+        Log every session, track your V-grade progression, and share sends
+        with your crew. The simplest climbing tracker for boulderers.
+      </p>
+      <div class="hero-cta">
+        <a href="#download" class="app-store" aria-label="Download on the App Store">
+          <svg viewBox="0 0 384 512" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+          <span class="app-store-text">
+            <small>Download on the</small>
+            <b>App Store</b>
+          </span>
+        </a>
+      </div>
+      <div class="hero-meta">
+        <span>Free</span>
+        <span class="dot"></span>
+        <span>iOS 17+</span>
+        <span class="dot"></span>
+        <span>No ads</span>
+      </div>
+    </div>
+
+    <div class="hero-visual reveal d1">
+      <div class="floating-pills" aria-hidden="true">
+        <span class="pill p1">V2 <small style="font-weight:700;opacity:0.85;margin-left:4px;">⚡</small></span>
+        <span class="pill p2">V4</span>
+        <span class="pill p3">V5</span>
+        <span class="pill p4">V7</span>
+      </div>
+      <div class="phone tilt-right">
+        <img src="/img/screenshots/feed.png" alt="Gecko Climbing feed showing friends' climbing sessions" loading="eager" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================  FEATURES  ===================== -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Built for the send</span>
+      <h2>Every feature, field-tested at the crag.</h2>
+      <p>
+        A tracker designed by climbers, for climbers. No bloat, no clutter —
+        just the tools you actually use between burns.
+      </p>
+    </div>
+
+    <!-- Feature 1 -->
+    <article class="feature-row reveal">
+      <div class="feature-text">
+        <span class="eyebrow">Log in seconds</span>
+        <h3>Every climb,<br />every outcome.</h3>
+        <p>
+          V0 to V17. Flash, send, project, or attempt. Gecko mirrors how
+          climbers actually talk about problems — not a generic "workout"
+          template.
+        </p>
+        <div class="feature-chips">
+          <span class="chip chip-flash">⚡ Flash</span>
+          <span class="chip chip-sent">✓ Sent</span>
+          <span class="chip chip-attempt">↻ Attempt</span>
+          <span class="chip">📋 Project</span>
+        </div>
+      </div>
+      <div class="feature-visual">
+        <div class="phone tilt-left">
+          <img src="/img/screenshots/log.png" alt="Logging a V0 flash attempt in Gecko Climbing" loading="lazy" />
+        </div>
+      </div>
+    </article>
+
+    <!-- Feature 2 -->
+    <article class="feature-row reverse reveal">
+      <div class="feature-text">
+        <span class="eyebrow">See progress</span>
+        <h3>Your stats,<br />at a glance.</h3>
+        <p>
+          Watch your top grade climb. Flash rate, send rate, week-over-week
+          progression — your data tells the story of your climbing,
+          automatically.
+        </p>
+        <div class="feature-chips">
+          <span class="chip">🔥 Streaks</span>
+          <span class="chip">📈 Top grade</span>
+          <span class="chip">📅 Weekly recaps</span>
+        </div>
+      </div>
+      <div class="feature-visual">
+        <div class="phone tilt-right">
+          <img src="/img/screenshots/profile.png" alt="Profile view with climbing stats and streak" loading="lazy" />
+        </div>
+      </div>
+    </article>
+
+    <!-- Feature 3 -->
+    <article class="feature-row reveal">
+      <div class="feature-text">
+        <span class="eyebrow">Your crew</span>
+        <h3>Climb together,<br />even apart.</h3>
+        <p>
+          Follow your friends, cheer their sends, and keep up with their
+          sessions. The feed is built for climbers — not doomscrolling,
+          not strangers, not ads.
+        </p>
+        <div class="feature-chips">
+          <span class="chip">♥ Likes</span>
+          <span class="chip">💬 Comments</span>
+          <span class="chip">🏆 Top sends</span>
+        </div>
+      </div>
+      <div class="feature-visual">
+        <div class="phone tilt-left">
+          <img src="/img/screenshots/feed.png" alt="Feed showing friend activity" loading="lazy" />
+        </div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- =====================  GRADE SPECTRUM  ===================== -->
+<section id="grades">
+  <div class="container">
+    <div class="spectrum reveal">
+      <div class="section-head" style="margin-bottom:0;">
+        <span class="eyebrow">V0 → V17</span>
+        <h2>A color system<br />that speaks climber.</h2>
+        <p>
+          Every grade is color-coded in the app so you can scan a session at
+          a glance. Green for the warm-up, purple for the project, black for
+          the dream.
+        </p>
+      </div>
+
+      <div class="spectrum-pills" aria-label="V-grade scale from V0 to V17">
+        <span class="grade-pill grade-v0">V0</span>
+        <span class="grade-pill grade-v1">V1</span>
+        <span class="grade-pill grade-v2">V2</span>
+        <span class="grade-pill grade-v3">V3</span>
+        <span class="grade-pill grade-v4">V4</span>
+        <span class="grade-pill grade-v5">V5</span>
+        <span class="grade-pill grade-v6">V6</span>
+        <span class="grade-pill grade-v7">V7</span>
+        <span class="grade-pill grade-v8">V8</span>
+        <span class="grade-pill grade-v9">V9</span>
+        <span class="grade-pill grade-v10">V10</span>
+        <span class="grade-pill grade-v11">V11</span>
+        <span class="grade-pill grade-v12">V12</span>
+        <span class="grade-pill grade-v13">V13</span>
+        <span class="grade-pill grade-v14">V14</span>
+        <span class="grade-pill grade-v15">V15</span>
+        <span class="grade-pill grade-v16">V16</span>
+        <span class="grade-pill grade-v17">V17</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================  VALUES / EXTRAS  ===================== -->
+<section class="values">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow" style="background:rgba(63,160,127,0.15); color:#7FD1B0;">What you get</span>
+      <h2>Free, forever. Built to respect you.</h2>
+      <p>No subscriptions, no tracking pixels, no ads between your climbs.</p>
+    </div>
+
+    <div class="values-grid">
+
+      <div class="value-card reveal">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></div>
+        <h4>Lights out, send on.</h4>
+        <p>A carefully-tuned dark mode that looks great at 9pm in the gym and 6am at the crag.</p>
+      </div>
+
+      <div class="value-card reveal d1">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        <h4>Weekly recaps.</h4>
+        <p>Sunday morning: your week in climbs. Automatic, local, private. Delete the notification if you don't want it.</p>
+      </div>
+
+      <div class="value-card reveal d2">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 22s-8-4.5-8-11.8A5.2 5.2 0 0 1 12 5a5.2 5.2 0 0 1 8 5.2c0 7.3-8 11.8-8 11.8z"/></svg></div>
+        <h4>Your data stays yours.</h4>
+        <p>We don't sell it, share it, or build ads against it. Delete your account and everything goes with you.</p>
+      </div>
+
+      <div class="value-card reveal">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg></div>
+        <h4>Offline-first.</h4>
+        <p>No signal at the crag? No problem. Log climbs locally; we'll sync when you're back in service.</p>
+      </div>
+
+      <div class="value-card reveal d1">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/><circle cx="9" cy="7" r="4"/></svg></div>
+        <h4>Just your crew.</h4>
+        <p>Follow friends, cheer sends, share progress. No suggested accounts, no algorithmic feed.</p>
+      </div>
+
+      <div class="value-card reveal d2">
+        <div class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <h4>Zero setup.</h4>
+        <p>Sign in with Apple or Google and you're logging your first session in under 30 seconds.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- =====================  FINAL CTA  ===================== -->
+<section class="cta-final" id="download">
+  <div class="container reveal">
+    <h2>Start logging.<br /><em class="brand">Start sending.</em></h2>
+    <p>Gecko is free on the App Store. iOS 17 and up.</p>
+    <a href="#" class="app-store large" aria-label="Download Gecko Climbing on the App Store">
+      <svg viewBox="0 0 384 512" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+      <span class="app-store-text">
+        <small>Download on the</small>
+        <b>App Store</b>
+      </span>
+    </a>
+  </div>
+</section>
+
+</main>
+
+<!-- =====================  FOOTER  ===================== -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <a href="/" class="brand-mark" aria-label="Gecko Climbing home">
+        <i class="logo-icon" aria-hidden="true" style="width:24px;height:24px;"></i>
+        <span>gecko</span>
+      </a>
+      <nav class="footer-links">
+        <a href="#features">Features</a>
+        <a href="#grades">Grades</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/support.html">Support</a>
+        <a href="mailto:absknv@gmail.com">Contact</a>
+      </nav>
+      <p class="footer-tagline">Made by climbers, for climbers. © 2026 Gecko Climbing.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/main.js" defer></script>
+</body>
+</html>
