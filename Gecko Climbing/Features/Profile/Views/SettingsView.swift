@@ -69,9 +69,9 @@ struct SettingsView: View {
                     sectionHeader("About")
 
                     VStack(spacing: 0) {
-                        aboutRow(label: "Version", value: "1.0.0")
+                        aboutRow(label: "Version", value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—")
                         Divider().padding(.horizontal, 16)
-                        aboutRow(label: "Build", value: "1")
+                        aboutRow(label: "Build", value: Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—")
                     }
                     .cardStyle()
 

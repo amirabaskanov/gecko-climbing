@@ -53,7 +53,7 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>Gecko Climbing uses your camera to capture photos of your climbs and for the upcoming Wall Analysis feature.</string>
+	<string>Gecko Climbing uses your camera to capture photos of your climbs.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Gecko Climbing accesses your photo library to attach photos to your sessions and climbs.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
@@ -62,5 +62,7 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
