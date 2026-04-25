@@ -27,6 +27,8 @@ final class GeckoAppDelegate: NSObject, UIApplicationDelegate {
         _ application: UIApplication,
         didFailToRegisterForRemoteNotificationsWithError error: Error
     ) {
+        #if DEBUG
         print("[GeckoAppDelegate] Failed to register for remote notifications: \(error.localizedDescription)")
+        #endif
     }
 }

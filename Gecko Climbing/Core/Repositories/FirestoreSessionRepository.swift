@@ -149,7 +149,9 @@ final class FirestoreSessionRepository: SessionRepositoryProtocol, @unchecked Se
                 try await deleteSubcollection(parent: postsRef.document(postDoc.documentID), name: "likes")
             }
         } catch {
+            #if DEBUG
             print("⚠️ deleteSessionAndAssociatedPost: leaf cleanup failed (anchors already deleted): \(error)")
+            #endif
         }
 
         // Update user stats after deletion

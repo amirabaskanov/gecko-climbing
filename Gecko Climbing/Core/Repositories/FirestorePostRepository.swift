@@ -20,7 +20,9 @@ final class FirestorePostRepository: PostRepositoryProtocol, @unchecked Sendable
 
         var feedUserIds = followingSnapshot.documents.map(\.documentID)
         feedUserIds.append(userId)
+        #if DEBUG
         print("📰 fetchFeed: querying posts for \(feedUserIds.count) users: \(feedUserIds)")
+        #endif
 
         // Firestore `in` queries support up to 30 values
         var posts: [PostModel] = []
@@ -31,7 +33,9 @@ final class FirestorePostRepository: PostRepositoryProtocol, @unchecked Sendable
                 .limit(to: 50)
                 .getDocuments()
 
+            #if DEBUG
             print("📰 fetchFeed: got \(snapshot.documents.count) docs for chunk")
+            #endif
             posts += try await decodePosts(from: snapshot.documents, currentUserId: userId)
         }
 

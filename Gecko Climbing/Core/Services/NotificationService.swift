@@ -39,7 +39,9 @@ final class NotificationService: NSObject {
             }
             return granted
         } catch {
+            #if DEBUG
             print("[NotificationService] requestAuthorization error: \(error.localizedDescription)")
+            #endif
             return false
         }
     }
@@ -50,7 +52,9 @@ final class NotificationService: NSObject {
         do {
             try await userRepository.registerFCMToken(token, for: uid)
         } catch {
+            #if DEBUG
             print("[NotificationService] Failed to upload FCM token: \(error.localizedDescription)")
+            #endif
         }
     }
 
@@ -87,7 +91,9 @@ final class NotificationService: NSObject {
         do {
             try await userRepository.updateTimeZone(TimeZone.current.identifier, for: userId)
         } catch {
+            #if DEBUG
             print("[NotificationService] Failed to sync timezone: \(error.localizedDescription)")
+            #endif
         }
     }
 
@@ -121,7 +127,9 @@ final class NotificationService: NSObject {
         do {
             try await center.add(request)
         } catch {
+            #if DEBUG
             print("[NotificationService] Failed to schedule weekly recap: \(error.localizedDescription)")
+            #endif
         }
     }
 
@@ -148,7 +156,9 @@ final class NotificationService: NSObject {
         do {
             try await center.add(request)
         } catch {
+            #if DEBUG
             print("[NotificationService] Failed to schedule dormant comeback: \(error.localizedDescription)")
+            #endif
         }
     }
 }

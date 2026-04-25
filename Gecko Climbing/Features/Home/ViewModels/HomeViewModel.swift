@@ -35,7 +35,9 @@ final class HomeViewModel {
             let fetched = try await postRepository.fetchFeed(for: userId)
             posts = fetched
             AnalyticsService.capture(.feedLoaded, properties: ["post_count": fetched.count])
+            #if DEBUG
             print("📰 Feed loaded: \(fetched.count) posts for userId: \(userId)")
+            #endif
 
             // Backfill for legacy posts: legacy posts either have no gradeSequence at all
             // or have only completed climbs (missing attempts) with an empty outcomeSequence.
@@ -58,9 +60,13 @@ final class HomeViewModel {
                         ) else { continue }
                         if Task.isCancelled { return }
                         updates[post.postId] = (result.grades, result.outcomes)
+                        #if DEBUG
                         print("✅ Backfilled post \(post.postId): \(result.grades.count) climbs")
+                        #endif
                     } catch {
+                        #if DEBUG
                         print("⚠️ Backfill failed for post \(post.postId): \(error)")
+                        #endif
                     }
                 }
 
@@ -76,7 +82,9 @@ final class HomeViewModel {
                 self.posts = newPosts
             }
         } catch {
+            #if DEBUG
             print("❌ Feed load error: \(error)")
+            #endif
             self.error = error
         }
         isLoading = false

@@ -70,6 +70,8 @@ final class MockFeedbackRepository: FeedbackRepositoryProtocol, @unchecked Senda
         screenshotData: Data?
     ) async throws {
         try await Task.sleep(nanoseconds: 800_000_000)
+        #if DEBUG
         print("📝 [Mock] Feedback submitted: [\(category.rawValue)] \(message)")
+        #endif
     }
 }
