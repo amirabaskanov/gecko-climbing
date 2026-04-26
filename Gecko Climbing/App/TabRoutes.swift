@@ -18,3 +18,8 @@ enum SocialRoute: Hashable {
 enum StatsRoute: Hashable {
     case profile
 }
+
+enum ProfileRoute: Hashable {
+    case fullStats
+    case weekInReview
+}

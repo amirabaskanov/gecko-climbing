@@ -3,11 +3,12 @@ import SwiftUI
 struct ProfileView: View {
     @Environment(AppEnvironment.self) private var appEnv
     @Environment(AuthViewModel.self) private var authViewModel
+    @Bindable var router: TabRouter<ProfileRoute>
     @State private var viewModel: ProfileViewModel?
     @State private var showEditProfile = false
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $router.path) {
             Group {
                 if let vm = viewModel {
                     content(vm)
@@ -39,6 +40,14 @@ struct ProfileView: View {
                             .font(.system(size: 15, weight: .medium))
                             .foregroundStyle(Color.geckoPrimary)
                     }
+                }
+            }
+            .navigationDestination(for: ProfileRoute.self) { route in
+                switch route {
+                case .fullStats:
+                    StatsView()
+                case .weekInReview:
+                    WeekInReviewView()
                 }
             }
         }
@@ -76,6 +85,21 @@ struct ProfileView: View {
                     // MARK: - Stats
                     statsSection(vm, user: user)
                         .padding(.horizontal, 16)
+
+                    #if DEBUG
+                    NavigationLink(value: ProfileRoute.weekInReview) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "sparkles")
+                            Text("Week in Review (DEBUG)")
+                                .font(.subheadline.weight(.semibold))
+                        }
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Capsule().fill(Color.geckoPrimary.opacity(0.8)))
+                    }
+                    .padding(.horizontal, 16)
+                    #endif
 
                     // MARK: - Recent Sessions
                     sessionsSection(vm)
@@ -132,9 +156,7 @@ struct ProfileView: View {
     // MARK: - Stats
 
     private func statsSection(_ vm: ProfileViewModel, user: UserModel) -> some View {
-        NavigationLink {
-            StatsView()
-        } label: {
+        NavigationLink(value: ProfileRoute.fullStats) {
             VStack(spacing: 16) {
                 HStack(spacing: 0) {
                     statItem(

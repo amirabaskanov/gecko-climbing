@@ -10,7 +10,7 @@ struct MainTabView: View {
     @State private var feedRefreshToken = UUID()
     @State private var logClimbCount = 0
     @State private var finishTrigger = UUID()
-    @State private var showWeeklySummary = false
+    @State private var profileRouter = TabRouter<ProfileRoute>()
 
     var body: some View {
         ZStack {
@@ -53,7 +53,7 @@ struct MainTabView: View {
                 .opacity(selectedTab == .social ? 1 : 0)
                 .allowsHitTesting(selectedTab == .social)
 
-            ProfileView()
+            ProfileView(router: profileRouter)
                 .opacity(selectedTab == .profile ? 1 : 0)
                 .allowsHitTesting(selectedTab == .profile)
         }
@@ -90,16 +90,14 @@ struct MainTabView: View {
             guard let newRoute else { return }
             handleNotificationRoute(newRoute)
         }
-        .sheet(isPresented: $showWeeklySummary) {
-            WeeklySummaryView()
-        }
     }
 
     private func handleNotificationRoute(_ route: NotificationRoute) {
         defer { deepLinkRouter.pendingRoute = nil }
         switch route {
         case .weeklyRecap:
-            showWeeklySummary = true
+            selectedTab = .profile
+            profileRouter.setPath([.fullStats, .weekInReview])
         default:
             break
         }
