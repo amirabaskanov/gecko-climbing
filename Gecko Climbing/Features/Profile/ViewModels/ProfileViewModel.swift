@@ -13,6 +13,7 @@ final class ProfileViewModel {
 
     // Edit fields
     var editDisplayName = ""
+    var editUsername = ""
     var editBio = ""
 
     private let userRepository: any UserRepositoryProtocol
@@ -40,6 +41,7 @@ final class ProfileViewModel {
             allSessions = s
             recentSessions = Array(s.prefix(10))
             editDisplayName = u.displayName
+            editUsername = u.username
             editBio = u.bio
             // Reconcile follow counts in background to fix any drift
             Task {
@@ -91,15 +93,62 @@ final class ProfileViewModel {
         return streak
     }
 
-    func saveProfile() async {
-        guard let updatedUser = user else { return }
-        updatedUser.displayName = editDisplayName
-        updatedUser.bio = editBio
+    var normalizedEditUsername: String {
+        Self.normalizedUsername(editUsername)
+    }
+
+    var usernameValidationMessage: String? {
+        let username = normalizedEditUsername
+        guard username.count >= 3 else {
+            return "Use at least 3 characters."
+        }
+        guard username.count <= 20 else {
+            return "Keep it to 20 characters or fewer."
+        }
+        guard username.allSatisfy({ $0.isASCII && ($0.isLetter || $0.isNumber || $0 == "_") }) else {
+            return "Use letters, numbers, and underscores only."
+        }
+        return nil
+    }
+
+    var canSaveProfile: Bool {
+        !editDisplayName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        usernameValidationMessage == nil
+    }
+
+    func saveProfile() async -> Bool {
+        guard let currentUser = user else { return false }
+        guard canSaveProfile else {
+            error = UserError.invalidUsername
+            return false
+        }
+
+        let updatedUser = UserModel(
+            uid: currentUser.uid,
+            displayName: editDisplayName.trimmingCharacters(in: .whitespacesAndNewlines),
+            username: normalizedEditUsername,
+            bio: editBio.trimmingCharacters(in: .whitespacesAndNewlines),
+            profileImageURL: currentUser.profileImageURL,
+            followersCount: currentUser.followersCount,
+            followingCount: currentUser.followingCount,
+            totalSessions: currentUser.totalSessions,
+            totalClimbs: currentUser.totalClimbs,
+            highestGrade: currentUser.highestGrade,
+            highestGradeNumeric: currentUser.highestGradeNumeric,
+            isPublic: currentUser.isPublic,
+            lastSyncedAt: currentUser.lastSyncedAt,
+            homeGymOverride: currentUser.homeGymOverride
+        )
         do {
             try await userRepository.updateUser(updatedUser)
             user = updatedUser
+            editDisplayName = updatedUser.displayName
+            editUsername = updatedUser.username
+            editBio = updatedUser.bio
+            return true
         } catch {
             self.error = error
+            return false
         }
     }
 
@@ -114,5 +163,11 @@ final class ProfileViewModel {
         } catch {
             self.error = error
         }
+    }
+
+    private static func normalizedUsername(_ value: String) -> String {
+        value
+            .lowercased()
+            .filter { $0.isASCII && ($0.isLetter || $0.isNumber || $0 == "_") }
     }
 }

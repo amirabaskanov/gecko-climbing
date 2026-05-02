@@ -32,7 +32,14 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
 
         if snapshot.exists, let data = snapshot.data() {
             let user = decodeUser(from: data, uid: uid)
-            try? await reserveUsernameForExistingUser(user)
+            // Best-effort migration for users created before username reservations
+            // existed: ensure their handle matches the regex and that a
+            // reservation document exists. If we have to repair the handle,
+            // return the repaired one to the caller so the UI doesn't briefly
+            // show an old/invalid username.
+            if let repaired = try? await migrateLegacyUserIfNeeded(user) {
+                return repaired
+            }
             return user
         }
 
@@ -60,7 +67,16 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
             displayName: displayName,
             username: username
         )
-        try await createUser(newUser, documentRef: docRef)
+        // The transaction-based createUser writes to /usernames/, which is
+        // gated by rules that may not be deployed yet. If we hit
+        // permission-denied, fall back to a plain user-doc write so sign-up
+        // still completes — the next sign-in will retry the reservation via
+        // migrateLegacyUserIfNeeded once rules are live.
+        do {
+            try await createUser(newUser, documentRef: docRef)
+        } catch where isPermissionDenied(error) {
+            try await docRef.setData(newUser.toDTO().asDictionary())
+        }
         return newUser
     }
 
@@ -68,7 +84,36 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
 
     func updateUser(_ user: UserModel) async throws {
         try validateUsername(user.username)
-        try await runUserUpdateTransaction(user)
+        // Same rules-not-yet-deployed fallback as createUser. Without the
+        // /usernames/ rules in place, the reservation transaction returns
+        // permission-denied; we still want the user's edits to land.
+        do {
+            try await runUserUpdateTransaction(user)
+        } catch where isPermissionDenied(error) {
+            try await updateUserWithoutReservation(user)
+        }
+    }
+
+    private func updateUserWithoutReservation(_ user: UserModel) async throws {
+        // Best-effort uniqueness without the reservation infra: query the
+        // users collection for the same username and reject if it belongs to
+        // someone else. Race-condition prone (two writers can both pass this
+        // check before either commits), but acceptable as a launch-day
+        // fallback until /usernames/ rules ship.
+        let snapshot = try await usersRef
+            .whereField("username", isEqualTo: user.username)
+            .limit(to: 2)
+            .getDocuments()
+        if snapshot.documents.contains(where: { $0.documentID != user.uid }) {
+            throw UserError.usernameTaken
+        }
+        try await usersRef.document(user.uid).setData(user.toDTO().asDictionary(), merge: true)
+    }
+
+    private func isPermissionDenied(_ error: Error) -> Bool {
+        let nsError = error as NSError
+        return nsError.domain == FirestoreErrorDomain &&
+            nsError.code == FirestoreErrorCode.permissionDenied.rawValue
     }
 
     // MARK: - Follow / Unfollow
@@ -327,6 +372,52 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
             "uid": user.uid,
             "createdAt": FieldValue.serverTimestamp()
         ])
+    }
+
+    /// Repairs a pre-reservation-era user account in place.
+    /// - If the user's existing username matches the new regex, ensures a
+    ///   reservation doc exists and returns nil (caller falls back to original).
+    /// - If the username is invalid (e.g. legacy users with uppercase or
+    ///   unicode chars), generates a normalized replacement based on
+    ///   displayName + uid suffix, writes it via `runUserUpdateTransaction`,
+    ///   and returns the repaired `UserModel` so the UI sees the new handle.
+    /// Throws if the repair attempt collides with another user's handle —
+    /// caller treats that as "could not migrate, keep current state".
+    private func migrateLegacyUserIfNeeded(_ user: UserModel) async throws -> UserModel? {
+        if isUsernameValid(user.username) {
+            try await reserveUsernameForExistingUser(user)
+            return nil
+        }
+
+        // Username is invalid or empty — pick a normalized fallback. Append
+        // a uid-derived suffix so the auto-repair almost never collides.
+        let suffix = String(user.uid.prefix(6)).lowercased()
+        let base = usernameBase(from: user.displayName)
+        let candidate = "\(base)_\(suffix)"
+        guard isUsernameValid(candidate) else { return nil }
+
+        let repaired = UserModel(
+            uid: user.uid,
+            displayName: user.displayName,
+            username: candidate,
+            bio: user.bio,
+            profileImageURL: user.profileImageURL,
+            followersCount: user.followersCount,
+            followingCount: user.followingCount,
+            totalSessions: user.totalSessions,
+            totalClimbs: user.totalClimbs,
+            highestGrade: user.highestGrade,
+            highestGradeNumeric: user.highestGradeNumeric,
+            isPublic: user.isPublic,
+            lastSyncedAt: user.lastSyncedAt,
+            homeGymOverride: user.homeGymOverride
+        )
+        try await runUserUpdateTransaction(repaired)
+        return repaired
+    }
+
+    private func isUsernameValid(_ username: String) -> Bool {
+        username.range(of: #"^[a-z0-9_]{3,20}$"#, options: .regularExpression) != nil
     }
 
     private func validateUsername(_ username: String) throws {

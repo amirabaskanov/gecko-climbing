@@ -1,27 +1,78 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isValidUsername(username) {
+      return username is string && username.matches('^[a-z0-9_]{3,20}$');
+    }
+
+    function usernameReservedBy(uid, username) {
+      return getAfter(/databases/$(database)/documents/usernames/$(username)).data.uid == uid;
+    }
+
+    function usernameUnchanged() {
+      return request.resource.data.username == resource.data.username;
+    }
+
+    function ownerUserWriteIsValid(uid) {
+      return isOwner(uid) &&
+        isValidUsername(request.resource.data.username) &&
+        (
+          !exists(/databases/$(database)/documents/users/$(uid)) ||
+          usernameUnchanged() ||
+          usernameReservedBy(uid, request.resource.data.username)
+        );
+    }
 
     // Users
     match /users/{uid} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null && request.auth.uid == uid;
-      // Owner can update anything; other users can only update follow/stat counters
-      allow update: if request.auth != null &&
-        (request.auth.uid == uid ||
+      allow read: if isSignedIn();
+      allow create: if ownerUserWriteIsValid(uid) &&
+        usernameReservedBy(uid, request.resource.data.username);
+      // Owners can edit their profile only when username ownership is valid.
+      // Other users can only update follow/stat counters.
+      allow update: if isSignedIn() &&
+        (ownerUserWriteIsValid(uid) ||
          request.resource.data.diff(resource.data).affectedKeys().hasOnly(
            ['followersCount', 'followingCount', 'totalSessions', 'totalClimbs', 'highestGrade', 'highestGradeNumeric']
          ));
 
       match /following/{targetUid} {
-        allow read: if request.auth != null;
-        allow write: if request.auth != null && request.auth.uid == uid;
+        allow read: if isSignedIn();
+        allow write: if isOwner(uid);
       }
 
       match /followers/{followerUid} {
-        allow read: if request.auth != null;
-        allow write: if request.auth != null && request.auth.uid == followerUid;
+        allow read: if isSignedIn();
+        allow write: if isSignedIn() && request.auth.uid == followerUid;
       }
+    }
+
+    // Username reservations. Document IDs are normalized usernames and keep
+    // profile handles unique across users.
+    match /usernames/{username} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() &&
+        isValidUsername(username) &&
+        request.resource.data.keys().hasOnly(['uid', 'createdAt']) &&
+        request.resource.data.uid == request.auth.uid &&
+        getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.username == username;
+      allow update: if isSignedIn() &&
+        isValidUsername(username) &&
+        request.resource.data.keys().hasOnly(['uid', 'createdAt']) &&
+        resource.data.uid == request.auth.uid &&
+        request.resource.data.uid == request.auth.uid &&
+        getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.username == username;
+      allow delete: if isSignedIn() &&
+        resource.data.uid == request.auth.uid &&
+        getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.username != username;
     }
 
     // Sessions
