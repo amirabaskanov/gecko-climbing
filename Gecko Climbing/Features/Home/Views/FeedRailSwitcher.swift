@@ -22,13 +22,16 @@ struct FeedRailSwitcher: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 32) {
+            // Equal-width tabs so the two labels split the screen 50/50 and
+            // read as a balanced pair, the way Beli / Letterboxd / X handle
+            // a two-tab segmented control. Each `railButton` claims half the
+            // header and centers its label within that half.
+            HStack(spacing: 0) {
                 ForEach(FeedRail.allCases, id: \.self) { rail in
                     railButton(rail)
+                        .frame(maxWidth: .infinity)
                 }
-                Spacer(minLength: 0)
             }
-            .padding(.horizontal, 20)
             .padding(.top, 6)
             .padding(.bottom, 0)
 
@@ -49,6 +52,9 @@ struct FeedRailSwitcher: View {
             }
             AnalyticsService.capture(.feedRailSwitched, properties: ["rail": rail.rawValue])
         } label: {
+            // Label + underline stack is content-sized (no infinity frames
+            // here) so the underline width matches the label width — the
+            // outer button claims the full half-width for hit area.
             VStack(spacing: 8) {
                 ZStack(alignment: .topTrailing) {
                     Text(rail.title)
@@ -75,12 +81,12 @@ struct FeedRailSwitcher: View {
                         RoundedRectangle(cornerRadius: 1.5, style: .continuous)
                             .fill(Color.geckoPrimary)
                             .frame(height: 3)
-                            .frame(maxWidth: .infinity)
                             .matchedGeometryEffect(id: "rail-underline", in: underlineNamespace)
                     }
                 }
             }
             .padding(.vertical, 8)
+            .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
