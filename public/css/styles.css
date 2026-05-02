@@ -526,6 +526,22 @@ section {
   margin-bottom: 18px;
 }
 .value-card .icon svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2.25; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Numbered pill — replaces icons in the values section for a bolder, more
+   editorial feel. */
+.value-card .value-num {
+  display: inline-block;
+  font-family: var(--font-display, inherit);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: #7FD1B0;
+  background: rgba(63, 160, 127, 0.14);
+  border: 1px solid rgba(127, 209, 176, 0.22);
+  padding: 6px 12px;
+  border-radius: 999px;
+  margin-bottom: 22px;
+}
 .value-card h4 {
   font-size: 1.125rem;
   font-weight: 800;
