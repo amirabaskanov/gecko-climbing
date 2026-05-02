@@ -66,6 +66,7 @@ struct ProfileView: View {
                     userRepository: appEnv.userRepository,
                     sessionRepository: appEnv.sessionRepository,
                     storageRepository: appEnv.storageRepository,
+                    postRepository: appEnv.postRepository,
                     userId: authViewModel.currentUserId
                 )
                 viewModel = vm

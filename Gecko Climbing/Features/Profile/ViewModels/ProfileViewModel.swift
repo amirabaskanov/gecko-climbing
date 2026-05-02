@@ -19,15 +19,18 @@ final class ProfileViewModel {
     private let userRepository: any UserRepositoryProtocol
     private let sessionRepository: any SessionRepositoryProtocol
     private let storageRepository: any StorageRepositoryProtocol
+    private let postRepository: any PostRepositoryProtocol
     private let userId: String
 
     init(userRepository: any UserRepositoryProtocol,
          sessionRepository: any SessionRepositoryProtocol,
          storageRepository: any StorageRepositoryProtocol,
+         postRepository: any PostRepositoryProtocol,
          userId: String) {
         self.userRepository = userRepository
         self.sessionRepository = sessionRepository
         self.storageRepository = storageRepository
+        self.postRepository = postRepository
         self.userId = userId
     }
 
@@ -139,12 +142,17 @@ final class ProfileViewModel {
             lastSyncedAt: currentUser.lastSyncedAt,
             homeGymOverride: currentUser.homeGymOverride
         )
+        let nameChanged = updatedUser.displayName != currentUser.displayName
+        let photoChanged = updatedUser.profileImageURL != currentUser.profileImageURL
         do {
             try await userRepository.updateUser(updatedUser)
             user = updatedUser
             editDisplayName = updatedUser.displayName
             editUsername = updatedUser.username
             editBio = updatedUser.bio
+            if nameChanged || photoChanged {
+                await cascadeIdentityToPosts(for: updatedUser)
+            }
             return true
         } catch {
             self.error = error
@@ -159,9 +167,27 @@ final class ProfileViewModel {
             user?.profileImageURL = url
             if let user {
                 try await userRepository.updateUser(user)
+                await cascadeIdentityToPosts(for: user)
             }
         } catch {
             self.error = error
+        }
+    }
+
+    /// Push the user's current display name and profile image URL into every
+    /// post they've authored. Best-effort — a cascade failure shouldn't block
+    /// the profile edit since the `users/{uid}` doc has already been updated.
+    private func cascadeIdentityToPosts(for user: UserModel) async {
+        do {
+            try await postRepository.cascadeAuthorMetadata(
+                uid: user.uid,
+                displayName: user.displayName,
+                profileImageURL: user.profileImageURL
+            )
+        } catch {
+            #if DEBUG
+            print("[ProfileViewModel] cascadeAuthorMetadata failed: \(error.localizedDescription)")
+            #endif
         }
     }
 

@@ -234,6 +234,34 @@ final class FirestorePostRepository: PostRepositoryProtocol, @unchecked Sendable
         try await batch.commit()
     }
 
+    func cascadeAuthorMetadata(
+        uid: String,
+        displayName: String,
+        profileImageURL: String
+    ) async throws {
+        let snapshot = try await postsRef
+            .whereField("userId", isEqualTo: uid)
+            .getDocuments()
+
+        guard !snapshot.documents.isEmpty else { return }
+
+        // Firestore caps batched writes at 500 ops; chunk to be safe.
+        for chunk in snapshot.documents.chunked(into: 499) {
+            let batch = db.batch()
+            for doc in chunk {
+                batch.updateData([
+                    "userDisplayName": displayName,
+                    "userProfileImageURL": profileImageURL
+                ], forDocument: doc.reference)
+            }
+            try await batch.commit()
+        }
+
+        #if DEBUG
+        print("👤 cascadeAuthorMetadata: updated \(snapshot.documents.count) posts for uid=\(uid)")
+        #endif
+    }
+
     func deletePostBySessionId(_ sessionId: String) async throws {
         let snapshot = try await postsRef
             .whereField("sessionId", isEqualTo: sessionId)

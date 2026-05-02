@@ -18,6 +18,17 @@ protocol PostRepositoryProtocol: AnyObject {
     func fetchComments(postId: String) async throws -> [CommentModel]
     func addComment(_ comment: CommentModel) async throws
     func deleteComment(postId: String, commentId: String) async throws
+
+    /// Cascade an author's denormalized profile fields (`userDisplayName`,
+    /// `userProfileImageURL`) to every post they've authored. Called after
+    /// the user edits their profile so old posts don't keep showing stale
+    /// names or avatars. Best-effort — the user's profile change is the
+    /// source of truth and shouldn't fail if the cascade does.
+    func cascadeAuthorMetadata(
+        uid: String,
+        displayName: String,
+        profileImageURL: String
+    ) async throws
 }
 
 // MARK: - Mock Implementation
@@ -122,6 +133,18 @@ final class MockPostRepository: PostRepositoryProtocol, @unchecked Sendable {
         mockComments[postId]?.removeAll { $0.id == commentId }
         if let idx = posts.firstIndex(where: { $0.postId == postId }) {
             posts[idx].commentsCount = max(0, posts[idx].commentsCount - 1)
+        }
+    }
+
+    func cascadeAuthorMetadata(
+        uid: String,
+        displayName: String,
+        profileImageURL: String
+    ) async throws {
+        try await Task.sleep(nanoseconds: 100_000_000)
+        for idx in posts.indices where posts[idx].userId == uid {
+            posts[idx].userDisplayName = displayName
+            posts[idx].userProfileImageURL = profileImageURL
         }
     }
 
