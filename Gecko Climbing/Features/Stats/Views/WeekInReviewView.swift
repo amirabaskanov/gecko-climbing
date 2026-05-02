@@ -3,9 +3,11 @@ import SwiftUI
 struct WeekInReviewView: View {
     @Environment(AppEnvironment.self) private var appEnv
     @Environment(AuthViewModel.self) private var authViewModel
+    @Environment(\.displayScale) private var displayScale
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel: WeekInReviewViewModel?
     @State private var heroAppeared = false
+    @State private var shareImage: Image?
 
     var body: some View {
         contentBody
@@ -38,8 +40,10 @@ struct WeekInReviewView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if vm.hasActivity {
                 storyScroll(vm)
+            } else if vm.hasLifetimeActivity {
+                EmptyReturning(vm: vm, onClose: { dismiss() })
             } else {
-                EmptyHero(onLogTap: { dismiss() })
+                EmptyFirstTimer(onClose: { dismiss() })
             }
         } else {
             ProgressView()
@@ -101,19 +105,47 @@ struct WeekInReviewView: View {
                 if vm.hasMultipleGyms, let gym = vm.mostVisitedGym {
                     GymCard(name: gym.name, count: gym.count)
                 }
-                OutroCTA(onSeeStats: {
-                    // Pop self → user lands on StatsView
-                    dismiss()
-                })
+                OutroCTA(
+                    shareImage: shareImage,
+                    onSeeStats: { dismiss() }
+                )
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
-            .padding(.bottom, 48)
+            .padding(.bottom, 24)
         }
         .scrollIndicators(.hidden)
+        .contentMargins(.bottom, 56)
         .onAppear {
             withAnimation(.geckoBounce.delay(0.05)) { heroAppeared = true }
         }
+        .task(id: vm.thisWeekSessions.count) {
+            shareImage = renderShareImage(vm: vm)
+        }
+    }
+
+    @MainActor
+    private func renderShareImage(vm: WeekInReviewViewModel) -> Image? {
+        let card = WeekInReviewShareCard(
+            displayName: vm.displayName,
+            dateRangeLabel: vm.dateRangeLabel.uppercased(),
+            hardestSendLabel: vm.hardestSendLabel,
+            hardestSendNumeric: vm.hardestSendNumeric ?? -1,
+            isPR: vm.isHardestSendPR,
+            totalSessions: vm.totalSessions,
+            totalClimbs: vm.totalClimbs,
+            totalSends: vm.totalSends,
+            totalDurationMinutes: vm.totalDurationMinutes,
+            sendRatePercent: Int((vm.sendRate * 100).rounded()),
+            weekDays: vm.weekDays,
+            daysClimbed: vm.daysClimbedThisWeek,
+            wheelhouse: vm.wheelhouse,
+            topFlash: vm.topFlashGrade
+        )
+        let renderer = ImageRenderer(content: card)
+        renderer.scale = max(displayScale, 3.0)
+        guard let uiImage = renderer.uiImage else { return nil }
+        return Image(uiImage: uiImage)
     }
 }
 
@@ -595,19 +627,191 @@ private struct GymCard: View {
 // MARK: - Outro CTA
 
 private struct OutroCTA: View {
+    let shareImage: Image?
     let onSeeStats: () -> Void
 
     var body: some View {
-        VStack(spacing: 14) {
-            Text("Keep climbing.")
-                .font(.system(size: 22, weight: .black, design: .rounded))
+        VStack(spacing: 18) {
+            VStack(spacing: 4) {
+                Text("Keep climbing.")
+                    .font(.system(size: 22, weight: .black, design: .rounded))
+                    .foregroundStyle(Color.geckoPrimary)
+                Text("Your story is just getting started.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+
+            if let shareImage {
+                ShareLink(
+                    item: shareImage,
+                    subject: Text("My week in climbing"),
+                    message: Text("My climbing week with Gecko"),
+                    preview: SharePreview(
+                        "Your week in climbing",
+                        image: shareImage
+                    )
+                ) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "square.and.arrow.up")
+                        Text("Share my week")
+                            .font(.subheadline.weight(.bold))
+                    }
+                    .padding(.horizontal, 22)
+                    .padding(.vertical, 14)
+                    .frame(maxWidth: .infinity)
+                    .background(Capsule().fill(Color.geckoPrimary))
+                    .foregroundStyle(.white)
+                }
+                .buttonStyle(.plain)
+                .bouncePress()
+            }
+
+            Button(action: onSeeStats) {
+                HStack(spacing: 6) {
+                    Text("See full stats")
+                        .font(.subheadline.weight(.semibold))
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.bold))
+                }
                 .foregroundStyle(Color.geckoPrimary)
-            Text("Your story is just getting started.")
+            }
+            .buttonStyle(.plain)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 24)
+    }
+}
+
+// MARK: - Empty states
+
+/// Returning climber — has lifetime activity but didn't climb in the past 7 days.
+/// Surfaces lifetime context so the screen still earns its keep.
+private struct EmptyReturning: View {
+    let vm: WeekInReviewViewModel
+    let onClose: () -> Void
+    @State private var appeared = false
+    @State private var pulse = false
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                rangeBadge
+                gapHero
+                lifetimeStripView
+                nudgeFooter
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            .padding(.bottom, 32)
+        }
+        .scrollIndicators(.hidden)
+        .onAppear {
+            withAnimation(.geckoBounce.delay(0.05)) { appeared = true }
+            withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) {
+                pulse = true
+            }
+        }
+    }
+
+    private var rangeBadge: some View {
+        Text(vm.dateRangeLabel.uppercased())
+            .font(.system(size: 11, weight: .bold, design: .rounded))
+            .tracking(1.4)
+            .foregroundStyle(Color.geckoPrimary)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 6)
+            .background(Capsule().fill(Color.geckoPrimary.opacity(0.12)))
+            .padding(.top, 8)
+    }
+
+    private var gapHero: some View {
+        VStack(spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(Color.geckoPrimary.opacity(0.10))
+                    .frame(width: 200, height: 200)
+                    .scaleEffect(pulse ? 1.04 : 0.98)
+                Circle()
+                    .fill(Color.geckoPrimary.opacity(0.18))
+                    .frame(width: 140, height: 140)
+                    .scaleEffect(pulse ? 1.08 : 0.94)
+                Image(systemName: "figure.climbing")
+                    .font(.system(size: 56, weight: .bold))
+                    .foregroundStyle(Color.geckoPrimary)
+            }
+            .scaleEffect(appeared ? 1 : 0.6)
+            .opacity(appeared ? 1 : 0)
+
+            Text("No climbs this week")
+                .font(.system(size: 22, weight: .black, design: .rounded))
+
+            Text(daysCopy)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
+    }
 
-            Button(action: onSeeStats) {
+    private var daysCopy: String {
+        guard let days = vm.daysSinceLastSession else {
+            return "Log a session to start your next story."
+        }
+        switch days {
+        case 0:
+            return "You climbed earlier today — refresh after your next session."
+        case 1:
+            return "Last climb was yesterday. Time for round two?"
+        case 2...6:
+            return "Last climb was \(days) days ago. The wall misses you."
+        case 7...13:
+            return "It's been over a week. Time to get back on the wall."
+        default:
+            return "It's been \(days) days. Your projects are waiting."
+        }
+    }
+
+    private var lifetimeStripView: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Where you stand")
+                .font(.caption.weight(.bold))
+                .tracking(1.2)
+                .foregroundStyle(.secondary)
+
+            HStack(spacing: 12) {
+                LifetimeTile(
+                    label: "Top grade",
+                    value: vm.lifetimeHardestGrade,
+                    tint: Color.gradeColor(for: vm.allTimeHighestGradeNumeric),
+                    big: true
+                )
+                LifetimeTile(
+                    label: "Sessions",
+                    value: "\(vm.lifetimeTotalSessions)",
+                    tint: .geckoPrimary
+                )
+                LifetimeTile(
+                    label: "Climbs",
+                    value: "\(vm.lifetimeTotalClimbs)",
+                    tint: .geckoOrange
+                )
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .cardStyle()
+    }
+
+    private var nudgeFooter: some View {
+        VStack(spacing: 14) {
+            Text("Your next chapter starts on the wall.")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+
+            Button(action: onClose) {
                 HStack(spacing: 6) {
                     Text("See full stats")
                         .font(.subheadline.weight(.bold))
@@ -615,48 +819,89 @@ private struct OutroCTA: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 12)
-                .background(
-                    Capsule().fill(Color.geckoPrimary)
-                )
+                .background(Capsule().fill(Color.geckoPrimary))
                 .foregroundStyle(.white)
             }
             .buttonStyle(.plain)
             .bouncePress()
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 24)
+        .padding(.top, 8)
     }
 }
 
-// MARK: - Empty state
+/// Tile used in the empty-state lifetime strip. Variant `big` emphasizes the grade.
+private struct LifetimeTile: View {
+    let label: String
+    let value: String
+    let tint: Color
+    var big: Bool = false
 
-private struct EmptyHero: View {
-    let onLogTap: () -> Void
+    var body: some View {
+        VStack(spacing: 6) {
+            Text(value)
+                .font(.system(size: big ? 26 : 20, weight: .black, design: .rounded))
+                .foregroundStyle(big ? tint : .primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+            Text(label.uppercased())
+                .font(.system(size: 9, weight: .bold, design: .rounded))
+                .tracking(0.8)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 14)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(tint.opacity(0.08))
+        )
+    }
+}
+
+/// First-time climber — no sessions ever logged. Pure onboarding card.
+private struct EmptyFirstTimer: View {
+    let onClose: () -> Void
+    @State private var appeared = false
 
     var body: some View {
         VStack(spacing: 20) {
-            Image(systemName: "mountain.2.fill")
-                .font(.system(size: 56))
-                .foregroundStyle(Color.geckoPrimary.opacity(0.4))
-            Text("No climbs this week")
-                .font(.title3.weight(.bold))
-            Text("Log a session to start your story.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-            Button(action: onLogTap) {
+            ZStack {
+                Circle()
+                    .fill(Color.geckoMint.opacity(0.5))
+                    .frame(width: 140, height: 140)
+                Image(systemName: "sparkles")
+                    .font(.system(size: 52, weight: .bold))
+                    .foregroundStyle(Color.geckoPrimary)
+            }
+            .scaleEffect(appeared ? 1 : 0.5)
+            .opacity(appeared ? 1 : 0)
+
+            VStack(spacing: 8) {
+                Text("Your story starts here")
+                    .font(.system(size: 22, weight: .black, design: .rounded))
+
+                Text("Log a climbing session and your week-in-review unlocks — hardest send, send rate, days you climbed, all of it.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 8)
+            }
+
+            Button(action: onClose) {
                 Text("Got it")
                     .font(.subheadline.weight(.bold))
                     .foregroundStyle(.white)
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, 28)
                     .padding(.vertical, 12)
                     .background(Capsule().fill(Color.geckoPrimary))
             }
             .buttonStyle(.plain)
             .bouncePress()
-            .padding(.top, 8)
+            .padding(.top, 4)
         }
         .padding(40)
+        .onAppear {
+            withAnimation(.geckoBounce.delay(0.1)) { appeared = true }
+        }
     }
 }
 

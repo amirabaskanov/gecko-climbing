@@ -86,20 +86,12 @@ struct ProfileView: View {
                     statsSection(vm, user: user)
                         .padding(.horizontal, 16)
 
-                    #if DEBUG
                     NavigationLink(value: ProfileRoute.weekInReview) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "sparkles")
-                            Text("Week in Review (DEBUG)")
-                                .font(.subheadline.weight(.semibold))
-                        }
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(Capsule().fill(Color.geckoPrimary.opacity(0.8)))
+                        WeekInReviewEntryPill()
                     }
+                    .buttonStyle(.plain)
+                    .bouncePress()
                     .padding(.horizontal, 16)
-                    #endif
 
                     // MARK: - Recent Sessions
                     sessionsSection(vm)
@@ -267,6 +259,53 @@ struct ProfileView: View {
             Text(label)
                 .font(.caption)
                 .foregroundStyle(.secondary)
+        }
+    }
+}
+
+// MARK: - Week in Review entry pill
+
+private struct WeekInReviewEntryPill: View {
+    @State private var sparkle = false
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(Color.white.opacity(0.18))
+                    .frame(width: 36, height: 36)
+                Image(systemName: "sparkles")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(.white)
+                    .symbolEffect(.bounce, value: sparkle)
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Your week in climbing")
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(.white)
+                Text("See how this week stacked up")
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.85))
+            }
+            Spacer(minLength: 0)
+            Image(systemName: "chevron.right")
+                .font(.system(size: 13, weight: .heavy))
+                .foregroundStyle(.white.opacity(0.85))
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(
+            Capsule().fill(Color.geckoPrimaryGradient)
+        )
+        .overlay(
+            Capsule().stroke(Color.white.opacity(0.18), lineWidth: 1)
+        )
+        .shadow(color: Color.geckoPrimary.opacity(0.35), radius: 10, x: 0, y: 4)
+        .onAppear {
+            // Light bounce on first appearance to draw the eye
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                sparkle.toggle()
+            }
         }
     }
 }

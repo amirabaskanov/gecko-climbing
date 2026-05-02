@@ -5,7 +5,9 @@ import Observation
 final class WeekInReviewViewModel {
     var thisWeekSessions: [SessionModel] = []
     var priorWeekSessions: [SessionModel] = []
+    var allSessions: [SessionModel] = []
     var allTimeHighestGradeNumeric: Int = -1
+    var displayName: String = ""
     var isLoading = false
     var error: Error?
 
@@ -187,6 +189,33 @@ final class WeekInReviewViewModel {
     /// Whether we have a meaningful prior-week to compare against.
     var hasPriorWeek: Bool { !priorWeekSessions.isEmpty }
 
+    // MARK: - Lifetime (used by empty state to give returning climbers context)
+
+    /// True if the user has logged at least one session ever.
+    var hasLifetimeActivity: Bool { !allSessions.isEmpty }
+
+    /// The most recent session of all time (regardless of whether in this week).
+    var lastSession: SessionModel? {
+        allSessions.max(by: { $0.date < $1.date })
+    }
+
+    /// Whole days between today and the user's most recent session. nil if none.
+    var daysSinceLastSession: Int? {
+        guard let last = lastSession else { return nil }
+        let lastDay = calendar.startOfDay(for: last.date)
+        let today = calendar.startOfDay(for: Date())
+        return calendar.dateComponents([.day], from: lastDay, to: today).day
+    }
+
+    /// Lifetime totals — used as a fallback hero on the empty state.
+    var lifetimeTotalSessions: Int { allSessions.count }
+    var lifetimeTotalClimbs: Int { allSessions.flatMap { $0.climbs }.count }
+
+    var lifetimeHardestGrade: String {
+        guard allTimeHighestGradeNumeric >= 0 else { return "—" }
+        return VGrade.label(for: allTimeHighestGradeNumeric)
+    }
+
     // MARK: - Loading
 
     func load() async {
@@ -206,9 +235,12 @@ final class WeekInReviewViewModel {
             let priorStart = priorWeekStart
             let priorEnd = priorWeekEnd
 
-            thisWeekSessions = allSessions.filter { $0.date >= weekStartLocal }
-            priorWeekSessions = allSessions.filter { $0.date >= priorStart && $0.date <= priorEnd }
+            let sessions = allSessions
+            self.allSessions = sessions
+            thisWeekSessions = sessions.filter { $0.date >= weekStartLocal }
+            priorWeekSessions = sessions.filter { $0.date >= priorStart && $0.date <= priorEnd }
             allTimeHighestGradeNumeric = user?.highestGradeNumeric ?? -1
+            displayName = user?.displayName ?? ""
         } catch {
             self.error = error
         }
