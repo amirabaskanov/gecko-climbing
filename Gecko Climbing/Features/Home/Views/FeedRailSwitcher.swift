@@ -47,7 +47,10 @@ struct FeedRailSwitcher: View {
 
         return Button {
             guard selection != rail else { return }
-            withAnimation(.geckoSnappy) {
+            // Soft eased spring so the underline glides instead of snapping —
+            // the rail switch should feel like a small visual settle, not a
+            // selection click.
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.9)) {
                 selection = rail
             }
             AnalyticsService.capture(.feedRailSwitched, properties: ["rail": rail.rawValue])
@@ -55,37 +58,44 @@ struct FeedRailSwitcher: View {
             // Label + underline stack is content-sized (no infinity frames
             // here) so the underline width matches the label width — the
             // outer button claims the full half-width for hit area.
-            VStack(spacing: 8) {
+            VStack(spacing: 6) {
                 ZStack(alignment: .topTrailing) {
                     Text(rail.title)
-                        .font(.system(size: 16, weight: isSelected ? .bold : .semibold, design: .rounded))
-                        .foregroundStyle(isSelected ? Color.primary : Color.geckoSecondaryText)
+                        // Active is full-weight on the foreground color;
+                        // inactive is the same weight but in tertiary so the
+                        // contrast comes from opacity rather than a bright
+                        // accent. Reads as quiet and intentional.
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundStyle(isSelected ? Color.primary : Color.secondary.opacity(0.6))
                         .padding(.horizontal, 2)
 
                     if showDot {
                         Circle()
                             .fill(Color.geckoPrimary)
-                            .frame(width: 6, height: 6)
-                            .offset(x: 8, y: -1)
+                            .frame(width: 5, height: 5)
+                            .offset(x: 7, y: -1)
                             .transition(.scale.combined(with: .opacity))
                     }
                 }
-                .animation(.geckoSnappy, value: showDot)
+                .animation(.easeInOut(duration: 0.2), value: showDot)
 
                 ZStack(alignment: .center) {
                     // Reserve the indicator's vertical space on every tab so
                     // labels don't shift when switching.
-                    Color.clear.frame(height: 3)
+                    Color.clear.frame(height: 2)
 
                     if isSelected {
-                        RoundedRectangle(cornerRadius: 1.5, style: .continuous)
-                            .fill(Color.geckoPrimary)
-                            .frame(height: 3)
+                        // Thin, foreground-tinted bar — same color as the
+                        // active label, so the indicator reads as part of
+                        // the type rather than a brand-color stripe.
+                        Capsule(style: .continuous)
+                            .fill(Color.primary.opacity(0.85))
+                            .frame(height: 2)
                             .matchedGeometryEffect(id: "rail-underline", in: underlineNamespace)
                     }
                 }
             }
-            .padding(.vertical, 8)
+            .padding(.vertical, 10)
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
         }
