@@ -13,6 +13,9 @@ enum AnalyticsEvent: String {
     case climbAdded = "climb_added"
     case commentAdded = "comment_added"
     case commentDeleted = "comment_deleted"
+    case userFollowed = "user_followed"
+    case userUnfollowed = "user_unfollowed"
+    case feedRailSwitched = "feed_rail_switched"
 }
 
 enum AnalyticsService {

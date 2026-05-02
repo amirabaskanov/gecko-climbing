@@ -15,6 +15,7 @@ struct UserDTO: Codable, Identifiable {
     let isPublic: Bool
     let createdAt: Date
     let notificationPrefs: NotificationPrefs
+    let homeGymOverride: String?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -31,6 +32,7 @@ struct UserDTO: Codable, Identifiable {
         case isPublic
         case createdAt
         case notificationPrefs
+        case homeGymOverride
     }
 
     init(
@@ -47,7 +49,8 @@ struct UserDTO: Codable, Identifiable {
         highestGradeNumeric: Int,
         isPublic: Bool,
         createdAt: Date,
-        notificationPrefs: NotificationPrefs = .default
+        notificationPrefs: NotificationPrefs = .default,
+        homeGymOverride: String? = nil
     ) {
         self.id = id
         self.displayName = displayName
@@ -63,6 +66,7 @@ struct UserDTO: Codable, Identifiable {
         self.isPublic = isPublic
         self.createdAt = createdAt
         self.notificationPrefs = notificationPrefs
+        self.homeGymOverride = homeGymOverride
     }
 
     init(from decoder: Decoder) throws {
@@ -81,6 +85,7 @@ struct UserDTO: Codable, Identifiable {
         self.isPublic = try container.decode(Bool.self, forKey: .isPublic)
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.notificationPrefs = try container.decodeIfPresent(NotificationPrefs.self, forKey: .notificationPrefs) ?? .default
+        self.homeGymOverride = try container.decodeIfPresent(String.self, forKey: .homeGymOverride)
     }
 
     func toModel() -> UserModel {
@@ -97,12 +102,13 @@ struct UserDTO: Codable, Identifiable {
             highestGrade: highestGrade,
             highestGradeNumeric: highestGradeNumeric,
             isPublic: isPublic,
-            lastSyncedAt: Date()
+            lastSyncedAt: Date(),
+            homeGymOverride: homeGymOverride
         )
     }
 
     func asDictionary() -> [String: Any] {
-        [
+        var dict: [String: Any] = [
             "displayName": displayName,
             "username": username,
             "bio": bio,
@@ -116,6 +122,10 @@ struct UserDTO: Codable, Identifiable {
             "isPublic": isPublic,
             "createdAt": createdAt
         ]
+        if let homeGymOverride, !homeGymOverride.isEmpty {
+            dict["homeGymOverride"] = homeGymOverride
+        }
+        return dict
     }
 }
 
@@ -134,7 +144,8 @@ extension UserModel {
             highestGrade: highestGrade,
             highestGradeNumeric: highestGradeNumeric,
             isPublic: isPublic,
-            createdAt: lastSyncedAt
+            createdAt: lastSyncedAt,
+            homeGymOverride: homeGymOverride
         )
     }
 }

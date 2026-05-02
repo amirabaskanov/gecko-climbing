@@ -7,6 +7,7 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
     private let authRepository: any AuthRepositoryProtocol
 
     private var usersRef: CollectionReference { db.collection("users") }
+    private var usernamesRef: CollectionReference { db.collection("usernames") }
 
     init(authRepository: any AuthRepositoryProtocol) {
         self.authRepository = authRepository
@@ -30,7 +31,9 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
         let snapshot = try await docRef.getDocument()
 
         if snapshot.exists, let data = snapshot.data() {
-            return decodeUser(from: data, uid: uid)
+            let user = decodeUser(from: data, uid: uid)
+            try? await reserveUsernameForExistingUser(user)
+            return user
         }
 
         // First sign-in — create user document from Firebase Auth profile.
@@ -49,28 +52,23 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
             if let emailLocal, !emailLocal.isEmpty { return emailLocal }
             return "Climber"
         }()
-        let base = displayName
-            .lowercased()
-            .replacingOccurrences(of: " ", with: "_")
-            .filter { $0.isLetter || $0.isNumber || $0 == "_" }
         let suffix = String(uid.prefix(6))
-        let username = "\(base)_\(suffix)"
+        let username = "\(usernameBase(from: displayName))_\(suffix.lowercased())"
 
         let newUser = UserModel(
             uid: uid,
             displayName: displayName,
             username: username
         )
-        let dto = newUser.toDTO()
-        try await docRef.setData(dto.asDictionary())
+        try await createUser(newUser, documentRef: docRef)
         return newUser
     }
 
     // MARK: - Update
 
     func updateUser(_ user: UserModel) async throws {
-        let dto = user.toDTO()
-        try await usersRef.document(user.uid).setData(dto.asDictionary(), merge: true)
+        try validateUsername(user.username)
+        try await runUserUpdateTransaction(user)
     }
 
     // MARK: - Follow / Unfollow
@@ -206,7 +204,147 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
         }
     }
 
+    // MARK: - Suggested climbers
+
+    func suggestedClimbers(excluding excludedUIDs: Set<String>, limit: Int) async throws -> [UserModel] {
+        // Active climbers ranked by sessions logged. Cheap to query (single
+        // index, no joins) and a strong heuristic for "real users worth
+        // following" without needing engagement data we don't yet collect.
+        // Demo accounts and the caller's own uid + follow set are filtered
+        // client-side so we don't burn an extra index per excluded uid.
+        let snapshot = try await usersRef
+            .order(by: "totalSessions", descending: true)
+            .limit(to: limit + excludedUIDs.count + FeedConfig.demoUserIds.count + 1)
+            .getDocuments()
+
+        let allExcluded = excludedUIDs.union(FeedConfig.demoUserIds)
+        return snapshot.documents.compactMap { doc -> UserModel? in
+            guard !allExcluded.contains(doc.documentID) else { return nil }
+            return decodeUser(from: doc.data(), uid: doc.documentID)
+        }
+        .prefix(limit)
+        .map { $0 }
+    }
+
     // MARK: - Private Helpers
+
+    private func createUser(_ user: UserModel, documentRef: DocumentReference) async throws {
+        try validateUsername(user.username)
+        let usernameRef = usernamesRef.document(user.username)
+        let dto = user.toDTO()
+
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            db.runTransaction { transaction, errorPointer in
+                do {
+                    let usernameSnapshot = try transaction.getDocument(usernameRef)
+                    if usernameSnapshot.exists {
+                        throw UserError.usernameTaken
+                    }
+
+                    transaction.setData(dto.asDictionary(), forDocument: documentRef)
+                    transaction.setData([
+                        "uid": user.uid,
+                        "createdAt": FieldValue.serverTimestamp()
+                    ], forDocument: usernameRef)
+                    return nil
+                } catch {
+                    errorPointer?.pointee = error as NSError
+                    return nil
+                }
+            } completion: { _, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
+    }
+
+    private func runUserUpdateTransaction(_ user: UserModel) async throws {
+        let userRef = usersRef.document(user.uid)
+        let newUsernameRef = usernamesRef.document(user.username)
+        let dto = user.toDTO()
+
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            db.runTransaction { transaction, errorPointer in
+                do {
+                    let userSnapshot = try transaction.getDocument(userRef)
+                    let currentUsername = userSnapshot.data()?["username"] as? String ?? ""
+
+                    let newUsernameSnapshot = try transaction.getDocument(newUsernameRef)
+                    if newUsernameSnapshot.exists {
+                        let ownerUID = newUsernameSnapshot.data()?["uid"] as? String
+                        if ownerUID != user.uid {
+                            throw UserError.usernameTaken
+                        }
+                    }
+
+                    if currentUsername != user.username {
+                        if !currentUsername.isEmpty {
+                            let oldUsernameRef = self.usernamesRef.document(currentUsername)
+                            let oldUsernameSnapshot = try transaction.getDocument(oldUsernameRef)
+                            if oldUsernameSnapshot.exists,
+                               oldUsernameSnapshot.data()?["uid"] as? String == user.uid {
+                                transaction.deleteDocument(oldUsernameRef)
+                            }
+                        }
+                    }
+
+                    transaction.setData([
+                        "uid": user.uid,
+                        "createdAt": FieldValue.serverTimestamp()
+                    ], forDocument: newUsernameRef)
+                    transaction.setData(dto.asDictionary(), forDocument: userRef, merge: true)
+                    return nil
+                } catch {
+                    errorPointer?.pointee = error as NSError
+                    return nil
+                }
+            } completion: { _, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
+    }
+
+    private func reserveUsernameForExistingUser(_ user: UserModel) async throws {
+        try validateUsername(user.username)
+        let usernameRef = usernamesRef.document(user.username)
+        let usernameSnapshot = try await usernameRef.getDocument()
+        if usernameSnapshot.exists {
+            let ownerUID = usernameSnapshot.data()?["uid"] as? String
+            if ownerUID != user.uid {
+                throw UserError.usernameTaken
+            }
+            return
+        }
+
+        try await usernameRef.setData([
+            "uid": user.uid,
+            "createdAt": FieldValue.serverTimestamp()
+        ])
+    }
+
+    private func validateUsername(_ username: String) throws {
+        let pattern = #"^[a-z0-9_]{3,20}$"#
+        guard username.range(of: pattern, options: .regularExpression) != nil else {
+            throw UserError.invalidUsername
+        }
+    }
+
+    private func usernameBase(from displayName: String) -> String {
+        let normalized = displayName
+            .lowercased()
+            .replacingOccurrences(of: " ", with: "_")
+            .filter { $0.isASCII && ($0.isLetter || $0.isNumber || $0 == "_") }
+            .trimmingCharacters(in: CharacterSet(charactersIn: "_"))
+
+        return normalized.isEmpty ? "climber" : String(normalized.prefix(13))
+    }
 
     private func decodeUser(from data: [String: Any], uid: String) -> UserModel {
         UserModel(
@@ -222,7 +360,8 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
             highestGrade: data["highestGrade"] as? String ?? "",
             highestGradeNumeric: data["highestGradeNumeric"] as? Int ?? 0,
             isPublic: data["isPublic"] as? Bool ?? true,
-            lastSyncedAt: (data["createdAt"] as? Timestamp)?.dateValue() ?? Date()
+            lastSyncedAt: (data["createdAt"] as? Timestamp)?.dateValue() ?? Date(),
+            homeGymOverride: data["homeGymOverride"] as? String
         )
     }
 

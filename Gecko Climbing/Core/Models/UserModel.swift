@@ -16,6 +16,10 @@ final class UserModel {
     var highestGradeNumeric: Int
     var isPublic: Bool
     var lastSyncedAt: Date
+    /// Manual override for the user's "home gym" — when set, this single gym is
+    /// used for "your gym" feed signals instead of the auto-detected top gyms
+    /// derived from session history. Empty/nil means auto-detect.
+    var homeGymOverride: String?
 
     init(uid: String,
          displayName: String,
@@ -29,7 +33,8 @@ final class UserModel {
          highestGrade: String = "",
          highestGradeNumeric: Int = -1,
          isPublic: Bool = true,
-         lastSyncedAt: Date = Date()) {
+         lastSyncedAt: Date = Date(),
+         homeGymOverride: String? = nil) {
         self.uid = uid
         self.displayName = displayName
         self.username = username
@@ -43,5 +48,6 @@ final class UserModel {
         self.highestGradeNumeric = highestGradeNumeric
         self.isPublic = isPublic
         self.lastSyncedAt = lastSyncedAt
+        self.homeGymOverride = homeGymOverride
     }
 }

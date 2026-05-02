@@ -11,6 +11,11 @@ protocol UserRepositoryProtocol: AnyObject {
     func fetchFollowers(uid: String) async throws -> [UserModel]
     func fetchFollowing(uid: String) async throws -> [UserModel]
     func searchUsers(query: String) async throws -> [UserModel]
+    /// Real climbers to suggest as potential follows. Excludes the current user,
+    /// demo accounts, and (when possible) users already followed.
+    /// Used to populate the "Climbers you might know" carousel injected into
+    /// empty Following feeds and into Discover.
+    func suggestedClimbers(excluding excludedUIDs: Set<String>, limit: Int) async throws -> [UserModel]
     func reconcileFollowCounts(uid: String) async throws
     func fetchNotificationPrefs(for userId: String) async throws -> NotificationPrefs
     func updateNotificationPrefs(_ prefs: NotificationPrefs, for userId: String) async throws
@@ -49,6 +54,9 @@ final class MockUserRepository: UserRepositoryProtocol, @unchecked Sendable {
 
     func updateUser(_ user: UserModel) async throws {
         try await Task.sleep(nanoseconds: 200_000_000)
+        if users.contains(where: { $0.uid != user.uid && $0.username == user.username }) {
+            throw UserError.usernameTaken
+        }
         if let idx = users.firstIndex(where: { $0.uid == user.uid }) {
             users[idx] = user
         }
@@ -92,6 +100,17 @@ final class MockUserRepository: UserRepositoryProtocol, @unchecked Sendable {
             $0.displayName.localizedCaseInsensitiveContains(query) ||
             $0.username.localizedCaseInsensitiveContains(query)
         }.filter { $0.uid != currentUserId }
+    }
+
+    func suggestedClimbers(excluding excludedUIDs: Set<String>, limit: Int) async throws -> [UserModel] {
+        try await Task.sleep(nanoseconds: 200_000_000)
+        return users
+            .filter { $0.uid != currentUserId }
+            .filter { !excludedUIDs.contains($0.uid) }
+            .filter { !FeedConfig.demoUserIds.contains($0.uid) }
+            .sorted { $0.totalSessions > $1.totalSessions }
+            .prefix(limit)
+            .map { $0 }
     }
 
     func reconcileFollowCounts(uid: String) async throws {
@@ -141,5 +160,17 @@ final class MockUserRepository: UserRepositoryProtocol, @unchecked Sendable {
 
 enum UserError: LocalizedError {
     case notFound
-    var errorDescription: String? { "User not found." }
+    case invalidUsername
+    case usernameTaken
+
+    var errorDescription: String? {
+        switch self {
+        case .notFound:
+            return "User not found."
+        case .invalidUsername:
+            return "Usernames must be 3-20 characters and can only use letters, numbers, and underscores."
+        case .usernameTaken:
+            return "That username is already taken."
+        }
+    }
 }

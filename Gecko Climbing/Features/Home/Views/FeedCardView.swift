@@ -3,6 +3,10 @@ import SwiftUI
 struct FeedCardView: View {
     let post: PostModel
     var currentUserId: String = ""
+    /// Contextual badges for this post relative to the local viewer (your gym,
+    /// your level, author's PR). Empty for posts that don't qualify; the
+    /// badge row is hidden in that case so cards without context stay clean.
+    var badges: [FeedBadge] = []
     let onLike: () -> Void
     let onComment: () -> Void
     let onUserTap: () -> Void
@@ -25,7 +29,16 @@ struct FeedCardView: View {
             headerSection
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
-                .padding(.bottom, 12)
+                .padding(.bottom, badges.isEmpty ? 12 : 8)
+
+            // Contextual signal row — only renders when at least one
+            // badge fires. Sits between the user header and photos so the
+            // signal lands the moment the eye reaches the card.
+            if !badges.isEmpty {
+                FeedBadgeRow(badges: badges)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 12)
+            }
 
             // Photos (swipeable, double-tap to like with heart overlay)
             if !photos.isEmpty {
@@ -359,6 +372,10 @@ struct FeedCardView: View {
     FeedCardView(
         post: .preview,
         currentUserId: "preview_user",
+        badges: [
+            .personalBest(grade: "V5"),
+            .yourGym(name: "Movement Denver")
+        ],
         onLike: {},
         onComment: {},
         onUserTap: {}
@@ -372,6 +389,7 @@ struct FeedCardView: View {
     FeedCardView(
         post: .preview,
         currentUserId: "preview_user",
+        badges: [.yourLevel(grade: "V5")],
         onLike: {},
         onComment: {},
         onUserTap: {}
@@ -381,6 +399,58 @@ struct FeedCardView: View {
     .preferredColorScheme(.dark)
 }
 #endif
+
+// MARK: - FeedBadgeRow
+
+/// Compact horizontal chip row shown between a feed card's header and its
+/// content. Each chip is a contextual reason the post matters to the viewer
+/// (e.g. "Your gym", "V5 personal best"). At most ~3 chips per card so the
+/// row stays single-line on standard widths; longer rows scroll horizontally.
+struct FeedBadgeRow: View {
+    let badges: [FeedBadge]
+
+    var body: some View {
+        ScrollView(.horizontal) {
+            HStack(spacing: 6) {
+                ForEach(badges, id: \.self) { badge in
+                    FeedBadgeChip(badge: badge)
+                }
+            }
+        }
+        .scrollIndicators(.hidden)
+        .scrollClipDisabled()
+    }
+}
+
+/// Pill-shaped contextual badge. Tinted by the badge's `tint` color with a
+/// soft fill + matching outline + bold text — distinct enough to read at a
+/// glance, restrained enough to not fight the post content.
+struct FeedBadgeChip: View {
+    let badge: FeedBadge
+
+    var body: some View {
+        HStack(spacing: 5) {
+            Image(systemName: badge.icon)
+                .font(.system(size: 10, weight: .heavy))
+            Text(badge.label)
+                .font(.system(size: 11, weight: .bold, design: .rounded))
+                .lineLimit(1)
+        }
+        .foregroundStyle(badge.tint)
+        .padding(.horizontal, 9)
+        .padding(.vertical, 5)
+        .background(
+            Capsule(style: .continuous)
+                .fill(badge.tint.opacity(0.13))
+        )
+        .overlay(
+            Capsule(style: .continuous)
+                .strokeBorder(badge.tint.opacity(0.30), lineWidth: 1)
+        )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(badge.label)
+    }
+}
 
 /// Diagonal-stripe pattern used to mark attempts vs completed sends.
 struct DiagonalStripes: Shape {

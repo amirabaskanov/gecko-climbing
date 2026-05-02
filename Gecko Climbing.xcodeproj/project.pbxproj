@@ -12,6 +12,7 @@
 		1A7483333D4E1395285CF84B /* FeedbackRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFCFD2EAD0DFCA6B5F175FE /* FeedbackRepository.swift */; };
 		293972122F6DD7250094ED7B /* PostHog in Frameworks */ = {isa = PBXBuildFile; productRef = 293972112F6DD7250094ED7B /* PostHog */; };
 		39656D43252B8C229F59E85F /* WeekInReviewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65A4DD6F9FD0BA0361398AAB /* WeekInReviewViewModel.swift */; };
+		3E8D04A82F6C4B6B8F700101 /* FeedConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E8D04A92F6C4B6B8F700101 /* FeedConfig.swift */; };
 		55804C2FCF62956FC9CD0313 /* Animation+Gecko.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210A18FB1D170D1A318A5D9D /* Animation+Gecko.swift */; };
 		5F742BB5AECF9030F1A5B2D2 /* AnimatedCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF087C0C87D75CC545532A78 /* AnimatedCounter.swift */; };
 		6164F35BD5F28F338841FB15 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7952659A9D0EC939FB359ED /* AnalyticsService.swift */; };
@@ -116,9 +117,18 @@
 		DA2F207D235787713C0B17B4 /* CommentModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA9370EA6F1FE7C0E87273E7 /* CommentModel.swift */; };
 		DD00F101 /* GeckoLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD00F001 /* GeckoLogoView.swift */; };
 		F28FF15DB60F2E83E59F5DA6 /* WeekInReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14054D5E8ADD54268E971351 /* WeekInReviewView.swift */; };
+		7A1B2C3D4E5F6A7B8C9D0E1F /* WeekInReviewShareCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1E2D3C4B5A6F7E8D9C0B1A /* WeekInReviewShareCard.swift */; };
+		8B2C3D4E5F6A7B8C9D0E1F2A /* StatsShareCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F7A8B9C0D1E2F /* StatsShareCard.swift */; };
 		FCDC53FADBE63D6F59D1BE5A /* SessionInsight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F7C51D1DCBA17F7391C88F8 /* SessionInsight.swift */; };
 		FD71D963B30139FE3E88631F /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC94383047E32B70E58063C /* FeedbackView.swift */; };
 		FFD3740A94B2E9425D9A5317 /* CommentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7780164948E9E512E7A7F80F /* CommentsView.swift */; };
+		FE000202 /* FeedRail.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE000102 /* FeedRail.swift */; };
+		FE000203 /* FeedBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE000103 /* FeedBadge.swift */; };
+		FE000204 /* FeedRanker.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE000104 /* FeedRanker.swift */; };
+		FE000205 /* FeedEnricher.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE000105 /* FeedEnricher.swift */; };
+		FE000206 /* FeedViewerContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE000106 /* FeedViewerContext.swift */; };
+		FE000207 /* FeedRailSwitcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE000107 /* FeedRailSwitcher.swift */; };
+		FE000208 /* SuggestedClimbersCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE000108 /* SuggestedClimbersCarousel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -141,8 +151,11 @@
 /* Begin PBXFileReference section */
 		0DC52164E07007813F0BE721 /* CommentsViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CommentsViewModel.swift; sourceTree = "<group>"; };
 		14054D5E8ADD54268E971351 /* WeekInReviewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeekInReviewView.swift; sourceTree = "<group>"; };
+		0F1E2D3C4B5A6F7E8D9C0B1A /* WeekInReviewShareCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeekInReviewShareCard.swift; sourceTree = "<group>"; };
+		1A2B3C4D5E6F7A8B9C0D1E2F /* StatsShareCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StatsShareCard.swift; sourceTree = "<group>"; };
 		210A18FB1D170D1A318A5D9D /* Animation+Gecko.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Animation+Gecko.swift"; sourceTree = "<group>"; };
 		2BD1EBB65F03EABE1DEA6EDC /* FirestoreFeedbackRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FirestoreFeedbackRepository.swift; sourceTree = "<group>"; };
+		3E8D04A92F6C4B6B8F700101 /* FeedConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedConfig.swift; sourceTree = "<group>"; };
 		34D56FBC16636B26129FD496 /* SkeletonView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SkeletonView.swift; sourceTree = "<group>"; };
 		5DFCE518CEAAC010499D7267 /* ConfettiView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConfettiView.swift; sourceTree = "<group>"; };
 		5F7C51D1DCBA17F7391C88F8 /* SessionInsight.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionInsight.swift; sourceTree = "<group>"; };
@@ -249,6 +262,13 @@
 		D7952659A9D0EC939FB359ED /* AnalyticsService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
 		DBFCFD2EAD0DFCA6B5F175FE /* FeedbackRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedbackRepository.swift; sourceTree = "<group>"; };
 		DD00F001 /* GeckoLogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeckoLogoView.swift; sourceTree = "<group>"; };
+		FE000102 /* FeedRail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedRail.swift; sourceTree = "<group>"; };
+		FE000103 /* FeedBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedBadge.swift; sourceTree = "<group>"; };
+		FE000104 /* FeedRanker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedRanker.swift; sourceTree = "<group>"; };
+		FE000105 /* FeedEnricher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedEnricher.swift; sourceTree = "<group>"; };
+		FE000106 /* FeedViewerContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedViewerContext.swift; sourceTree = "<group>"; };
+		FE000107 /* FeedRailSwitcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedRailSwitcher.swift; sourceTree = "<group>"; };
+		FE000108 /* SuggestedClimbersCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedClimbersCarousel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -364,6 +384,7 @@
 			isa = PBXGroup;
 			children = (
 				AA000114 /* AppEnvironment.swift */,
+				3E8D04A92F6C4B6B8F700101 /* FeedConfig.swift */,
 				AA000115 /* AuthRepository.swift */,
 				AA000116 /* SessionRepository.swift */,
 				AA000117 /* ClimbRepository.swift */,
@@ -450,8 +471,29 @@
 			children = (
 				A3000035 /* Views */,
 				A3000036 /* ViewModels */,
+				FE000301 /* Models */,
+				FE000302 /* Services */,
 			);
 			path = Home;
+			sourceTree = "<group>";
+		};
+		FE000301 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				FE000102 /* FeedRail.swift */,
+				FE000103 /* FeedBadge.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		FE000302 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				FE000104 /* FeedRanker.swift */,
+				FE000105 /* FeedEnricher.swift */,
+				FE000106 /* FeedViewerContext.swift */,
+			);
+			path = Services;
 			sourceTree = "<group>";
 		};
 		A3000035 /* Views */ = {
@@ -461,6 +503,8 @@
 				AA000146 /* PostDetailView.swift */,
 				AA000147 /* HomeView.swift */,
 				7780164948E9E512E7A7F80F /* CommentsView.swift */,
+				FE000107 /* FeedRailSwitcher.swift */,
+				FE000108 /* SuggestedClimbersCarousel.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -577,6 +621,8 @@
 				AA000142 /* ProgressChartView.swift */,
 				AA000143 /* StatsView.swift */,
 				14054D5E8ADD54268E971351 /* WeekInReviewView.swift */,
+				0F1E2D3C4B5A6F7E8D9C0B1A /* WeekInReviewShareCard.swift */,
+				1A2B3C4D5E6F7A8B9C0D1E2F /* StatsShareCard.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -930,8 +976,18 @@
 				AA000405 /* NotificationSettingsViewModel.swift in Sources */,
 				AA000406 /* NotificationSettingsView.swift in Sources */,
 				AA000407 /* NotificationPrePromptView.swift in Sources */,
+				3E8D04A82F6C4B6B8F700101 /* FeedConfig.swift in Sources */,
 				F28FF15DB60F2E83E59F5DA6 /* WeekInReviewView.swift in Sources */,
+				7A1B2C3D4E5F6A7B8C9D0E1F /* WeekInReviewShareCard.swift in Sources */,
+				8B2C3D4E5F6A7B8C9D0E1F2A /* StatsShareCard.swift in Sources */,
 				39656D43252B8C229F59E85F /* WeekInReviewViewModel.swift in Sources */,
+				FE000202 /* FeedRail.swift in Sources */,
+				FE000203 /* FeedBadge.swift in Sources */,
+				FE000204 /* FeedRanker.swift in Sources */,
+				FE000205 /* FeedEnricher.swift in Sources */,
+				FE000206 /* FeedViewerContext.swift in Sources */,
+				FE000207 /* FeedRailSwitcher.swift in Sources */,
+				FE000208 /* SuggestedClimbersCarousel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

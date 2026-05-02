@@ -12,13 +12,17 @@ final class FirestorePostRepository: PostRepositoryProtocol, @unchecked Sendable
     }
 
     func fetchFeed(for userId: String) async throws -> [PostModel] {
-        // Fetch posts from users the current user follows, plus their own
+        // Fetch posts from users the current user follows, plus their own.
+        // Demo accounts are filtered client-side as defense in depth — even if
+        // a user follows a demo, the demo's content stays out of the feed.
         let followingSnapshot = try await db.collection("users")
             .document(userId)
             .collection("following")
             .getDocuments()
 
-        var feedUserIds = followingSnapshot.documents.map(\.documentID)
+        var feedUserIds = followingSnapshot.documents
+            .map(\.documentID)
+            .filter { !FeedConfig.demoUserIds.contains($0) }
         feedUserIds.append(userId)
         #if DEBUG
         print("📰 fetchFeed: querying posts for \(feedUserIds.count) users: \(feedUserIds)")
@@ -39,7 +43,32 @@ final class FirestorePostRepository: PostRepositoryProtocol, @unchecked Sendable
             posts += try await decodePosts(from: snapshot.documents, currentUserId: userId)
         }
 
-        return posts.sorted { $0.createdAt > $1.createdAt }
+        return posts
+            .filter { !FeedConfig.demoUserIds.contains($0.userId) }
+            .sorted { $0.createdAt > $1.createdAt }
+    }
+
+    func fetchDiscover(for userId: String) async throws -> [PostModel] {
+        // Public, recent posts excluding the viewer's own posts and demo accounts.
+        // We over-fetch within a recent window and let `FeedRanker` do the final
+        // sort client-side — the ranking signals (engagement, gym match, grade
+        // proximity) live in the viewer's local context, not in Firestore.
+        let cutoff = Date().addingTimeInterval(-Double(FeedConfig.discoverWindowDays) * 86_400)
+
+        let snapshot = try await postsRef
+            .whereField("createdAt", isGreaterThanOrEqualTo: cutoff)
+            .order(by: "createdAt", descending: true)
+            .limit(to: FeedConfig.discoverFetchLimit)
+            .getDocuments()
+
+        #if DEBUG
+        print("📰 fetchDiscover: got \(snapshot.documents.count) recent posts")
+        #endif
+
+        let posts = try await decodePosts(from: snapshot.documents, currentUserId: userId)
+        return posts
+            .filter { $0.userId != userId }
+            .filter { !FeedConfig.demoUserIds.contains($0.userId) }
     }
 
     func createPost(_ post: PostModel) async throws {

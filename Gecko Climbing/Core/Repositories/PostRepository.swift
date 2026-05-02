@@ -3,6 +3,10 @@ import Foundation
 // MARK: - Protocol
 protocol PostRepositoryProtocol: AnyObject {
     func fetchFeed(for userId: String) async throws -> [PostModel]
+    /// Public, recent posts for the Discover rail. Implementations exclude
+    /// `FeedConfig.demoUserIds` and any posts older than the discover window.
+    /// Ordering and final ranking happen client-side via `FeedRanker`.
+    func fetchDiscover(for userId: String) async throws -> [PostModel]
     func createPost(_ post: PostModel) async throws
     func likePost(_ postId: String, userId: String) async throws
     func unlikePost(_ postId: String, userId: String) async throws
@@ -29,7 +33,24 @@ final class MockPostRepository: PostRepositoryProtocol, @unchecked Sendable {
     func fetchFeed(for userId: String) async throws -> [PostModel] {
         try await Task.sleep(nanoseconds: 400_000_000)
         return posts
+            .filter { !FeedConfig.demoUserIds.contains($0.userId) }
             .sorted { $0.createdAt > $1.createdAt }
+            .map { post in
+                let p = post
+                p.isLikedByCurrentUser = likedPostIds.contains(p.postId)
+                return p
+            }
+    }
+
+    func fetchDiscover(for userId: String) async throws -> [PostModel] {
+        try await Task.sleep(nanoseconds: 400_000_000)
+        let cutoff = Date().addingTimeInterval(-Double(FeedConfig.discoverWindowDays) * 86_400)
+        return posts
+            .filter { !FeedConfig.demoUserIds.contains($0.userId) }
+            .filter { $0.createdAt >= cutoff }
+            .filter { $0.userId != userId }
+            .sorted { $0.createdAt > $1.createdAt }
+            .prefix(FeedConfig.discoverFetchLimit)
             .map { post in
                 let p = post
                 p.isLikedByCurrentUser = likedPostIds.contains(p.postId)
