@@ -80,10 +80,11 @@ final class SessionDetailViewModel {
         }
     }
 
-    func updateSessionDetails(gymName: String, notes: String, date: Date) async {
+    func updateSessionDetails(gymName: String, notes: String, date: Date, durationMinutes: Int) async {
         session.gymName = gymName
         session.notes = notes
         session.date = date
+        session.durationMinutes = max(0, durationMinutes)
         do {
             try await sessionRepository.updateSession(session)
         } catch {

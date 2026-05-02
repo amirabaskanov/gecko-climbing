@@ -102,7 +102,12 @@ final class NewSessionViewModel {
         }
         isLoading = true
 
-        let finalDuration = elapsedMinutes > 0 ? elapsedMinutes : totalDurationMinutes
+        // The post-session form pre-fills its duration picker with the elapsed
+        // timer value, so an untouched form already saves the timer reading.
+        // Trust the form value as the user's final say — they may have been
+        // climbing before opening the app or want to correct what the timer
+        // captured. Fall back to the elapsed time only if the picker is zero.
+        let finalDuration = totalDurationMinutes > 0 ? totalDurationMinutes : elapsedMinutes
 
         let session = SessionModel(
             userId: userId,

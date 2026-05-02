@@ -75,8 +75,9 @@ struct SessionDetailView: View {
                     gymName: vm.session.gymName,
                     notes: vm.session.notes,
                     date: vm.session.date,
-                    onSave: { gymName, notes, date in
-                        Task { await vm.updateSessionDetails(gymName: gymName, notes: notes, date: date) }
+                    durationMinutes: vm.session.durationMinutes,
+                    onSave: { gymName, notes, date, duration in
+                        Task { await vm.updateSessionDetails(gymName: gymName, notes: notes, date: date, durationMinutes: duration) }
                     },
                     onDelete: {
                         Task {
@@ -330,21 +331,34 @@ struct EditSessionSheet: View {
     @State private var gymName: String
     @State private var notes: String
     @State private var date: Date
+    @State private var durationHours: Int
+    @State private var durationMinutes: Int
     @State private var showDatePicker = false
     @State private var showDeleteConfirmation = false
-    let onSave: (String, String, Date) -> Void
+    let onSave: (String, String, Date, Int) -> Void
     var onDelete: (() -> Void)?
 
-    init(gymName: String, notes: String, date: Date, onSave: @escaping (String, String, Date) -> Void, onDelete: (() -> Void)? = nil) {
+    init(gymName: String,
+         notes: String,
+         date: Date,
+         durationMinutes: Int,
+         onSave: @escaping (String, String, Date, Int) -> Void,
+         onDelete: (() -> Void)? = nil) {
         _gymName = State(initialValue: gymName)
         _notes = State(initialValue: notes)
         _date = State(initialValue: date)
+        _durationHours = State(initialValue: durationMinutes / 60)
+        _durationMinutes = State(initialValue: durationMinutes % 60)
         self.onSave = onSave
         self.onDelete = onDelete
     }
 
     private var canSave: Bool {
         !gymName.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    private var totalDurationMinutes: Int {
+        durationHours * 60 + durationMinutes
     }
 
     var body: some View {
@@ -385,6 +399,42 @@ struct EditSessionSheet: View {
                             .padding(.vertical, 10)
                             .background(Color.geckoInputBackground)
                             .clipShape(RoundedRectangle(cornerRadius: 14))
+                    }
+
+                    // Duration
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Duration")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                        HStack(spacing: 12) {
+                            HStack(spacing: 4) {
+                                Picker("Hours", selection: $durationHours) {
+                                    ForEach(0..<13) { Text("\($0)").tag($0) }
+                                }
+                                .pickerStyle(.wheel)
+                                .frame(width: 70, height: 100)
+                                .clipped()
+                                Text("h")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(.secondary)
+                            }
+                            HStack(spacing: 4) {
+                                Picker("Minutes", selection: $durationMinutes) {
+                                    ForEach(0..<60) { Text("\($0)").tag($0) }
+                                }
+                                .pickerStyle(.wheel)
+                                .frame(width: 70, height: 100)
+                                .clipped()
+                                Text("m")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 4)
+                        .background(Color.geckoInputBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
 
                     // Notes
@@ -438,7 +488,7 @@ struct EditSessionSheet: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        onSave(gymName, notes, date)
+                        onSave(gymName, notes, date, totalDurationMinutes)
                         dismiss()
                     }
                     .fontWeight(.semibold)
