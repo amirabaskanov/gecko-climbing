@@ -100,11 +100,12 @@ struct GradeBadge: View {
 
     private var numeric: Int { VGrade.numeric(for: grade) }
     private var color: Color { isCompleted ? Color.gradeColor(for: numeric) : Color.geckoSecondaryText }
+    private var onColor: Color { isCompleted ? VGrade.textColor(for: numeric) : .white }
 
     var body: some View {
         Text(grade)
             .font(size.font)
-            .foregroundStyle(.white)
+            .foregroundStyle(onColor)
             .padding(size.padding)
             .background(
                 RoundedRectangle(cornerRadius: 20)

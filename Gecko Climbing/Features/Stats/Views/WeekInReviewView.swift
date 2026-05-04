@@ -14,7 +14,12 @@ struct WeekInReviewView: View {
             .background(backgroundGradient)
             .navigationTitle("Week in Review")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(.hidden, for: .navigationBar)
+            // Materialize the bar when scrolling so cards don't bleed under
+            // the title and back button. iOS's default automatic background
+            // resolves to a translucent material once content scrolls under,
+            // which is exactly what we want here.
+            .toolbarBackground(.automatic, for: .navigationBar)
+            .toolbarBackground(Color.geckoBackground, for: .navigationBar)
             .errorAlert(error: Binding(
                 get: { viewModel?.error },
                 set: { viewModel?.error = $0 }

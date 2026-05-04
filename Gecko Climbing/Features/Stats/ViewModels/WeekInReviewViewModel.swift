@@ -95,17 +95,18 @@ final class WeekInReviewViewModel {
         Set(thisWeekSessions.map { calendar.startOfDay(for: $0.date) })
     }
 
-    /// Returns 7 dates (Mon→Sun of *current* calendar week of today). For the dot row.
-    /// Note: we anchor on the user's actual locale-week to read naturally.
+    /// Returns the seven start-of-day dates that make up the rolling 7-day
+    /// window ending today. Matches `weekStart` exactly so the day-dot row
+    /// can correctly highlight every session inside the window.
+    ///
+    /// Previous behaviour used the locale's calendar week (Mon→Sun of today),
+    /// which silently disagreed with `daysClimbedThisWeek` whenever the
+    /// rolling window crossed a week boundary, resulting in genuine
+    /// climb-days rendering as un-lit dots.
     var weekDays: [Date] {
-        let today = calendar.startOfDay(for: Date())
-        let weekday = calendar.component(.weekday, from: today) // 1=Sun..7=Sat
-        // Shift so Monday is index 0 (1=Sun → 6, 2=Mon → 0, ...)
-        let offsetFromMonday = (weekday + 5) % 7
-        guard let monday = calendar.date(byAdding: .day, value: -offsetFromMonday, to: today) else {
-            return []
+        (0..<7).compactMap { offset in
+            calendar.date(byAdding: .day, value: offset, to: weekStart)
         }
-        return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: monday) }
     }
 
     /// "Your wheelhouse": the V-grade you sent the most this week, with count.

@@ -231,16 +231,17 @@ struct SessionRowView: View {
     private func gradeChip(grade: String, numeric: Int, outcome: ClimbOutcome, count: Int) -> some View {
         let color = Color.gradeColor(for: numeric)
         let isAttempt = outcome == .attempt
+        let onColor = VGrade.textColor(for: numeric)
 
         HStack(spacing: 4) {
             Text(grade)
                 .font(.system(size: 12, weight: .bold, design: .rounded))
-                .foregroundStyle(isAttempt ? color : .white)
+                .foregroundStyle(isAttempt ? color : onColor)
 
             if count > 1 {
                 Text("\u{00D7}\(count)")
                     .font(.system(size: 10, weight: .bold, design: .rounded))
-                    .foregroundStyle((isAttempt ? color : .white).opacity(0.8))
+                    .foregroundStyle((isAttempt ? color : onColor).opacity(0.8))
             }
         }
         .padding(.horizontal, 10)
