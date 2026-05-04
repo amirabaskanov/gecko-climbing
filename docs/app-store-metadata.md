@@ -52,8 +52,8 @@ Welcome to Gecko Climbing! Start tracking your bouldering sessions today.
 This app requires a user account to function. A demo account is provided for review purposes.
 
 Demo credentials:
-- Email: demo123@gmail.com
-- Password: [FILL IN YOUR DEMO ACCOUNT PASSWORD]
+- Email: demo@trygecko.app
+- Password: GeckoReview2026!
 
 The app uses Firebase for authentication and data storage, and PostHog for anonymous product analytics.
 
