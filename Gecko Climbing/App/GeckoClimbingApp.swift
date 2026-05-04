@@ -36,7 +36,19 @@ struct GeckoClimbingApp: App {
                      UserModel.self,
                      PostModel.self
             )
-            let env = AppEnvironment()
+            // Screenshot mode swaps Firebase wiring for in-memory mocks loaded
+            // with rich seed data — used to capture App Store / marketing
+            // screenshots without polluting production Firestore.
+            let env: AppEnvironment
+            #if DEBUG
+            if AppEnvironment.isScreenshotMode {
+                env = MainActor.assumeIsolated { AppEnvironment.screenshotMode }
+            } else {
+                env = AppEnvironment()
+            }
+            #else
+            env = AppEnvironment()
+            #endif
             let auth = AuthViewModel(authRepository: env.authRepository)
             let service = NotificationService(
                 userRepository: env.userRepository,

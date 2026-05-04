@@ -139,13 +139,14 @@ struct FeedCardView: View {
 
             // Top send badge
             if !post.topGrade.isEmpty {
+                let textColor = VGrade.textColor(for: post.topGradeNumeric)
                 VStack(spacing: 2) {
                     Text(post.topGrade)
                         .font(.system(size: 20, weight: .black, design: .rounded))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(textColor)
                     Text("TOP SEND")
                         .font(.system(size: 7, weight: .bold))
-                        .foregroundStyle(.white.opacity(0.85))
+                        .foregroundStyle(textColor.opacity(0.85))
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
@@ -159,24 +160,35 @@ struct FeedCardView: View {
     private var photoSection: some View {
         TabView(selection: $currentPhotoIndex) {
             ForEach(Array(photos.enumerated()), id: \.offset) { index, url in
-                AsyncImage(url: URL(string: url)) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image
+                Group {
+                    if let bundleImage = Image.bundled(from: url) {
+                        bundleImage
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                             .frame(maxWidth: .infinity)
                             .frame(height: 280)
                             .clipped()
-                    case .failure:
-                        photoPlaceholder
-                    case .empty:
-                        ProgressView()
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 280)
-                            .background(Color.geckoInputBackground)
-                    @unknown default:
-                        photoPlaceholder
+                    } else {
+                        AsyncImage(url: URL(string: url)) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 280)
+                                    .clipped()
+                            case .failure:
+                                photoPlaceholder
+                            case .empty:
+                                ProgressView()
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 280)
+                                    .background(Color.geckoInputBackground)
+                            @unknown default:
+                                photoPlaceholder
+                            }
+                        }
                     }
                 }
                 .tag(index)

@@ -1,11 +1,26 @@
 import SwiftUI
 
+extension Image {
+    /// `bundle:asset-name` URLs are an in-app convention for screenshot-mode
+    /// mocks: instead of fetching a Firebase Storage HTTPS URL, render an
+    /// image bundled in the app's asset catalog. Returns nil for normal URLs.
+    static func bundled(from urlString: String?) -> Image? {
+        guard let urlString, urlString.hasPrefix("bundle:") else { return nil }
+        let name = String(urlString.dropFirst("bundle:".count))
+        return Image(name)
+    }
+}
+
 struct AsyncImageView: View {
     let url: String?
     var contentMode: ContentMode = .fill
 
     var body: some View {
-        if let urlString = url, let imageURL = URL(string: urlString) {
+        if let bundleImage = Image.bundled(from: url) {
+            bundleImage
+                .resizable()
+                .aspectRatio(contentMode: contentMode)
+        } else if let urlString = url, let imageURL = URL(string: urlString) {
             AsyncImage(url: imageURL) { phase in
                 switch phase {
                 case .success(let image):
@@ -51,7 +66,9 @@ struct AvatarView: View {
 
     var body: some View {
         Group {
-            if let urlString = url, !urlString.isEmpty, let imageURL = URL(string: urlString) {
+            if let bundleImage = Image.bundled(from: url) {
+                bundleImage.resizable().aspectRatio(contentMode: .fill)
+            } else if let urlString = url, !urlString.isEmpty, let imageURL = URL(string: urlString) {
                 AsyncImage(url: imageURL) { phase in
                     switch phase {
                     case .success(let image):

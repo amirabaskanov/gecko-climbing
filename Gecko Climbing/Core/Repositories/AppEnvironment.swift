@@ -33,11 +33,15 @@ final class AppEnvironment {
     }
 
     #if DEBUG
-    /// Private mock initializer used by `.preview`. Wires up mock repositories
-    /// pre-authenticated as a fake user so preview screens render real data
-    /// paths without hitting Firebase.
-    private init(previewMarker: Void) {
-        let mockAuth = MockAuthRepository.previewAuthenticated()
+    /// Private mock initializer used by `.preview` and `.screenshotMode`. Wires
+    /// up mock repositories pre-authenticated as the given user so preview
+    /// screens (and screenshot-mode runs) render real data paths without
+    /// hitting Firebase.
+    private init(mockCurrentUserId: String, mockDisplayName: String) {
+        let mockAuth = MockAuthRepository.previewAuthenticated(
+            userId: mockCurrentUserId,
+            displayName: mockDisplayName
+        )
         authRepository = mockAuth
         sessionRepository = MockSessionRepository(currentUserId: mockAuth.currentUserId)
         climbRepository = MockClimbRepository()
@@ -51,7 +55,23 @@ final class AppEnvironment {
     /// each call returns an independent instance with fresh seed data.
     @MainActor
     static var preview: AppEnvironment {
-        AppEnvironment(previewMarker: ())
+        AppEnvironment(mockCurrentUserId: "preview_user", mockDisplayName: "Preview Climber")
+    }
+
+    /// Screenshot-mode environment for App Store / marketing captures. Boots
+    /// the running app with rich seed data (Kai Mendez's account + 4 follower
+    /// climbers, photos, sessions, comments). Activated at launch via the
+    /// `-screenshotMode YES` argument — see `GeckoClimbingApp.init`.
+    @MainActor
+    static var screenshotMode: AppEnvironment {
+        AppEnvironment(mockCurrentUserId: MockSeed.kaiUserId, mockDisplayName: MockSeed.kaiDisplayName)
+    }
+
+    /// True when the process was launched with `-screenshotMode YES` (Xcode
+    /// scheme arg or `xcrun simctl launch ... -screenshotMode YES`). Inspected
+    /// at app boot to decide whether to wire mock repositories.
+    static var isScreenshotMode: Bool {
+        ProcessInfo.processInfo.arguments.contains("-screenshotMode")
     }
 
     /// Convenience: a matching `AuthViewModel` already authenticated for the
@@ -62,3 +82,73 @@ final class AppEnvironment {
     }
     #endif
 }
+
+#if DEBUG
+// MARK: - Mock Seed Constants
+
+/// Centralised cast and constants for screenshot-mode / SwiftUI-preview seed
+/// data. The Mock repositories pull from here so the same Kai/Riley/Maya/
+/// Jordan/Sam identities show up consistently in users, posts, comments,
+/// follows, and sessions.
+enum MockSeed {
+
+    // MARK: - The cast
+
+    static let kaiUserId = "kai_mendez"
+    static let kaiDisplayName = "Kai Mendez"
+
+    static let rileyUserId = "riley_brooks"
+    static let rileyDisplayName = "Riley Brooks"
+
+    static let mayaUserId = "maya_tanaka"
+    static let mayaDisplayName = "Maya Tanaka"
+
+    static let jordanUserId = "jordan_reyes"
+    static let jordanDisplayName = "Jordan Reyes"
+
+    static let marcoUserId = "marco_park"
+    static let marcoDisplayName = "Marco Park"
+
+    static let naomiUserId = "naomi_cole"
+    static let naomiDisplayName = "Naomi Cole"
+
+    // MARK: - Bundle photo refs (resolved by `Image.bundled(from:)`)
+
+    static let kaiAvatar = "bundle:kai-avatar"
+    static let climbIndoorMale1 = "bundle:climb-indoor-male-1"
+    static let climbIndoorMale2 = "bundle:climb-indoor-male-2"
+    static let climbIndoorFemale1 = "bundle:climb-indoor-female-1"
+    static let climbOutdoorFemale = "bundle:climb-outdoor-female"
+    static let climbOutdoorMale = "bundle:climb-outdoor-male"
+    static let gymCRGHarvard = "bundle:gym-crg-harvard"
+    static let gymHollywood = "bundle:gym-hollywood"
+
+    // MARK: - Cast lookup
+
+    /// Display name for a given mock user ID. Used by post/comment seeders so
+    /// denormalized author fields stay in sync with `UserModel.displayName`.
+    static func displayName(for userId: String) -> String {
+        switch userId {
+        case kaiUserId: return kaiDisplayName
+        case rileyUserId: return rileyDisplayName
+        case mayaUserId: return mayaDisplayName
+        case jordanUserId: return jordanDisplayName
+        case marcoUserId: return marcoDisplayName
+        case naomiUserId: return naomiDisplayName
+        default: return ""
+        }
+    }
+
+    /// Profile image URL (bundle ref) for a given mock user. Three of the six
+    /// climbers have photos; Maya, Jordan, and Naomi fall through to initials
+    /// avatars so the cast feels real (not everyone sets a profile photo).
+    static func avatarURL(for userId: String) -> String {
+        switch userId {
+        case kaiUserId: return kaiAvatar
+        case rileyUserId: return climbIndoorFemale1
+        case marcoUserId: return climbOutdoorMale
+        default: return ""
+        }
+    }
+}
+#endif
