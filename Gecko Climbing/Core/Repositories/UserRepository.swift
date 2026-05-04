@@ -32,6 +32,17 @@ final class MockUserRepository: UserRepositoryProtocol, @unchecked Sendable {
     init(currentUserId: String) {
         self.currentUserId = currentUserId
         self.users = Self.makeSeedUsers(currentUserId: currentUserId)
+        // Pre-seed Kai following the rest of the cast so the Following feed
+        // is populated on first launch in screenshot mode.
+        if currentUserId == MockSeed.kaiUserId {
+            followingSet = [
+                MockSeed.rileyUserId,
+                MockSeed.mayaUserId,
+                MockSeed.jordanUserId,
+                MockSeed.marcoUserId,
+                MockSeed.naomiUserId
+            ]
+        }
     }
 
     func fetchUser(uid: String) async throws -> UserModel {
@@ -134,27 +145,115 @@ final class MockUserRepository: UserRepositoryProtocol, @unchecked Sendable {
     func updateTimeZone(_ identifier: String, for userId: String) async throws {}
 
     private static func makeSeedUsers(currentUserId: String) -> [UserModel] {
-        let seedUsers: [(String, String, String, Int, Int, String, Int)] = [
-            (currentUserId, "Alex Stone", "alex_stone", 5, 24, "V6", 6),
-            ("friend_1", "Sam Rocks", "sam_rocks", 12, 8, "V8", 8),
-            ("friend_2", "Jordan Peak", "jordan_peak", 3, 15, "V5", 5),
-            ("friend_3", "Casey Wall", "casey_wall", 27, 5, "V10", 10),
-            ("friend_4", "Morgan Crimp", "morgan_crimp", 8, 20, "V7", 7)
-        ]
-        return seedUsers.map { uid, name, username, followers, following, grade, gradeNum in
-            UserModel(
-                uid: uid,
-                displayName: name,
-                username: username,
-                bio: "Climbing since \(2018 + Int.random(in: 0...5))",
-                followersCount: followers,
-                followingCount: following,
-                totalSessions: Int.random(in: 10...80),
-                totalClimbs: Int.random(in: 50...500),
-                highestGrade: grade,
-                highestGradeNumeric: gradeNum
+        // When running in screenshot mode the current user is Kai; otherwise
+        // (regular SwiftUI previews) it's a generic preview user. Either way,
+        // the rest of the cast stays the same so previews still look rich.
+        let isKai = currentUserId == MockSeed.kaiUserId
+
+        let kai = UserModel(
+            uid: isKai ? currentUserId : MockSeed.kaiUserId,
+            displayName: MockSeed.kaiDisplayName,
+            username: "kaisends",
+            bio: "SF · Dogpatch regular · projecting V8",
+            profileImageURL: MockSeed.kaiAvatar,
+            followersCount: 142,
+            followingCount: 96,
+            totalSessions: 38,
+            totalClimbs: 240,
+            highestGrade: "V7",
+            highestGradeNumeric: 7
+        )
+
+        let riley = UserModel(
+            uid: MockSeed.rileyUserId,
+            displayName: MockSeed.rileyDisplayName,
+            username: "rileybrooks",
+            bio: "LA · Hollywood Boulders · learning to trust my feet",
+            profileImageURL: MockSeed.climbIndoorFemale1,
+            followersCount: 198,
+            followingCount: 124,
+            totalSessions: 78,
+            totalClimbs: 401,
+            highestGrade: "V6",
+            highestGradeNumeric: 6
+        )
+
+        let maya = UserModel(
+            uid: MockSeed.mayaUserId,
+            displayName: MockSeed.mayaDisplayName,
+            username: "mayatanaka",
+            bio: "5 months in. Falling on V3s. Loving every minute.",
+            followersCount: 67,
+            followingCount: 92,
+            totalSessions: 22,
+            totalClimbs: 98,
+            highestGrade: "V3",
+            highestGradeNumeric: 3
+        )
+
+        let jordan = UserModel(
+            uid: MockSeed.jordanUserId,
+            displayName: MockSeed.jordanDisplayName,
+            username: "jordanreyes",
+            bio: "Boulder, CO · The Spot · here for the send energy",
+            followersCount: 89,
+            followingCount: 71,
+            totalSessions: 41,
+            totalClimbs: 187,
+            highestGrade: "V4",
+            highestGradeNumeric: 4
+        )
+
+        let marco = UserModel(
+            uid: MockSeed.marcoUserId,
+            displayName: MockSeed.marcoDisplayName,
+            username: "marcopark",
+            bio: "Bay Area. Prefers overhangs. Slabs respectfully.",
+            profileImageURL: MockSeed.climbOutdoorMale,
+            followersCount: 113,
+            followingCount: 138,
+            totalSessions: 52,
+            totalClimbs: 246,
+            highestGrade: "V5",
+            highestGradeNumeric: 5
+        )
+
+        let naomi = UserModel(
+            uid: MockSeed.naomiUserId,
+            displayName: MockSeed.naomiDisplayName,
+            username: "naomicole",
+            bio: "Boston. CRG Harvard. Currently siege-training V8.",
+            followersCount: 264,
+            followingCount: 81,
+            totalSessions: 96,
+            totalClimbs: 524,
+            highestGrade: "V7",
+            highestGradeNumeric: 7
+        )
+
+        var users = [kai, riley, maya, jordan, marco, naomi]
+
+        // If the current user isn't Kai (e.g. SwiftUI preview), prepend a
+        // generic stub so `fetchCurrentUser()` resolves.
+        if !isKai {
+            users.insert(
+                UserModel(
+                    uid: currentUserId,
+                    displayName: "Preview Climber",
+                    username: "preview_climber",
+                    bio: "Preview environment user",
+                    followersCount: 5,
+                    followingCount: 12,
+                    totalSessions: 8,
+                    totalClimbs: 34,
+                    highestGrade: "V4",
+                    highestGradeNumeric: 4
+                ),
+                at: 0
             )
         }
+
+        return users
     }
 }
 
