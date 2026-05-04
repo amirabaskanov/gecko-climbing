@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "climb-outdoor-male.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

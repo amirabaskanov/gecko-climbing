@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "gym-crg-harvard.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
