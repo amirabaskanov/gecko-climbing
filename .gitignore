@@ -24,6 +24,7 @@ Pods/
 
 # Tool configs
 .xcodebuildmcp/
+.netlify/
 
 # Secrets / keys
 *.plist.bak
@@ -37,6 +38,7 @@ serviceAccountKey*.json
 
 # Local scratch / preview files
 color-preview.html
+firebase-debug.log
 
 # Claude Code
 .claude/
