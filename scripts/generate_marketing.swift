@@ -59,8 +59,8 @@ struct MarketingSpec {
 let specs: [MarketingSpec] = [
     MarketingSpec(
         inputFilename: "01-flagship.jpg",
-        outputFilename: "01-track-every-send.png",
-        tagline: "Every send\ntells a story."
+        outputFilename: "01-train-smarter.png",
+        tagline: "Train smarter,\nclimb higher."
     ),
     MarketingSpec(
         inputFilename: "02-sessions.jpg",
