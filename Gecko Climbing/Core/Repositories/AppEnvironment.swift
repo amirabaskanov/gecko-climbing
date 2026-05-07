@@ -83,13 +83,17 @@ final class AppEnvironment {
     #endif
 }
 
-#if DEBUG
 // MARK: - Mock Seed Constants
 
 /// Centralised cast and constants for screenshot-mode / SwiftUI-preview seed
 /// data. The Mock repositories pull from here so the same Kai/Riley/Maya/
 /// Jordan/Sam identities show up consistently in users, posts, comments,
 /// follows, and sessions.
+///
+/// Available in Release builds because the Mock repository implementations
+/// (which reference these constants) are not themselves DEBUG-gated. The
+/// constants are inert string identifiers — no security or size cost from
+/// shipping them.
 enum MockSeed {
 
     // MARK: - The cast
@@ -151,4 +155,3 @@ enum MockSeed {
         }
     }
 }
-#endif
