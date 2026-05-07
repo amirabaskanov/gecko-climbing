@@ -58,27 +58,27 @@ struct MarketingSpec {
 
 let specs: [MarketingSpec] = [
     MarketingSpec(
-        inputFilename: "01-flagship.jpg",
+        inputFilename: "01-flagship.png",
         outputFilename: "01-train-smarter.png",
         tagline: "Train smarter,\nclimb higher."
     ),
     MarketingSpec(
-        inputFilename: "02-sessions.jpg",
+        inputFilename: "02-sessions.png",
         outputFilename: "02-track-every-climb.png",
         tagline: "Track every climb,\nfrom V0 to project."
     ),
     MarketingSpec(
-        inputFilename: "03-stats.jpg",
+        inputFilename: "03-stats.png",
         outputFilename: "03-watch-progress.png",
         tagline: "Watch your progress\ntake shape."
     ),
     MarketingSpec(
-        inputFilename: "04-week-in-review.jpg",
+        inputFilename: "04-week-in-review.png",
         outputFilename: "04-week-recap.png",
         tagline: "Your week in\nclimbing, recapped."
     ),
     MarketingSpec(
-        inputFilename: "05-discover.jpg",
+        inputFilename: "05-discover.png",
         outputFilename: "05-crew-sending.png",
         tagline: "See what your crew\nis sending."
     )
@@ -208,7 +208,7 @@ func render(spec: MarketingSpec, inputDir: String, outputDir: String) {
 @MainActor
 func main() {
     let repoRoot = "/Users/amir/Desktop/Gecko Climbing"
-    let inputDir = "\(repoRoot)/docs/screenshots/marketing-input"
+    let inputDir = "\(repoRoot)/docs/screenshots/marketing-input-hires"
     let outputDir = "\(repoRoot)/docs/screenshots/marketing"
 
     try? FileManager.default.createDirectory(
