@@ -24,6 +24,8 @@ struct FeedCardView: View {
     @State private var captionExpanded = false
     @State private var showReportDialog = false
     @State private var showBlockDialog = false
+    @State private var reportSubmitted = false
+    @State private var didBlock = false
 
     private var canModerate: Bool {
         post.userId != currentUserId && (onReport != nil || onBlock != nil)
@@ -186,7 +188,7 @@ struct FeedCardView: View {
                 Button(role: .destructive) {
                     showBlockDialog = true
                 } label: {
-                    Label("Block @\(post.userDisplayName)", systemImage: "hand.raised")
+                    Label("Block \(post.userDisplayName)", systemImage: "hand.raised")
                 }
             }
         } label: {
@@ -204,22 +206,30 @@ struct FeedCardView: View {
             titleVisibility: .visible
         ) {
             ForEach(ReportModel.Reason.allCases) { reason in
-                Button(reason.rawValue) { onReport?(reason) }
+                Button(reason.rawValue) {
+                    onReport?(reason)
+                    reportSubmitted.toggle()
+                }
             }
             Button("Cancel", role: .cancel) { }
         } message: {
-            Text("Tell us what's going on. We review reports within 24 hours.")
+            Text("Tell us what's going on. Our team will review this.")
         }
         .confirmationDialog(
-            "Block @\(post.userDisplayName)?",
+            "Block \(post.userDisplayName)?",
             isPresented: $showBlockDialog,
             titleVisibility: .visible
         ) {
-            Button("Block", role: .destructive) { onBlock?() }
+            Button("Block", role: .destructive) {
+                onBlock?()
+                didBlock.toggle()
+            }
             Button("Cancel", role: .cancel) { }
         } message: {
             Text("You won't see their posts. They won't see yours. You can unblock anyone later in Settings.")
         }
+        .sensoryFeedback(.success, trigger: reportSubmitted)
+        .sensoryFeedback(.impact(weight: .medium), trigger: didBlock)
     }
 
     // MARK: - Photos
