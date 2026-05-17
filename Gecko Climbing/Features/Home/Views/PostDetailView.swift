@@ -3,10 +3,12 @@ import SwiftUI
 struct PostDetailView: View {
     @Environment(AppEnvironment.self) private var appEnv
     @Environment(AuthViewModel.self) private var authViewModel
+    @Environment(\.dismiss) private var dismiss
     let postId: String
     @State private var post: PostModel?
     @State private var didFailToLoad = false
     @State private var showComments = false
+    @State private var error: Error?
 
     /// Preloaded path — the post is already in hand (e.g. tapped from the
     /// feed), so the view renders instantly with no fetch.
@@ -41,6 +43,7 @@ struct PostDetailView: View {
         .background(Color.geckoBackground)
         .navigationTitle("Post")
         .navigationBarTitleDisplayMode(.inline)
+        .errorAlert(error: $error)
         .task {
             guard post == nil else { return }
             post = try? await appEnv.postRepository.fetchPost(postId: postId)
@@ -57,7 +60,9 @@ struct PostDetailView: View {
                     currentUserId: authViewModel.currentUserId,
                     onLike: {},
                     onComment: { showComments = true },
-                    onUserTap: {}
+                    onUserTap: {},
+                    onReport: { reason in Task { await submitReport(reason, for: post) } },
+                    onBlock: { Task { await blockAuthor(of: post) } }
                 )
                 .padding(.horizontal)
             }
@@ -74,6 +79,37 @@ struct PostDetailView: View {
             ))
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.hidden)
+        }
+    }
+
+    // MARK: - Moderation (App Store Guideline 1.2)
+
+    private func submitReport(_ reason: ReportModel.Reason, for post: PostModel) async {
+        let report = ReportModel(
+            reporterUserId: authViewModel.currentUserId,
+            targetType: .post,
+            targetId: post.postId,
+            targetPostId: post.postId,
+            targetAuthorId: post.userId,
+            reason: reason
+        )
+        do {
+            try await appEnv.feedbackRepository.submitReport(report)
+            AnalyticsService.capture(.postReported, properties: ["reason": reason.rawValue])
+        } catch {
+            self.error = error
+        }
+    }
+
+    /// Block the author and pop back to the feed; their posts are filtered
+    /// on the next feed load now that the block persists.
+    private func blockAuthor(of post: PostModel) async {
+        do {
+            try await appEnv.userRepository.blockUser(post.userId)
+            AnalyticsService.capture(.userBlocked)
+            dismiss()
+        } catch {
+            self.error = error
         }
     }
 }
