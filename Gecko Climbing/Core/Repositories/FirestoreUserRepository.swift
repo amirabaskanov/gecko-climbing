@@ -482,7 +482,8 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
             highestGradeNumeric: data["highestGradeNumeric"] as? Int ?? 0,
             isPublic: data["isPublic"] as? Bool ?? true,
             lastSyncedAt: (data["createdAt"] as? Timestamp)?.dateValue() ?? Date(),
-            homeGymOverride: data["homeGymOverride"] as? String
+            homeGymOverride: data["homeGymOverride"] as? String,
+            blockedUserIds: data["blockedUserIds"] as? [String] ?? []
         )
     }
 
