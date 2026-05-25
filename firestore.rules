@@ -40,6 +40,10 @@ service cloud.firestore {
       // Other users can only update follow/stat counters.
       allow update: if isSignedIn() &&
         (ownerUserWriteIsValid(uid) ||
+         // Owners may always manage their block list, independent of any
+         // username-validity check — moderation must never be blocked.
+         (isOwner(uid) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['blockedUserIds'])) ||
          request.resource.data.diff(resource.data).affectedKeys().hasOnly(
            ['followersCount', 'followingCount', 'totalSessions', 'totalClimbs', 'highestGrade', 'highestGradeNumeric']
          ));
@@ -115,6 +119,12 @@ service cloud.firestore {
     // Feedback — users can only create, never read/update/delete their own
     match /feedback/{feedbackId} {
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Reports — moderation reports (App Store Guideline 1.2). Users can only
+    // create their own; triage happens server-side via the Firebase console.
+    match /reports/{reportId} {
+      allow create: if request.auth != null && request.resource.data.reporterUserId == request.auth.uid;
     }
 
     // Server-only collections — notifications backend (Cloud Functions)
