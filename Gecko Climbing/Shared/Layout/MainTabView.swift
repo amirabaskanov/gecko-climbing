@@ -10,11 +10,14 @@ struct MainTabView: View {
     @State private var feedRefreshToken = UUID()
     @State private var logClimbCount = 0
     @State private var finishTrigger = UUID()
+    @State private var homeRouter = TabRouter<HomeRoute>()
+    @State private var sessionRouter = TabRouter<SessionRoute>()
+    @State private var socialRouter = TabRouter<SocialRoute>()
     @State private var profileRouter = TabRouter<ProfileRoute>()
 
     var body: some View {
         ZStack {
-            HomeView(refreshToken: feedRefreshToken)
+            HomeView(router: homeRouter, refreshToken: feedRefreshToken)
                 .opacity(selectedTab == .feed ? 1 : 0)
                 .allowsHitTesting(selectedTab == .feed)
 
@@ -25,7 +28,8 @@ struct MainTabView: View {
                         previousTab = selectedTab
                     }
                     selectedTab = .log
-                }
+                },
+                router: sessionRouter
             )
                 .opacity(selectedTab == .sessions ? 1 : 0)
                 .allowsHitTesting(selectedTab == .sessions)
@@ -49,7 +53,7 @@ struct MainTabView: View {
             .opacity(selectedTab == .log ? 1 : 0)
             .allowsHitTesting(selectedTab == .log)
 
-            SocialView()
+            SocialView(router: socialRouter)
                 .opacity(selectedTab == .social ? 1 : 0)
                 .allowsHitTesting(selectedTab == .social)
 

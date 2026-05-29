@@ -6,6 +6,8 @@ struct ProfileView: View {
     @Bindable var router: TabRouter<ProfileRoute>
     @State private var viewModel: ProfileViewModel?
     @State private var showEditProfile = false
+    /// Owns the nav stack for the "See all" sessions list pushed from this tab.
+    @State private var sessionsRouter = TabRouter<SessionRoute>()
 
     var body: some View {
         NavigationStack(path: $router.path) {
@@ -221,7 +223,7 @@ struct ProfileView: View {
                 Spacer()
                 if !vm.recentSessions.isEmpty {
                     NavigationLink {
-                        SessionListView(refreshToken: UUID())
+                        SessionListView(refreshToken: UUID(), router: sessionsRouter)
                     } label: {
                         Text("See all")
                             .font(.caption.weight(.medium))

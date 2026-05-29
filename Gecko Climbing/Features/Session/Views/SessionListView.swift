@@ -14,8 +14,8 @@ struct SessionListView: View {
     /// one when the app backgrounds.
     var onStartSession: (() -> Void)? = nil
 
+    @Bindable var router: TabRouter<SessionRoute>
     @State private var viewModel: SessionListViewModel?
-    @State private var router = TabRouter<SessionRoute>()
     @State private var error: Error?
     @State private var appeared = false
 

@@ -3,8 +3,8 @@ import SwiftUI
 struct HomeView: View {
     @Environment(AppEnvironment.self) private var appEnv
     @Environment(AuthViewModel.self) private var authViewModel
+    @Bindable var router: TabRouter<HomeRoute>
     @State private var viewModel: HomeViewModel?
-    @State private var router = TabRouter<HomeRoute>()
     @State private var appeared = false
     @State private var commentsPostId: String?
     var refreshToken: UUID = UUID()

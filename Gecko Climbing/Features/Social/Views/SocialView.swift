@@ -3,8 +3,8 @@ import SwiftUI
 struct SocialView: View {
     @Environment(AppEnvironment.self) private var appEnv
     @Environment(AuthViewModel.self) private var authViewModel
+    @Bindable var router: TabRouter<SocialRoute>
     @State private var viewModel: SocialViewModel?
-    @State private var router = TabRouter<SocialRoute>()
     @State private var appeared = false
 
     var body: some View {
