@@ -99,10 +99,18 @@ struct MainTabView: View {
     private func handleNotificationRoute(_ route: NotificationRoute) {
         defer { deepLinkRouter.pendingRoute = nil }
         switch route {
+        case .profile(let userId):
+            selectedTab = .social
+            socialRouter.setPath([.friendProfile(uid: userId)])
+        case .session(let id):
+            selectedTab = .sessions
+            sessionRouter.setPath([.sessionDetail(sessionId: id)])
         case .weeklyRecap:
             selectedTab = .profile
             profileRouter.setPath([.fullStats, .weekInReview])
-        default:
+        case .post, .comment:
+            // Post/comment targets need post-by-id resolution so they never
+            // land on a blank screen; wired up once that lands.
             break
         }
     }
