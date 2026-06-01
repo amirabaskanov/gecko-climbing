@@ -13,6 +13,11 @@ protocol PostRepositoryProtocol: AnyObject {
     func deletePost(_ postId: String) async throws
     func deletePostBySessionId(_ sessionId: String) async throws
     func fetchPosts(for userId: String) async throws -> [PostModel]
+    /// Fetch a single post by id, regardless of feed membership. Used for
+    /// deep links (e.g. a like or comment notification) where the target
+    /// post may not be in the viewer's loaded feed. Returns nil if the post
+    /// no longer exists.
+    func fetchPost(postId: String) async throws -> PostModel?
     func reconcileLikesCount(postId: String) async throws
     func backfillGradeSequence(postId: String, sessionId: String) async throws -> (grades: [String], outcomes: [String])?
     func fetchComments(postId: String) async throws -> [CommentModel]
@@ -110,6 +115,13 @@ final class MockPostRepository: PostRepositoryProtocol, @unchecked Sendable {
     func fetchPosts(for userId: String) async throws -> [PostModel] {
         try await Task.sleep(nanoseconds: 300_000_000)
         return posts.filter { $0.userId == userId }.sorted { $0.createdAt > $1.createdAt }
+    }
+
+    func fetchPost(postId: String) async throws -> PostModel? {
+        try await Task.sleep(nanoseconds: 200_000_000)
+        guard let post = posts.first(where: { $0.postId == postId }) else { return nil }
+        post.isLikedByCurrentUser = likedPostIds.contains(post.postId)
+        return post
     }
 
     func reconcileLikesCount(postId: String) async throws {

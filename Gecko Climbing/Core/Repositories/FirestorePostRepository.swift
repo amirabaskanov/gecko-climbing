@@ -283,6 +283,23 @@ final class FirestorePostRepository: PostRepositoryProtocol, @unchecked Sendable
         return try await decodePosts(from: snapshot.documents, currentUserId: currentUserId)
     }
 
+    func fetchPost(postId: String) async throws -> PostModel? {
+        let doc = try await postsRef.document(postId).getDocument()
+        guard let data = doc.data() else { return nil }
+        let post = decodePost(from: data, id: doc.documentID)
+
+        let currentUserId = authRepository.currentUserId
+        if !currentUserId.isEmpty {
+            let likeDoc = try? await postsRef
+                .document(postId)
+                .collection("likes")
+                .document(currentUserId)
+                .getDocument()
+            post.isLikedByCurrentUser = likeDoc?.exists ?? false
+        }
+        return post
+    }
+
     // MARK: - Private
 
     private func decodePosts(from documents: [QueryDocumentSnapshot], currentUserId: String) async throws -> [PostModel] {
