@@ -34,6 +34,10 @@ struct HomeView: View {
                     let candidates = (viewModel?.followingPosts ?? []) + (viewModel?.discoverPosts ?? [])
                     if let post = candidates.first(where: { $0.postId == postId }) {
                         PostDetailView(post: post)
+                    } else {
+                        // Deep-linked from a notification — the post isn't in
+                        // the loaded feed, so load it by id.
+                        PostDetailView(postId: postId)
                     }
                 case .friendProfile(let uid):
                     FriendProfileView(uid: uid)

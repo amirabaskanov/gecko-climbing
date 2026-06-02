@@ -108,10 +108,14 @@ struct MainTabView: View {
         case .weeklyRecap:
             selectedTab = .profile
             profileRouter.setPath([.fullStats, .weekInReview])
-        case .post, .comment:
-            // Post/comment targets need post-by-id resolution so they never
-            // land on a blank screen; wired up once that lands.
-            break
+        case .post(let id):
+            selectedTab = .feed
+            homeRouter.setPath([.postDetail(postId: id)])
+        case .comment(let postId, _):
+            // Land on the post; its comment thread is one tap away. The
+            // specific comment id isn't deep-linked yet.
+            selectedTab = .feed
+            homeRouter.setPath([.postDetail(postId: postId)])
         }
     }
 }
