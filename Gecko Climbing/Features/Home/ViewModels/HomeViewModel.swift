@@ -46,9 +46,16 @@ final class HomeViewModel {
     let postRepository: any PostRepositoryProtocol
     let userRepository: any UserRepositoryProtocol
     let sessionRepository: any SessionRepositoryProtocol
+    let feedbackRepository: any FeedbackRepositoryProtocol
     let userId: String
     var userDisplayName: String = ""
     var userProfileImageURL: String = ""
+
+    /// User IDs the viewer has blocked. Refreshed from the user doc on every
+    /// `loadFeed()` and on optimistic `blockUser(uid:)` calls. Posts and
+    /// comments authored by these users are filtered out client-side from
+    /// both rails before the views see them.
+    private(set) var blockedUserIds: Set<String> = []
 
     private var backfillTask: Task<Void, Never>?
     private var initialRailDecided = false
@@ -57,11 +64,13 @@ final class HomeViewModel {
         postRepository: any PostRepositoryProtocol,
         userRepository: any UserRepositoryProtocol,
         sessionRepository: any SessionRepositoryProtocol,
+        feedbackRepository: any FeedbackRepositoryProtocol,
         userId: String
     ) {
         self.postRepository = postRepository
         self.userRepository = userRepository
         self.sessionRepository = sessionRepository
+        self.feedbackRepository = feedbackRepository
         self.userId = userId
     }
 
@@ -107,9 +116,13 @@ final class HomeViewModel {
 
         viewerContext = context
         followingIds = ids
-        followingPosts = following
-        discoverPosts = FeedRanker.rank(rawDiscover, for: context)
-        suggestedClimbers = suggestions
+        // Pull the latest block list out of the viewer-context fetch so the
+        // filter is applied before any post hits the UI.
+        blockedUserIds = context.blockedUserIds
+        followingPosts = following.filter { !blockedUserIds.contains($0.userId) }
+        let filteredDiscover = rawDiscover.filter { !blockedUserIds.contains($0.userId) }
+        discoverPosts = FeedRanker.rank(filteredDiscover, for: context)
+        suggestedClimbers = suggestions.filter { !blockedUserIds.contains($0.uid) }
 
         // Resolve author profiles lazily so badge derivation works even when
         // the profile cache is cold. We only fetch profiles we don't already
@@ -212,6 +225,51 @@ final class HomeViewModel {
             AnalyticsService.capture(.userUnfollowed)
         } catch {
             followingIds.insert(user.uid)
+            self.error = error
+        }
+    }
+
+    // MARK: - Moderation (App Store Review Guideline 1.2)
+
+    /// Submit a report for the given post. Fire-and-forget: the user gets no
+    /// confirmation toast — the dialog dismissing is the feedback. Errors
+    /// surface through the standard `error` channel.
+    func reportPost(_ post: PostModel, reason: ReportModel.Reason) async {
+        let report = ReportModel(
+            reporterUserId: userId,
+            targetType: .post,
+            targetId: post.postId,
+            targetPostId: post.postId,
+            targetAuthorId: post.userId,
+            reason: reason
+        )
+        do {
+            try await feedbackRepository.submitReport(report)
+            AnalyticsService.capture(.postReported, properties: ["reason": reason.rawValue])
+        } catch {
+            self.error = error
+        }
+    }
+
+    /// Block the user with `uid`. Optimistically removes their posts from
+    /// both rails so the action feels immediate; on failure the posts come
+    /// back via the next `loadFeed()`.
+    func blockUser(uid: String) async {
+        guard !blockedUserIds.contains(uid) else { return }
+        let removedFollowing = followingPosts.filter { $0.userId == uid }
+        let removedDiscover = discoverPosts.filter { $0.userId == uid }
+        blockedUserIds.insert(uid)
+        followingPosts.removeAll { $0.userId == uid }
+        discoverPosts.removeAll { $0.userId == uid }
+
+        do {
+            try await userRepository.blockUser(uid)
+            AnalyticsService.capture(.userBlocked)
+        } catch {
+            // Roll back the optimistic UI on failure.
+            blockedUserIds.remove(uid)
+            followingPosts.append(contentsOf: removedFollowing)
+            discoverPosts.append(contentsOf: removedDiscover)
             self.error = error
         }
     }

@@ -16,7 +16,12 @@ struct FeedViewerContext: Equatable {
     /// session history. Compared case-insensitively.
     let homeGyms: Set<String>
 
-    static let empty = FeedViewerContext(userId: "", highestGradeNumeric: -1, homeGyms: [])
+    /// IDs of users the viewer has blocked. Carried in the viewer context so
+    /// the same fetch that builds ranking inputs also produces the filter
+    /// set the rails use to hide blocked authors.
+    let blockedUserIds: Set<String>
+
+    static let empty = FeedViewerContext(userId: "", highestGradeNumeric: -1, homeGyms: [], blockedUserIds: [])
 
     /// Builds a viewer context from the user's profile + session history.
     /// `homeGyms` is the manual override (a single gym) when set, otherwise
@@ -42,7 +47,8 @@ struct FeedViewerContext: Equatable {
         return FeedViewerContext(
             userId: user.uid,
             highestGradeNumeric: user.highestGradeNumeric,
-            homeGyms: gyms
+            homeGyms: gyms,
+            blockedUserIds: Set(user.blockedUserIds)
         )
     }
 }

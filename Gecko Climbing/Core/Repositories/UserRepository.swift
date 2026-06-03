@@ -21,6 +21,18 @@ protocol UserRepositoryProtocol: AnyObject {
     func updateNotificationPrefs(_ prefs: NotificationPrefs, for userId: String) async throws
     func registerFCMToken(_ token: String, for userId: String) async throws
     func updateTimeZone(_ identifier: String, for userId: String) async throws
+
+    // MARK: - Blocking (App Store Review Guideline 1.2)
+
+    /// Add `targetUserId` to the current user's block list. Their posts and
+    /// comments are then filtered out client-side from every feed.
+    func blockUser(_ targetUserId: String) async throws
+    /// Remove `targetUserId` from the current user's block list.
+    func unblockUser(_ targetUserId: String) async throws
+    /// Resolve the current user's `blockedUserIds` to full `UserModel`
+    /// records for the Blocked Users management screen. Returns the rows
+    /// in the order they appear in `blockedUserIds`.
+    func fetchBlockedUsers() async throws -> [UserModel]
 }
 
 // MARK: - Mock Implementation
@@ -143,6 +155,29 @@ final class MockUserRepository: UserRepositoryProtocol, @unchecked Sendable {
     func registerFCMToken(_ token: String, for userId: String) async throws {}
 
     func updateTimeZone(_ identifier: String, for userId: String) async throws {}
+
+    // MARK: - Blocking
+
+    func blockUser(_ targetUserId: String) async throws {
+        try await Task.sleep(nanoseconds: 200_000_000)
+        guard let idx = users.firstIndex(where: { $0.uid == currentUserId }) else { return }
+        if !users[idx].blockedUserIds.contains(targetUserId) {
+            users[idx].blockedUserIds.append(targetUserId)
+        }
+    }
+
+    func unblockUser(_ targetUserId: String) async throws {
+        try await Task.sleep(nanoseconds: 200_000_000)
+        guard let idx = users.firstIndex(where: { $0.uid == currentUserId }) else { return }
+        users[idx].blockedUserIds.removeAll { $0 == targetUserId }
+    }
+
+    func fetchBlockedUsers() async throws -> [UserModel] {
+        try await Task.sleep(nanoseconds: 200_000_000)
+        guard let me = users.first(where: { $0.uid == currentUserId }) else { return [] }
+        let order = me.blockedUserIds
+        return order.compactMap { id in users.first(where: { $0.uid == id }) }
+    }
 
     private static func makeSeedUsers(currentUserId: String) -> [UserModel] {
         // When running in screenshot mode the current user is Kai; otherwise

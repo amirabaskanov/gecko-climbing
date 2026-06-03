@@ -16,6 +16,7 @@ struct UserDTO: Codable, Identifiable {
     let createdAt: Date
     let notificationPrefs: NotificationPrefs
     let homeGymOverride: String?
+    let blockedUserIds: [String]
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -33,6 +34,7 @@ struct UserDTO: Codable, Identifiable {
         case createdAt
         case notificationPrefs
         case homeGymOverride
+        case blockedUserIds
     }
 
     init(
@@ -50,7 +52,8 @@ struct UserDTO: Codable, Identifiable {
         isPublic: Bool,
         createdAt: Date,
         notificationPrefs: NotificationPrefs = .default,
-        homeGymOverride: String? = nil
+        homeGymOverride: String? = nil,
+        blockedUserIds: [String] = []
     ) {
         self.id = id
         self.displayName = displayName
@@ -67,6 +70,7 @@ struct UserDTO: Codable, Identifiable {
         self.createdAt = createdAt
         self.notificationPrefs = notificationPrefs
         self.homeGymOverride = homeGymOverride
+        self.blockedUserIds = blockedUserIds
     }
 
     init(from decoder: Decoder) throws {
@@ -86,6 +90,7 @@ struct UserDTO: Codable, Identifiable {
         self.createdAt = try container.decode(Date.self, forKey: .createdAt)
         self.notificationPrefs = try container.decodeIfPresent(NotificationPrefs.self, forKey: .notificationPrefs) ?? .default
         self.homeGymOverride = try container.decodeIfPresent(String.self, forKey: .homeGymOverride)
+        self.blockedUserIds = try container.decodeIfPresent([String].self, forKey: .blockedUserIds) ?? []
     }
 
     func toModel() -> UserModel {
@@ -103,7 +108,8 @@ struct UserDTO: Codable, Identifiable {
             highestGradeNumeric: highestGradeNumeric,
             isPublic: isPublic,
             lastSyncedAt: Date(),
-            homeGymOverride: homeGymOverride
+            homeGymOverride: homeGymOverride,
+            blockedUserIds: blockedUserIds
         )
     }
 
@@ -145,7 +151,8 @@ extension UserModel {
             highestGradeNumeric: highestGradeNumeric,
             isPublic: isPublic,
             createdAt: lastSyncedAt,
-            homeGymOverride: homeGymOverride
+            homeGymOverride: homeGymOverride,
+            blockedUserIds: blockedUserIds
         )
     }
 }

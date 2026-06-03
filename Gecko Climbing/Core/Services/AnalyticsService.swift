@@ -16,6 +16,9 @@ enum AnalyticsEvent: String {
     case userFollowed = "user_followed"
     case userUnfollowed = "user_unfollowed"
     case feedRailSwitched = "feed_rail_switched"
+    case postReported = "post_reported"
+    case userBlocked = "user_blocked"
+    case userUnblocked = "user_unblocked"
 }
 
 enum AnalyticsService {

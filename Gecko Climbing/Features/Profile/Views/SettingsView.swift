@@ -31,6 +31,26 @@ struct SettingsView: View {
                 }
                 .staggeredAppear(index: 0, appeared: appeared)
 
+                // MARK: - Privacy
+
+                VStack(alignment: .leading, spacing: 12) {
+                    sectionHeader("Privacy")
+
+                    NavigationLink {
+                        BlockedUsersView()
+                    } label: {
+                        settingsRowContent(
+                            icon: "hand.raised",
+                            title: "Blocked Users",
+                            subtitle: "Manage who you've blocked",
+                            iconColor: .geckoPrimary
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .bouncePress()
+                }
+                .staggeredAppear(index: 1, appeared: appeared)
+
                 // MARK: - Support
 
                 VStack(alignment: .leading, spacing: 12) {
@@ -45,7 +65,7 @@ struct SettingsView: View {
                         showFeedback = true
                     }
                 }
-                .staggeredAppear(index: 1, appeared: appeared)
+                .staggeredAppear(index: 2, appeared: appeared)
 
                 // MARK: - Account
 
@@ -61,7 +81,7 @@ struct SettingsView: View {
                         showSignOutConfirm = true
                     }
                 }
-                .staggeredAppear(index: 2, appeared: appeared)
+                .staggeredAppear(index: 3, appeared: appeared)
 
                 // MARK: - About
 
@@ -84,7 +104,7 @@ struct SettingsView: View {
                     }
                     .padding(.top, 4)
                 }
-                .staggeredAppear(index: 3, appeared: appeared)
+                .staggeredAppear(index: 4, appeared: appeared)
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
@@ -182,5 +202,149 @@ struct SettingsView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 13)
+    }
+}
+
+// MARK: - Blocked Users
+//
+// Colocated with Settings (instead of its own file) so it ships in the Xcode
+// build target without a project-file edit. App Store Review reaches this
+// surface via Settings → Privacy → Blocked Users to verify Guideline 1.2.
+
+/// Management screen for the current user's block list. State lives in-view
+/// — the logic is a fetch and an unblock-with-rollback, anything more
+/// elaborate would be the same shape with extra ceremony.
+struct BlockedUsersView: View {
+    @Environment(AppEnvironment.self) private var appEnv
+
+    @State private var users: [UserModel] = []
+    @State private var isLoading = true
+    @State private var error: Error?
+
+    var body: some View {
+        Group {
+            if isLoading {
+                loadingState
+            } else if users.isEmpty {
+                emptyState
+            } else {
+                listState
+            }
+        }
+        .background(Color.geckoBackground)
+        .navigationTitle("Blocked Users")
+        .navigationBarTitleDisplayMode(.inline)
+        .task { await load() }
+        .errorAlert(error: $error)
+    }
+
+    // MARK: - States
+
+    private var loadingState: some View {
+        VStack {
+            Spacer()
+            ProgressView()
+                .controlSize(.large)
+                .tint(Color.geckoPrimary)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private var emptyState: some View {
+        VStack(spacing: 14) {
+            Spacer()
+            Image(systemName: "hand.raised")
+                .font(.system(size: 44, weight: .light))
+                .foregroundStyle(Color.geckoSecondaryText.opacity(0.5))
+            Text("No blocked users")
+                .font(.title3.weight(.semibold))
+                .fontDesign(.rounded)
+            Text("You can block someone from\nthe \"…\" menu on any post.")
+                .font(.subheadline)
+                .foregroundStyle(Color.geckoSecondaryText)
+                .multilineTextAlignment(.center)
+            Spacer()
+            Spacer()
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 32)
+    }
+
+    private var listState: some View {
+        ScrollView {
+            VStack(spacing: 12) {
+                ForEach(users) { user in
+                    blockedRow(user)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 12)
+            .padding(.bottom, 32)
+        }
+    }
+
+    private func blockedRow(_ user: UserModel) -> some View {
+        HStack(spacing: 12) {
+            AvatarView(url: user.profileImageURL, size: 44, name: user.displayName)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(user.displayName)
+                    .font(.subheadline.weight(.semibold))
+                Text("@\(user.username)")
+                    .font(.caption)
+                    .foregroundStyle(Color.geckoSecondaryText)
+            }
+
+            Spacer()
+
+            Button {
+                Task { await unblock(user) }
+            } label: {
+                Text("Unblock")
+                    .font(.caption.weight(.bold))
+                    .fontDesign(.rounded)
+                    .foregroundStyle(Color.geckoPrimary)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(
+                        Capsule().fill(Color.geckoInputBackground)
+                    )
+            }
+            .buttonStyle(.plain)
+            .bouncePress()
+        }
+        .padding(14)
+        .cardStyle()
+    }
+
+    // MARK: - Actions
+
+    private func load() async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            users = try await appEnv.userRepository.fetchBlockedUsers()
+        } catch {
+            self.error = error
+        }
+    }
+
+    private func unblock(_ user: UserModel) async {
+        let originalIndex = users.firstIndex(where: { $0.uid == user.uid })
+        withAnimation(.geckoSnappy) {
+            users.removeAll { $0.uid == user.uid }
+        }
+        do {
+            try await appEnv.userRepository.unblockUser(user.uid)
+            AnalyticsService.capture(.userUnblocked)
+        } catch {
+            if let idx = originalIndex {
+                withAnimation(.geckoSnappy) {
+                    users.insert(user, at: min(idx, users.count))
+                }
+            }
+            self.error = error
+        }
     }
 }

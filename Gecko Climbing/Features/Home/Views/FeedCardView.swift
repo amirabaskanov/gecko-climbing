@@ -11,11 +11,23 @@ struct FeedCardView: View {
     let onComment: () -> Void
     let onUserTap: () -> Void
     var onCardTap: (() -> Void)?
+    /// Submit a report for this post with the given reason. When nil, the
+    /// "..." moderation menu is hidden — useful for previews and embedded
+    /// contexts where moderation lives at a higher level.
+    var onReport: ((ReportModel.Reason) -> Void)?
+    /// Block the post's author. Nil hides the block action.
+    var onBlock: (() -> Void)?
 
     @State private var heartScale: CGFloat = 1.0
     @State private var currentPhotoIndex = 0
     @State private var showDoubleTapHeart = false
     @State private var captionExpanded = false
+    @State private var showReportDialog = false
+    @State private var showBlockDialog = false
+
+    private var canModerate: Bool {
+        post.userId != currentUserId && (onReport != nil || onBlock != nil)
+    }
 
     private var photos: [String] {
         if !post.imageURLs.isEmpty { return post.imageURLs }
@@ -137,6 +149,10 @@ struct FeedCardView: View {
 
             Spacer()
 
+            if canModerate {
+                moderationMenu
+            }
+
             // Top send badge
             if !post.topGrade.isEmpty {
                 let textColor = VGrade.textColor(for: post.topGradeNumeric)
@@ -152,6 +168,57 @@ struct FeedCardView: View {
                 .padding(.vertical, 8)
                 .background(Color.gradeColor(for: post.topGradeNumeric), in: RoundedRectangle(cornerRadius: 12))
             }
+        }
+    }
+
+    // MARK: - Moderation menu (Apple Guideline 1.2)
+
+    private var moderationMenu: some View {
+        Menu {
+            if onReport != nil {
+                Button {
+                    showReportDialog = true
+                } label: {
+                    Label("Report post", systemImage: "flag")
+                }
+            }
+            if onBlock != nil {
+                Button(role: .destructive) {
+                    showBlockDialog = true
+                } label: {
+                    Label("Block @\(post.userDisplayName)", systemImage: "hand.raised")
+                }
+            }
+        } label: {
+            Image(systemName: "ellipsis")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(Color.geckoSecondaryText)
+                .frame(width: 32, height: 32)
+                .contentShape(Rectangle())
+        }
+        .menuOrder(.fixed)
+        .accessibilityLabel("More options")
+        .confirmationDialog(
+            "Report this post",
+            isPresented: $showReportDialog,
+            titleVisibility: .visible
+        ) {
+            ForEach(ReportModel.Reason.allCases) { reason in
+                Button(reason.rawValue) { onReport?(reason) }
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Tell us what's going on. We review reports within 24 hours.")
+        }
+        .confirmationDialog(
+            "Block @\(post.userDisplayName)?",
+            isPresented: $showBlockDialog,
+            titleVisibility: .visible
+        ) {
+            Button("Block", role: .destructive) { onBlock?() }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("You won't see their posts. They won't see yours. You can unblock anyone later in Settings.")
         }
     }
 

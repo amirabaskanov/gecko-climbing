@@ -50,6 +50,7 @@ struct HomeView: View {
                     postRepository: appEnv.postRepository,
                     userRepository: appEnv.userRepository,
                     sessionRepository: appEnv.sessionRepository,
+                    feedbackRepository: appEnv.feedbackRepository,
                     userId: authViewModel.currentUserId
                 )
                 vm.userDisplayName = authViewModel.currentUserDisplayName
@@ -135,7 +136,9 @@ struct HomeView: View {
                             onLike: { Task { await vm.toggleLike(post) } },
                             onComment: { commentsPostId = post.postId },
                             onUserTap: { router.push(.friendProfile(uid: post.userId)) },
-                            onCardTap: { router.push(.postDetail(postId: post.postId)) }
+                            onCardTap: { router.push(.postDetail(postId: post.postId)) },
+                            onReport: { reason in Task { await vm.reportPost(post, reason: reason) } },
+                            onBlock: { Task { await vm.blockUser(uid: post.userId) } }
                         )
                         .padding(.horizontal, 16)
                         .staggeredAppear(index: index, appeared: appeared)
@@ -243,7 +246,9 @@ struct HomeView: View {
                             onLike: { Task { await vm.toggleLike(post) } },
                             onComment: { commentsPostId = post.postId },
                             onUserTap: { router.push(.friendProfile(uid: post.userId)) },
-                            onCardTap: { router.push(.postDetail(postId: post.postId)) }
+                            onCardTap: { router.push(.postDetail(postId: post.postId)) },
+                            onReport: { reason in Task { await vm.reportPost(post, reason: reason) } },
+                            onBlock: { Task { await vm.blockUser(uid: post.userId) } }
                         )
                         .padding(.horizontal, 16)
                         .staggeredAppear(index: index, appeared: appeared)

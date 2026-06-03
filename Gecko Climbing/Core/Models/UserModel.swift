@@ -20,6 +20,10 @@ final class UserModel {
     /// used for "your gym" feed signals instead of the auto-detected top gyms
     /// derived from session history. Empty/nil means auto-detect.
     var homeGymOverride: String?
+    /// User IDs this person has blocked. Their posts and comments are
+    /// filtered out of every feed the current user sees. Required by App
+    /// Store Review Guideline 1.2.
+    var blockedUserIds: [String]
 
     init(uid: String,
          displayName: String,
@@ -34,7 +38,8 @@ final class UserModel {
          highestGradeNumeric: Int = -1,
          isPublic: Bool = true,
          lastSyncedAt: Date = Date(),
-         homeGymOverride: String? = nil) {
+         homeGymOverride: String? = nil,
+         blockedUserIds: [String] = []) {
         self.uid = uid
         self.displayName = displayName
         self.username = username
@@ -49,5 +54,6 @@ final class UserModel {
         self.isPublic = isPublic
         self.lastSyncedAt = lastSyncedAt
         self.homeGymOverride = homeGymOverride
+        self.blockedUserIds = blockedUserIds
     }
 }

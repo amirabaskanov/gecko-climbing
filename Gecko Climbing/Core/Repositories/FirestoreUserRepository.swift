@@ -227,6 +227,36 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
         )
     }
 
+    // MARK: - Blocking
+
+    func blockUser(_ targetUserId: String) async throws {
+        let uid = authRepository.currentUserId
+        guard !uid.isEmpty else { throw UserError.notFound }
+        try await usersRef.document(uid).updateData([
+            "blockedUserIds": FieldValue.arrayUnion([targetUserId])
+        ])
+    }
+
+    func unblockUser(_ targetUserId: String) async throws {
+        let uid = authRepository.currentUserId
+        guard !uid.isEmpty else { throw UserError.notFound }
+        try await usersRef.document(uid).updateData([
+            "blockedUserIds": FieldValue.arrayRemove([targetUserId])
+        ])
+    }
+
+    func fetchBlockedUsers() async throws -> [UserModel] {
+        let me = try await fetchCurrentUser()
+        let ids = me.blockedUserIds
+        guard !ids.isEmpty else { return [] }
+        let users = try await fetchUsers(byIds: ids)
+        // Preserve the order users blocked people in (Firestore `whereField in`
+        // does not guarantee order). `fetchUsers(byIds:)` already returns
+        // models in id order, so we re-sort to match the source array.
+        let lookup = Dictionary(uniqueKeysWithValues: users.map { ($0.uid, $0) })
+        return ids.compactMap { lookup[$0] }
+    }
+
     // MARK: - Search
 
     func searchUsers(query: String) async throws -> [UserModel] {

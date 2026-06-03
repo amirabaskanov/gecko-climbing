@@ -41,4 +41,24 @@ final class FirestoreFeedbackRepository: FeedbackRepositoryProtocol, @unchecked 
 
         try await feedbackRef.document(docId).setData(data)
     }
+
+    // MARK: - Reports
+
+    private var reportsRef: CollectionReference { db.collection("reports") }
+
+    func submitReport(_ report: ReportModel) async throws {
+        var data: [String: Any] = [
+            "reporterUserId": report.reporterUserId,
+            "targetType": report.targetType.rawValue,
+            "targetId": report.targetId,
+            "targetAuthorId": report.targetAuthorId,
+            "reason": report.reason.rawValue,
+            "createdAt": FieldValue.serverTimestamp(),
+            "deviceInfo": DeviceInfo.current
+        ]
+        if let postId = report.targetPostId {
+            data["targetPostId"] = postId
+        }
+        try await reportsRef.document(report.id).setData(data)
+    }
 }

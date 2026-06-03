@@ -1,6 +1,64 @@
 import Foundation
 import UIKit
 
+// MARK: - Report Model
+//
+// Lives in this file (instead of Core/Models) so it ships in the Xcode build
+// target without needing a project-file edit. The `reports` Firestore
+// collection is owned by FeedbackRepository conceptually, so the colocation
+// reads naturally too.
+
+/// A user-submitted report of objectionable content. Required by App Store
+/// Review Guideline 1.2 (Safety – User-Generated Content). Lives in the
+/// `reports` Firestore collection; triage happens out-of-band via the
+/// Firebase console.
+struct ReportModel: Identifiable, Sendable {
+    let id: String
+    let reporterUserId: String
+    let targetType: TargetType
+    let targetId: String
+    /// Parent post id when the target is a comment. Equal to `targetId` for
+    /// post targets; nil for user-level reports.
+    let targetPostId: String?
+    let targetAuthorId: String
+    let reason: Reason
+    let createdAt: Date
+
+    enum TargetType: String, Sendable {
+        case post, comment, user
+    }
+
+    enum Reason: String, CaseIterable, Identifiable, Sendable {
+        case spam = "Spam or fake"
+        case harassment = "Harassment or bullying"
+        case inappropriate = "Inappropriate content"
+        case impersonation = "Impersonation"
+        case other = "Something else"
+
+        var id: String { rawValue }
+    }
+
+    init(
+        id: String = UUID().uuidString,
+        reporterUserId: String,
+        targetType: TargetType,
+        targetId: String,
+        targetPostId: String? = nil,
+        targetAuthorId: String,
+        reason: Reason,
+        createdAt: Date = Date()
+    ) {
+        self.id = id
+        self.reporterUserId = reporterUserId
+        self.targetType = targetType
+        self.targetId = targetId
+        self.targetPostId = targetPostId
+        self.targetAuthorId = targetAuthorId
+        self.reason = reason
+        self.createdAt = createdAt
+    }
+}
+
 // MARK: - Feedback Category
 
 enum FeedbackCategory: String, CaseIterable, Identifiable {
@@ -58,6 +116,12 @@ protocol FeedbackRepositoryProtocol: AnyObject {
         message: String,
         screenshotData: Data?
     ) async throws
+
+    /// Submit a user-generated report of objectionable content. Required by
+    /// App Store Review Guideline 1.2 (Safety – UGC). Reports land in the
+    /// `reports` Firestore collection; triage happens via the Firebase
+    /// console.
+    func submitReport(_ report: ReportModel) async throws
 }
 
 // MARK: - Mock Implementation
@@ -72,6 +136,13 @@ final class MockFeedbackRepository: FeedbackRepositoryProtocol, @unchecked Senda
         try await Task.sleep(nanoseconds: 800_000_000)
         #if DEBUG
         print("📝 [Mock] Feedback submitted: [\(category.rawValue)] \(message)")
+        #endif
+    }
+
+    func submitReport(_ report: ReportModel) async throws {
+        try await Task.sleep(nanoseconds: 400_000_000)
+        #if DEBUG
+        print("🚩 [Mock] Report submitted: \(report.targetType.rawValue) \(report.targetId) — \(report.reason.rawValue)")
         #endif
     }
 }
