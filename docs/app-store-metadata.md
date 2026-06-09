@@ -48,6 +48,11 @@ Welcome to Gecko Climbing! Start tracking your bouldering sessions today.
 - Social feed — follow friends and share sessions
 - Dark mode support
 
+## URLs
+- Support URL: https://trygecko.app/support.html
+- Marketing URL: https://trygecko.app
+- Privacy Policy URL: https://trygecko.app/privacy.html
+
 ## App Review Notes
 This app requires a user account to function. A demo account is provided for review purposes.
 
@@ -55,7 +60,9 @@ Demo credentials:
 - Email: demo@trygecko.app
 - Password: GeckoReview2026!
 
+Moderation (Guideline 1.2): Report and Block are available on every post via the "..." menu at the top-right of each post. Blocked users are managed in Settings > Privacy > Blocked Users.
+
 The app uses Firebase for authentication and data storage, and PostHog for anonymous product analytics.
 
 ## Age Rating
-4+ (no objectionable content)
+4+ base content. Answer "Yes" to user-generated content (moderation is in place via Report + Block). Profanity may be marked Infrequent to reflect occasional user-typed language, yielding a 12+ rating; all other content categories are None.
