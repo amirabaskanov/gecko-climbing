@@ -65,4 +65,4 @@ Moderation (Guideline 1.2): Report and Block are available on every post via the
 The app uses Firebase for authentication and data storage, and PostHog for anonymous product analytics.
 
 ## Age Rating
-4+ base content. Answer "Yes" to user-generated content (moderation is in place via Report + Block). Profanity may be marked Infrequent to reflect occasional user-typed language, yielding a 12+ rating; all other content categories are None.
+9+ final rating. Answer "Yes" to user-generated content (moderation is in place via Report + Block). Profanity or Crude Humor marked Infrequent to reflect occasional user-typed language, which yields 9+; all other content categories are None.
