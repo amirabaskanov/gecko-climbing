@@ -33,6 +33,15 @@ protocol UserRepositoryProtocol: AnyObject {
     /// records for the Blocked Users management screen. Returns the rows
     /// in the order they appear in `blockedUserIds`.
     func fetchBlockedUsers() async throws -> [UserModel]
+
+    // MARK: - Account Deletion (App Store Review Guideline 5.1.1(v))
+
+    /// Permanently delete every Firestore document the current user owns:
+    /// their posts, sessions (and nested climbs), username reservation, follow
+    /// edges, and the user document itself. Must be called while still signed
+    /// in (security rules check `request.auth.uid`) and before the Firebase
+    /// Auth account is deleted.
+    func deleteAccountData() async throws
 }
 
 // MARK: - Mock Implementation
@@ -177,6 +186,12 @@ final class MockUserRepository: UserRepositoryProtocol, @unchecked Sendable {
         guard let me = users.first(where: { $0.uid == currentUserId }) else { return [] }
         let order = me.blockedUserIds
         return order.compactMap { id in users.first(where: { $0.uid == id }) }
+    }
+
+    func deleteAccountData() async throws {
+        try await Task.sleep(nanoseconds: 300_000_000)
+        users.removeAll { $0.uid == currentUserId }
+        followingSet.removeAll()
     }
 
     private static func makeSeedUsers(currentUserId: String) -> [UserModel] {

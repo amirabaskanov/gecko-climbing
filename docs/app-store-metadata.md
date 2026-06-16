@@ -62,6 +62,8 @@ Demo credentials:
 
 Moderation (Guideline 1.2): Report and Block are available on every post via the "..." menu at the top-right of each post. Blocked users are managed in Settings > Privacy > Blocked Users.
 
+Account deletion (Guideline 5.1.1(v)): Profile tab (bottom-right) > gear icon (top-right) > Account > Delete Account. After confirming, email/password accounts re-enter their password, then the account and all associated data (posts, sessions, stats, profile) are permanently deleted and the user is signed out and cannot sign back in. A screen recording of this flow on a physical device is attached below.
+
 The app uses Firebase for authentication and data storage, and PostHog for anonymous product analytics.
 
 ## Age Rating

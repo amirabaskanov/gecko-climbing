@@ -4,6 +4,11 @@ struct SettingsView: View {
     @Environment(AuthViewModel.self) private var authViewModel
     @Environment(AppEnvironment.self) private var appEnvironment
     @State private var showSignOutConfirm = false
+    @State private var showDeleteConfirm = false
+    @State private var showPasswordPrompt = false
+    @State private var passwordInput = ""
+    @State private var isDeleting = false
+    @State private var deleteError: Error?
     @State private var showFeedback = false
     @State private var appeared = false
 
@@ -80,6 +85,16 @@ struct SettingsView: View {
                     ) {
                         showSignOutConfirm = true
                     }
+
+                    settingsRow(
+                        icon: "trash",
+                        title: "Delete Account",
+                        subtitle: "Permanently erase your account and data",
+                        iconColor: .red
+                    ) {
+                        showDeleteConfirm = true
+                    }
+                    .disabled(isDeleting)
                 }
                 .staggeredAppear(index: 3, appeared: appeared)
 
@@ -113,17 +128,89 @@ struct SettingsView: View {
         .background(Color.geckoBackground)
         .navigationTitle("Settings")
         .onAppear { appeared = true }
+        .overlay {
+            if isDeleting {
+                deletingOverlay
+            }
+        }
         .confirmationDialog("Sign out of Gecko Climbing?", isPresented: $showSignOutConfirm, titleVisibility: .visible) {
             Button("Sign Out", role: .destructive) {
                 authViewModel.signOut()
             }
             Button("Cancel", role: .cancel) {}
         }
+        .confirmationDialog(
+            "Delete your account?",
+            isPresented: $showDeleteConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Delete Account", role: .destructive) {
+                Task { await deleteAccount() }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This permanently deletes your account, posts, sessions, and stats. This can't be undone.")
+        }
+        .alert("Confirm your password", isPresented: $showPasswordPrompt) {
+            SecureField("Password", text: $passwordInput)
+                .textContentType(.password)
+            Button("Delete Account", role: .destructive) {
+                Task { await deleteAccount(reauthPassword: passwordInput) }
+            }
+            Button("Cancel", role: .cancel) { passwordInput = "" }
+        } message: {
+            Text("For your security, please re-enter your password to permanently delete your account.")
+        }
+        .errorAlert(error: $deleteError)
         .sheet(isPresented: $showFeedback) {
             FeedbackView(viewModel: FeedbackViewModel(
                 feedbackRepository: appEnvironment.feedbackRepository,
                 userId: authViewModel.currentUserId
             ))
+        }
+    }
+
+    // MARK: - Account deletion
+
+    private var deletingOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.35).ignoresSafeArea()
+            VStack(spacing: 14) {
+                ProgressView()
+                    .controlSize(.large)
+                    .tint(.white)
+                Text("Deleting your account…")
+                    .font(.subheadline.weight(.semibold))
+                    .fontDesign(.rounded)
+                    .foregroundStyle(.white)
+            }
+            .padding(28)
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18))
+        }
+        .transition(.opacity)
+    }
+
+    private func deleteAccount(reauthPassword: String? = nil) async {
+        isDeleting = true
+        defer { isDeleting = false }
+        do {
+            try await authViewModel.deleteAccount(
+                userRepository: appEnvironment.userRepository,
+                reauthPassword: reauthPassword
+            )
+            // On success the auth state listener flips the app back to sign-in;
+            // no further navigation needed here.
+            passwordInput = ""
+        } catch let authError as AuthError {
+            if case .passwordRequired = authError {
+                // Password account that needs re-auth — prompt and retry.
+                passwordInput = ""
+                showPasswordPrompt = true
+            } else {
+                deleteError = authError
+            }
+        } catch {
+            deleteError = error
         }
     }
 
@@ -274,7 +361,7 @@ struct BlockedUsersView: View {
     private var listState: some View {
         ScrollView {
             VStack(spacing: 12) {
-                ForEach(users) { user in
+                ForEach(users, id: \.uid) { user in
                     blockedRow(user)
                 }
             }

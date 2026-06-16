@@ -89,6 +89,26 @@ final class AuthViewModel {
         }
     }
 
+    /// Permanently delete the user's account and all the data they've shared
+    /// (App Store Review Guideline 5.1.1(v)). Re-authenticates first so the
+    /// auth deletion is guaranteed to succeed, then wipes Firestore data while
+    /// still authenticated, then deletes the Firebase Auth account — at which
+    /// point the auth state listener flips `isAuthenticated` and the app routes
+    /// back to sign-in. The re-auth gate runs before any data is touched, so a
+    /// thrown `passwordRequired`/`requiresRecentLogin` leaves the account fully
+    /// intact for the caller to recover from.
+    func deleteAccount(userRepository: any UserRepositoryProtocol, reauthPassword: String?) async throws {
+        let userIdToWipe = authRepository.currentUserId
+        try await authRepository.reauthenticateForDeletion(password: reauthPassword)
+        try await userRepository.deleteAccountData()
+        try await authRepository.deleteAccount()
+        if !userIdToWipe.isEmpty {
+            NewSessionViewModel.wipeDraft(for: userIdToWipe)
+        }
+        AnalyticsService.capture(.accountDeleted)
+        AnalyticsService.reset()
+    }
+
     func signInWithGoogle() async {
         isLoading = true
         error = nil

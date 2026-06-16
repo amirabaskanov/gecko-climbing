@@ -40,6 +40,57 @@ final class FirebaseAuthRepository: AuthRepositoryProtocol, @unchecked Sendable 
         }
     }
 
+    func reauthenticateForDeletion(password: String?) async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw AuthError.unknown("No signed-in account to delete.")
+        }
+        let providerId = user.providerData.first?.providerID ?? user.providerID
+        if providerId == "password" || providerId == "emailLink" {
+            // Always re-authenticate password accounts: it doubles as a
+            // confirmation step and removes any dependency on how recently the
+            // user signed in.
+            guard let email = user.email, let password, !password.isEmpty else {
+                throw AuthError.passwordRequired
+            }
+            let credential = EmailAuthProvider.credential(withEmail: email, password: password)
+            do {
+                try await user.reauthenticate(with: credential)
+            } catch let error as NSError {
+                let code = AuthErrorCode(rawValue: error.code)
+                if code == .wrongPassword || code == .invalidCredential {
+                    throw AuthError.invalidCredentials
+                }
+                throw mapFirebaseError(error)
+            }
+        } else {
+            // OAuth (Google/Apple): we can't silently re-authenticate without
+            // re-running the provider UI, so verify the login is recent enough
+            // that delete() will succeed. Bailing here — before any data is
+            // touched — guarantees we never leave a half-deleted account.
+            let token = try await user.getIDTokenResult()
+            if Date().timeIntervalSince(token.authDate) > 4 * 60 {
+                throw AuthError.requiresRecentLogin
+            }
+        }
+    }
+
+    func deleteAccount() async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw AuthError.unknown("No signed-in account to delete.")
+        }
+        do {
+            try await user.delete()
+            authLog.info("Deleted Firebase Auth account")
+        } catch let error as NSError {
+            if AuthErrorCode(rawValue: error.code) == .requiresRecentLogin {
+                authLog.error("Account deletion requires recent login")
+                throw AuthError.requiresRecentLogin
+            }
+            authLog.error("Account deletion failed: domain=\(error.domain, privacy: .public) code=\(error.code, privacy: .public) desc=\(error.localizedDescription, privacy: .public)")
+            throw mapFirebaseError(error)
+        }
+    }
+
     func signInWithGoogle(idToken: String, accessToken: String) async throws {
         let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
         do {

@@ -47,6 +47,9 @@ service cloud.firestore {
          request.resource.data.diff(resource.data).affectedKeys().hasOnly(
            ['followersCount', 'followingCount', 'totalSessions', 'totalClimbs', 'highestGrade', 'highestGradeNumeric']
          ));
+      // Owners may delete their own profile (App Store Guideline 5.1.1(v)
+      // account deletion).
+      allow delete: if isOwner(uid);
 
       match /following/{targetUid} {
         allow read: if isSignedIn();
@@ -76,7 +79,14 @@ service cloud.firestore {
         getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.username == username;
       allow delete: if isSignedIn() &&
         resource.data.uid == request.auth.uid &&
-        getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.username != username;
+        (
+          // Account deletion: the user doc is already gone, so there's no
+          // handle left to protect.
+          !exists(/databases/$(database)/documents/users/$(request.auth.uid)) ||
+          // Username change: only release the old handle once the user doc
+          // claims a different one.
+          getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.username != username
+        );
     }
 
     // Sessions

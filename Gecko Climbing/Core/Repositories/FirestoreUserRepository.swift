@@ -257,6 +257,69 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
         return ids.compactMap { lookup[$0] }
     }
 
+    // MARK: - Account Deletion
+
+    func deleteAccountData() async throws {
+        let uid = authRepository.currentUserId
+        guard !uid.isEmpty else { throw UserError.notFound }
+
+        // Read the username up front so we can release the reservation. If the
+        // user doc is already gone (partial prior deletion) we just skip it.
+        let userSnapshot = try? await usersRef.document(uid).getDocument()
+        let username = userSnapshot?.data()?["username"] as? String
+
+        // Posts owned by the user.
+        try await deleteDocuments(
+            in: db.collection("posts").whereField("userId", isEqualTo: uid)
+        )
+
+        // Sessions owned by the user, plus each session's nested climbs.
+        let sessionsSnapshot = try await db.collection("sessions")
+            .whereField("userId", isEqualTo: uid)
+            .getDocuments()
+        for sessionDoc in sessionsSnapshot.documents {
+            try await deleteDocuments(in: sessionDoc.reference.collection("climbs"))
+            try await sessionDoc.reference.delete()
+        }
+
+        // Follow graph. Security rules only let us write our own /following
+        // edges and the matching /followers/{me} edge on the people we
+        // followed, so clean exactly those. Edges other people created toward
+        // us (their /following/{me}, our /followers/*) aren't ours to delete;
+        // they resolve to nothing once our user doc is gone and are filtered
+        // out client-side, so leaving them dangling is harmless.
+        let followingSnapshot = try await usersRef.document(uid)
+            .collection("following").getDocuments()
+        for followingDoc in followingSnapshot.documents {
+            let targetUID = followingDoc.documentID
+            try? await usersRef.document(targetUID)
+                .collection("followers").document(uid).delete()
+            try? await followingDoc.reference.delete()
+        }
+
+        // The user document itself, then the username reservation. The
+        // reservation delete is best-effort: its rule keys off the user doc no
+        // longer claiming the handle, so it must come after the user doc is
+        // gone, and if rules haven't caught up the account still deletes
+        // cleanly with only a stale reservation left behind.
+        try await usersRef.document(uid).delete()
+        if let username, !username.isEmpty {
+            try? await usernamesRef.document(username).delete()
+        }
+    }
+
+    /// Delete every document returned by a query (or all docs in a collection),
+    /// committing in batches of 400 to stay under Firestore's 500-op limit.
+    private func deleteDocuments(in query: Query) async throws {
+        let snapshot = try await query.getDocuments()
+        let chunks = snapshot.documents.chunked(into: 400)
+        for chunk in chunks {
+            let batch = db.batch()
+            for doc in chunk { batch.deleteDocument(doc.reference) }
+            try await batch.commit()
+        }
+    }
+
     // MARK: - Search
 
     func searchUsers(query: String) async throws -> [UserModel] {

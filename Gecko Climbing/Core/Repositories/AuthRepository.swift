@@ -8,6 +8,19 @@ protocol AuthRepositoryProtocol: AnyObject {
     func signIn(email: String, password: String) async throws
     func signUp(email: String, password: String, username: String, displayName: String) async throws
     func signOut() throws
+    /// Make sure the signed-in session is fresh enough that Firebase will honor
+    /// an account deletion, so the caller never wipes Firestore data and then
+    /// fails to delete the auth user (a half-deleted account). For password
+    /// accounts this re-authenticates with the supplied password; pass `nil`
+    /// to discover whether one is needed (throws `AuthError.passwordRequired`).
+    /// For OAuth accounts it verifies the login is recent and otherwise throws
+    /// `AuthError.requiresRecentLogin`.
+    func reauthenticateForDeletion(password: String?) async throws
+    /// Permanently delete the signed-in Firebase Auth account. Call this only
+    /// after `reauthenticateForDeletion` has succeeded and the user's Firestore
+    /// data has been wiped — once the auth user is gone we lose the uid the
+    /// security rules check against.
+    func deleteAccount() async throws
     func signInWithGoogle(idToken: String, accessToken: String) async throws
     func signInWithApple(idToken: String, rawNonce: String, fullName: PersonNameComponents?) async throws
     func addAuthStateListener(_ listener: @escaping (Bool) -> Void)
@@ -71,6 +84,20 @@ final class MockAuthRepository: AuthRepositoryProtocol, @unchecked Sendable {
         stateListener?(false)
     }
 
+    func reauthenticateForDeletion(password: String?) async throws {
+        // Mock accounts never go stale; nothing to re-authenticate.
+    }
+
+    func deleteAccount() async throws {
+        try await Task.sleep(nanoseconds: 300_000_000)
+        let email = currentUserId.contains("@") ? currentUserId : "\(currentUserId)@test.com"
+        mockUsers[email] = nil
+        currentUserId = ""
+        currentUserDisplayName = ""
+        isAuthenticated = false
+        stateListener?(false)
+    }
+
     func signInWithGoogle(idToken: String, accessToken: String) async throws {
         try await Task.sleep(nanoseconds: 500_000_000)
         currentUserId = "google_mock_user"
@@ -112,6 +139,13 @@ enum AuthError: LocalizedError {
     /// is on and we couldn't look them up.
     case accountExistsWithDifferentCredential(email: String?, existingProviders: [String])
     case providerNotEnabled
+    /// Firebase requires a fresh sign-in before it will delete the account.
+    /// Surfaced from the account-deletion flow so the UI can tell the user to
+    /// sign out and back in first.
+    case requiresRecentLogin
+    /// A password is needed to re-authenticate a password account before
+    /// deletion. The deletion UI catches this to prompt for the password.
+    case passwordRequired
     case appleAuthorizationFailed(String)
     case nonceGenerationFailed(Int)
     case unknown(String)
@@ -127,6 +161,10 @@ enum AuthError: LocalizedError {
             return Self.accountCollisionMessage(providers: providers)
         case .providerNotEnabled:
             return "Apple Sign-In isn't enabled for this app yet. Please try Google or email."
+        case .requiresRecentLogin:
+            return "For your security, please sign out and sign back in, then try deleting your account again."
+        case .passwordRequired:
+            return "Please enter your password to delete your account."
         case .appleAuthorizationFailed(let message):
             return "Apple Sign-In failed: \(message)"
         case .nonceGenerationFailed:

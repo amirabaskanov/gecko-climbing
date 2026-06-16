@@ -19,6 +19,7 @@ enum AnalyticsEvent: String {
     case postReported = "post_reported"
     case userBlocked = "user_blocked"
     case userUnblocked = "user_unblocked"
+    case accountDeleted = "account_deleted"
 }
 
 enum AnalyticsService {
