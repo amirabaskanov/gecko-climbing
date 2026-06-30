@@ -20,14 +20,17 @@ struct StatsView: View {
                 set: { viewModel?.error = $0 }
             ))
             .onAppear {
-                if viewModel == nil {
-                    let vm = StatsViewModel(
-                        sessionRepository: appEnv.sessionRepository,
-                        userId: authViewModel.currentUserId
-                    )
-                    viewModel = vm
-                    Task { await vm.loadStats() }
-                }
+                // Reuse the VM across appearances but always re-fetch: a session
+                // edited elsewhere (e.g. SessionDetailView) must be reflected when
+                // the user returns here. The refresh is silent — `contentBody`
+                // keeps showing existing data while `isLoading` is true, so there's
+                // no spinner flash once stats have loaded once.
+                let vm = viewModel ?? StatsViewModel(
+                    sessionRepository: appEnv.sessionRepository,
+                    userId: authViewModel.currentUserId
+                )
+                viewModel = vm
+                Task { await vm.loadStats() }
             }
     }
 
