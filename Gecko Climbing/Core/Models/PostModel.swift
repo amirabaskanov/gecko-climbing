@@ -72,6 +72,55 @@ final class PostModel {
     }
 }
 
+// MARK: - Session → Post snapshot
+
+/// The denormalized slice of a session that a feed `PostModel` caches: the
+/// headline grade, climb count, gym, grade histogram, and the chronological
+/// grade/outcome sequences. This is the single source of truth for that
+/// projection — both post *creation* (`CelebrationView`) and post *sync after
+/// a session edit* (`SessionDetailViewModel`) build it here, so the feed can
+/// never drift from the session it mirrors. Computed straight from `climbs`,
+/// so it does not depend on `SessionModel.updateStats()` having run.
+struct PostSessionSnapshot {
+    let gymName: String
+    let topGrade: String
+    let topGradeNumeric: Int
+    let totalClimbs: Int
+    let gradeCounts: [String: Int]
+    let gradeSequence: [String]
+    let outcomeSequence: [String]
+
+    init(session: SessionModel) {
+        // Chronological (oldest → newest) so the feed renders in logging order.
+        let ordered = session.climbs.sorted { $0.loggedAt < $1.loggedAt }
+        let completed = ordered.filter { $0.climbOutcome.isCompleted }
+        let topCompleted = completed.max(by: { $0.gradeNumeric < $1.gradeNumeric })
+
+        gymName = session.gymName
+        topGrade = topCompleted?.grade ?? ""
+        topGradeNumeric = topCompleted?.gradeNumeric ?? -1
+        totalClimbs = ordered.count
+        gradeCounts = Dictionary(grouping: completed, by: { $0.grade }).mapValues { $0.count }
+        // Include attempts in the sequences — the feed renders them with a
+        // different texture, keyed off the parallel `outcomeSequence`.
+        gradeSequence = ordered.map(\.grade)
+        outcomeSequence = ordered.map { $0.climbOutcome.rawValue }
+    }
+
+    /// Field map applied to a post document on edit-sync. Keys match `PostDTO`.
+    var firestoreFields: [String: Any] {
+        [
+            "gymName": gymName,
+            "topGrade": topGrade,
+            "topGradeNumeric": topGradeNumeric,
+            "totalClimbs": totalClimbs,
+            "gradeCounts": gradeCounts,
+            "gradeSequence": gradeSequence,
+            "outcomeSequence": outcomeSequence
+        ]
+    }
+}
+
 #if DEBUG
 extension PostModel {
     /// Canned post for SwiftUI previews. Avoid referencing this outside previews.

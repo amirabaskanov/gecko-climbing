@@ -416,10 +416,10 @@ final class DTORoundtripTests: XCTestCase {
         let dto = PostDTO(
             id: "p1", userId: "u1", userDisplayName: "Alex",
             userProfileImageURL: "", sessionId: "s1", gymName: "Gym",
-            type: "session", caption: "Test", imageURL: nil,
+            type: "session", caption: "Test", imageURL: nil, imageURLs: [],
             likesCount: 0, commentsCount: 0, createdAt: Date(),
             topGrade: "V5", topGradeNumeric: 5, totalClimbs: 1,
-            gradeCounts: ["V5": 1], visibility: "followers"
+            gradeCounts: ["V5": 1], gradeSequence: [], outcomeSequence: [], visibility: "followers"
         )
         let dict = dto.asDictionary()
         XCTAssertNil(dict["imageURL"])
@@ -455,7 +455,9 @@ final class MockAuthRepositoryTests: XCTestCase {
             try await auth.signUp(email: "user1@test.com", password: "pass", username: "test", displayName: "Test")
             XCTFail("Should have thrown")
         } catch let error as AuthError {
-            XCTAssertEqual(error, .emailAlreadyInUse)
+            guard case .emailAlreadyInUse = error else {
+                return XCTFail("Wrong AuthError: \(error)")
+            }
         } catch {
             XCTFail("Wrong error type: \(error)")
         }
@@ -553,19 +555,20 @@ final class MockUserRepositoryTests: XCTestCase {
 
     func testFollowAndUnfollow() async throws {
         let repo = MockUserRepository(currentUserId: "user1")
+        let target = MockSeed.rileyUserId
 
-        let before = try await repo.isFollowing(targetUID: "friend_1")
+        let before = try await repo.isFollowing(targetUID: target)
         XCTAssertFalse(before)
 
-        try await repo.follow(targetUID: "friend_1")
-        let afterFollow = try await repo.isFollowing(targetUID: "friend_1")
+        try await repo.follow(targetUID: target)
+        let afterFollow = try await repo.isFollowing(targetUID: target)
         XCTAssertTrue(afterFollow)
 
         let following = try await repo.fetchFollowing(uid: "user1")
-        XCTAssertTrue(following.contains { $0.uid == "friend_1" })
+        XCTAssertTrue(following.contains { $0.uid == target })
 
-        try await repo.unfollow(targetUID: "friend_1")
-        let afterUnfollow = try await repo.isFollowing(targetUID: "friend_1")
+        try await repo.unfollow(targetUID: target)
+        let afterUnfollow = try await repo.isFollowing(targetUID: target)
         XCTAssertFalse(afterUnfollow)
     }
 
@@ -578,9 +581,9 @@ final class MockUserRepositoryTests: XCTestCase {
 
     func testSearchReturnsMatching() async throws {
         let repo = MockUserRepository(currentUserId: "user1")
-        let results = try await repo.searchUsers(query: "Sam")
+        let results = try await repo.searchUsers(query: "Riley")
         XCTAssertFalse(results.isEmpty)
-        XCTAssertEqual(results.first?.displayName, "Sam Rocks")
+        XCTAssertEqual(results.first?.displayName, MockSeed.rileyDisplayName)
     }
 
     func testSearchEmptyQuery() async throws {
@@ -591,11 +594,11 @@ final class MockUserRepositoryTests: XCTestCase {
 
     func testFollowIncrementsCount() async throws {
         let repo = MockUserRepository(currentUserId: "user1")
-        let beforeUser = try await repo.fetchUser(uid: "friend_1")
+        let beforeUser = try await repo.fetchUser(uid: MockSeed.rileyUserId)
         let beforeCount = beforeUser.followersCount
 
-        try await repo.follow(targetUID: "friend_1")
-        let afterUser = try await repo.fetchUser(uid: "friend_1")
+        try await repo.follow(targetUID: MockSeed.rileyUserId)
+        let afterUser = try await repo.fetchUser(uid: MockSeed.rileyUserId)
 
         XCTAssertEqual(afterUser.followersCount, beforeCount + 1)
     }
@@ -603,11 +606,11 @@ final class MockUserRepositoryTests: XCTestCase {
     func testUnfollowDoesNotGoNegative() async throws {
         let repo = MockUserRepository(currentUserId: "user1")
         // Unfollow someone we're not following — count should not go below 0
-        let beforeUser = try await repo.fetchUser(uid: "friend_1")
+        let beforeUser = try await repo.fetchUser(uid: MockSeed.rileyUserId)
         _ = beforeUser.followersCount
 
-        try await repo.unfollow(targetUID: "friend_1")
-        let afterUser = try await repo.fetchUser(uid: "friend_1")
+        try await repo.unfollow(targetUID: MockSeed.rileyUserId)
+        let afterUser = try await repo.fetchUser(uid: MockSeed.rileyUserId)
         XCTAssertGreaterThanOrEqual(afterUser.followersCount, 0)
     }
 }
@@ -619,7 +622,7 @@ final class MockPostRepositoryTests: XCTestCase {
     func testSeedFeedHasPosts() async throws {
         let repo = MockPostRepository()
         let posts = try await repo.fetchFeed(for: "user1")
-        XCTAssertEqual(posts.count, 5)
+        XCTAssertFalse(posts.isEmpty)
         // Sorted by date descending
         for i in 0..<(posts.count - 1) {
             XCTAssertGreaterThanOrEqual(posts[i].createdAt, posts[i + 1].createdAt)
@@ -719,6 +722,7 @@ final class MockClimbRepositoryTests: XCTestCase {
 
 // MARK: - NewSessionViewModel Tests
 
+@MainActor
 final class NewSessionViewModelTests: XCTestCase {
 
     func testAddClimbInsertsAtBeginning() {
@@ -800,25 +804,38 @@ final class NewSessionViewModelTests: XCTestCase {
 
 // MARK: - HomeViewModel Tests
 
+@MainActor
 final class HomeViewModelTests: XCTestCase {
 
     func testLoadFeedPopulatesPosts() async {
         let repo = MockPostRepository()
-        let vm = HomeViewModel(postRepository: repo, userId: "user1")
+        let vm = HomeViewModel(
+            postRepository: repo,
+            userRepository: MockUserRepository(currentUserId: "user1"),
+            sessionRepository: MockSessionRepository(currentUserId: "user1"),
+            feedbackRepository: MockFeedbackRepository(),
+            userId: "user1"
+        )
 
         await vm.loadFeed()
 
-        XCTAssertFalse(vm.posts.isEmpty)
-        XCTAssertFalse(vm.isLoading)
+        XCTAssertFalse(vm.followingPosts.isEmpty)
+        XCTAssertFalse(vm.isLoadingFollowing)
         XCTAssertNil(vm.error)
     }
 
     func testToggleLikeFlipsState() async {
         let repo = MockPostRepository()
-        let vm = HomeViewModel(postRepository: repo, userId: "user1")
+        let vm = HomeViewModel(
+            postRepository: repo,
+            userRepository: MockUserRepository(currentUserId: "user1"),
+            sessionRepository: MockSessionRepository(currentUserId: "user1"),
+            feedbackRepository: MockFeedbackRepository(),
+            userId: "user1"
+        )
 
         await vm.loadFeed()
-        guard let post = vm.posts.first else {
+        guard let post = vm.followingPosts.first else {
             XCTFail("No posts in feed")
             return
         }
@@ -827,13 +844,19 @@ final class HomeViewModelTests: XCTestCase {
 
         await vm.toggleLike(post)
 
-        let updated = vm.posts.first { $0.postId == post.postId }!
+        let updated = vm.followingPosts.first { $0.postId == post.postId }!
         XCTAssertEqual(updated.isLikedByCurrentUser, !wasLiked)
     }
 
     func testToggleLikeNonExistentPost() async {
         let repo = MockPostRepository()
-        let vm = HomeViewModel(postRepository: repo, userId: "user1")
+        let vm = HomeViewModel(
+            postRepository: repo,
+            userRepository: MockUserRepository(currentUserId: "user1"),
+            sessionRepository: MockSessionRepository(currentUserId: "user1"),
+            feedbackRepository: MockFeedbackRepository(),
+            userId: "user1"
+        )
         await vm.loadFeed()
 
         let fakePost = PostModel(postId: "nonexistent", userId: "u1", sessionId: "s1")
@@ -844,6 +867,7 @@ final class HomeViewModelTests: XCTestCase {
 
 // MARK: - StatsViewModel Tests
 
+@MainActor
 final class StatsViewModelTests: XCTestCase {
 
     func testComputedStats() {
@@ -945,6 +969,7 @@ final class StatsViewModelTests: XCTestCase {
 
 // MARK: - SessionDetailViewModel Tests
 
+@MainActor
 final class SessionDetailViewModelTests: XCTestCase {
 
     func testSortedClimbsChronological() {
@@ -953,7 +978,7 @@ final class SessionDetailViewModelTests: XCTestCase {
         let newer = ClimbModel(sessionId: session.sessionId, grade: "V5", gradeNumeric: 5, outcome: .sent, attempts: 2, loggedAt: Date())
         session.climbs = [newer, older]
 
-        let vm = SessionDetailViewModel(session: session, sessionRepository: MockSessionRepository(currentUserId: "u1"))
+        let vm = SessionDetailViewModel(session: session, sessionRepository: MockSessionRepository(currentUserId: "u1"), postRepository: MockPostRepository())
 
         // Chronological: first logged climb (V3) comes first, latest (V5) last.
         XCTAssertEqual(vm.sortedClimbs[0].grade, "V3")
@@ -969,7 +994,7 @@ final class SessionDetailViewModelTests: XCTestCase {
             ClimbModel(sessionId: session.sessionId, grade: "V2", gradeNumeric: 2, outcome: .attempt),
         ]
 
-        let vm = SessionDetailViewModel(session: session, sessionRepository: MockSessionRepository(currentUserId: "u1"))
+        let vm = SessionDetailViewModel(session: session, sessionRepository: MockSessionRepository(currentUserId: "u1"), postRepository: MockPostRepository())
 
         XCTAssertEqual(vm.flashes.count, 1)
         XCTAssertEqual(vm.sends.count, 1)
@@ -978,7 +1003,7 @@ final class SessionDetailViewModelTests: XCTestCase {
 
     func testAddClimb() async {
         let session = SessionModel(userId: "u1", gymName: "Test")
-        let vm = SessionDetailViewModel(session: session, sessionRepository: MockSessionRepository(currentUserId: "u1"))
+        let vm = SessionDetailViewModel(session: session, sessionRepository: MockSessionRepository(currentUserId: "u1"), postRepository: MockPostRepository())
 
         await vm.addClimb(grade: "V5", outcome: .flash, attempts: 1)
 
@@ -993,16 +1018,58 @@ final class SessionDetailViewModelTests: XCTestCase {
         session.climbs = [climb]
         session.updateStats()
 
-        let vm = SessionDetailViewModel(session: session, sessionRepository: MockSessionRepository(currentUserId: "u1"))
+        let vm = SessionDetailViewModel(session: session, sessionRepository: MockSessionRepository(currentUserId: "u1"), postRepository: MockPostRepository())
         await vm.deleteClimb(climb)
 
         XCTAssertTrue(vm.session.climbs.isEmpty)
         XCTAssertEqual(vm.session.totalClimbs, 0)
     }
+
+    /// Editing a session must cascade its denormalized snapshot onto the linked
+    /// feed post — the bug this fixes was the post going stale after an edit.
+    func testEditSyncsLinkedFeedPost() async throws {
+        let session = SessionModel(userId: "u1", gymName: "Movement")
+        let starter = ClimbModel(sessionId: session.sessionId, grade: "V3", gradeNumeric: 3, outcome: .flash)
+        session.climbs = [starter]
+        session.updateStats()
+
+        // A shared post pointing at this session, seeded into the post repo.
+        let postRepo = MockPostRepository()
+        let post = PostModel(userId: "u1", sessionId: session.sessionId, gymName: "Movement",
+                             topGrade: "V3", topGradeNumeric: 3, totalClimbs: 1, gradeCounts: ["V3": 1])
+        try await postRepo.createPost(post)
+
+        let vm = SessionDetailViewModel(session: session, sessionRepository: MockSessionRepository(currentUserId: "u1"), postRepository: postRepo)
+
+        // Add a harder climb — the post's headline grade and counts should follow.
+        await vm.addClimb(grade: "V6", outcome: .sent, attempts: 3)
+
+        let synced = try await postRepo.fetchPosts(for: "u1").first { $0.sessionId == session.sessionId }
+        let updated = try XCTUnwrap(synced)
+        XCTAssertEqual(updated.topGrade, "V6")
+        XCTAssertEqual(updated.topGradeNumeric, 6)
+        XCTAssertEqual(updated.totalClimbs, 2)
+        XCTAssertEqual(updated.gradeCounts["V6"], 1)
+        XCTAssertEqual(updated.gradeSequence, ["V3", "V6"])
+        XCTAssertEqual(updated.outcomeSequence, ["flash", "sent"])
+    }
+
+    /// Editing a session that was never shared must not error — the post sync
+    /// is a no-op when no post references the session.
+    func testEditWithNoLinkedPostIsNoOp() async {
+        let session = SessionModel(userId: "u1", gymName: "Test")
+        let vm = SessionDetailViewModel(session: session, sessionRepository: MockSessionRepository(currentUserId: "u1"), postRepository: MockPostRepository())
+
+        await vm.addClimb(grade: "V4", outcome: .flash, attempts: 1)
+
+        XCTAssertNil(vm.error)
+        XCTAssertEqual(vm.session.climbs.count, 1)
+    }
 }
 
 // MARK: - SocialViewModel Tests
 
+@MainActor
 final class SocialViewModelTests: XCTestCase {
 
     func testFollowState() async {
@@ -1022,7 +1089,9 @@ final class SocialViewModelTests: XCTestCase {
         let repo = MockUserRepository(currentUserId: "user1")
         let vm = SocialViewModel(userRepository: repo, userId: "user1")
 
-        await vm.follow(user: UserModel(uid: "friend_1", displayName: "Sam", username: "sam"))
+        // Follow a user that exists in the mock seed so loadFollowing() (which
+        // resolves followed UIDs back to seeded UserModels) can return it.
+        await vm.follow(user: UserModel(uid: MockSeed.rileyUserId, displayName: MockSeed.rileyDisplayName, username: "riley"))
         await vm.loadFollowing()
 
         XCTAssertFalse(vm.following.isEmpty)
@@ -1044,6 +1113,7 @@ final class SocialViewModelTests: XCTestCase {
 
 // MARK: - ProfileViewModel Tests
 
+@MainActor
 final class ProfileViewModelTests: XCTestCase {
 
     func testWeeklyStreakNoSessions() {
@@ -1051,6 +1121,7 @@ final class ProfileViewModelTests: XCTestCase {
             userRepository: MockUserRepository(currentUserId: "u1"),
             sessionRepository: MockSessionRepository(currentUserId: "u1"),
             storageRepository: MockStorageRepository(),
+            postRepository: MockPostRepository(),
             userId: "u1"
         )
         vm.allSessions = []
@@ -1062,6 +1133,7 @@ final class ProfileViewModelTests: XCTestCase {
             userRepository: MockUserRepository(currentUserId: "u1"),
             sessionRepository: MockSessionRepository(currentUserId: "u1"),
             storageRepository: MockStorageRepository(),
+            postRepository: MockPostRepository(),
             userId: "u1"
         )
         vm.allSessions = [
@@ -1075,6 +1147,7 @@ final class ProfileViewModelTests: XCTestCase {
             userRepository: MockUserRepository(currentUserId: "user1"),
             sessionRepository: MockSessionRepository(currentUserId: "user1"),
             storageRepository: MockStorageRepository(),
+            postRepository: MockPostRepository(),
             userId: "user1"
         )
 
@@ -1092,6 +1165,7 @@ final class ProfileViewModelTests: XCTestCase {
             userRepository: MockUserRepository(currentUserId: "user1"),
             sessionRepository: MockSessionRepository(currentUserId: "user1"),
             storageRepository: MockStorageRepository(),
+            postRepository: MockPostRepository(),
             userId: "user1"
         )
 

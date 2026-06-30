@@ -24,7 +24,8 @@ struct SessionDetailView: View {
             if viewModel == nil {
                 viewModel = SessionDetailViewModel(
                     session: session,
-                    sessionRepository: appEnv.sessionRepository
+                    sessionRepository: appEnv.sessionRepository,
+                    postRepository: appEnv.postRepository
                 )
             }
         }

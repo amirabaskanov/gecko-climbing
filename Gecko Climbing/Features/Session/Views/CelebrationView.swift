@@ -238,32 +238,26 @@ struct CelebrationView: View {
                     }
                 }
 
-                // Chronological (oldest → newest) so the feed renders in logging order.
-                let orderedClimbs = saved.climbs.sorted { $0.loggedAt < $1.loggedAt }
-                let completedClimbs = orderedClimbs.filter { $0.climbOutcome.isCompleted }
-                let gradeCounts = Dictionary(
-                    grouping: completedClimbs,
-                    by: { $0.grade }
-                ).mapValues { $0.count }
-                // Include attempts too so the feed can render them with a different texture.
-                let gradeSequence = orderedClimbs.map(\.grade)
-                let outcomeSequence = orderedClimbs.map { $0.climbOutcome.rawValue }
+                // Build the session-derived fields from the shared snapshot so a
+                // brand-new post and a post re-synced after an edit are always
+                // computed identically (see PostSessionSnapshot).
+                let snapshot = PostSessionSnapshot(session: saved)
 
                 let post = PostModel(
                     userId: saved.userId,
                     userDisplayName: userDisplayName,
                     userProfileImageURL: userProfileImageURL,
                     sessionId: saved.sessionId,
-                    gymName: saved.gymName,
+                    gymName: snapshot.gymName,
                     caption: caption,
                     imageURL: uploadedURLs.first,
                     imageURLs: uploadedURLs,
-                    topGrade: saved.highestGrade,
-                    topGradeNumeric: saved.highestGradeNumeric,
-                    totalClimbs: saved.totalClimbs,
-                    gradeCounts: gradeCounts,
-                    gradeSequence: gradeSequence,
-                    outcomeSequence: outcomeSequence
+                    topGrade: snapshot.topGrade,
+                    topGradeNumeric: snapshot.topGradeNumeric,
+                    totalClimbs: snapshot.totalClimbs,
+                    gradeCounts: snapshot.gradeCounts,
+                    gradeSequence: snapshot.gradeSequence,
+                    outcomeSequence: snapshot.outcomeSequence
                 )
                 onDone(saved, post)
             }

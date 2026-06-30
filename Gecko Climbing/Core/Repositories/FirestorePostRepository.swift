@@ -272,6 +272,29 @@ final class FirestorePostRepository: PostRepositoryProtocol, @unchecked Sendable
         }
     }
 
+    func updatePost(forSessionId sessionId: String, snapshot: PostSessionSnapshot) async throws {
+        guard !sessionId.isEmpty else { return }
+
+        let matches = try await postsRef
+            .whereField("sessionId", isEqualTo: sessionId)
+            .getDocuments()
+        guard !matches.documents.isEmpty else { return }
+
+        // One session maps to one post in practice, but batch + chunk defensively.
+        let fields = snapshot.firestoreFields
+        for chunk in matches.documents.chunked(into: 499) {
+            let batch = db.batch()
+            for doc in chunk {
+                batch.updateData(fields, forDocument: doc.reference)
+            }
+            try await batch.commit()
+        }
+
+        #if DEBUG
+        print("📝 updatePost: synced \(matches.documents.count) post(s) for sessionId=\(sessionId)")
+        #endif
+    }
+
     func fetchPosts(for userId: String) async throws -> [PostModel] {
         let snapshot = try await postsRef
             .whereField("userId", isEqualTo: userId)

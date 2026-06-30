@@ -86,6 +86,12 @@ final class FirestoreSessionRepository: SessionRepositoryProtocol, @unchecked Se
 
         try await batch.commit()
         session.isSyncedToFirestore = true
+
+        // Editing climbs can change the user's all-time highest grade / climb
+        // totals, so recompute the denormalized user-doc stats — same as
+        // create/delete do. Without this the profile + "all-time best" surfaces
+        // go stale after an edit.
+        try await updateUserStats(userId: session.userId)
     }
 
     func deleteSession(_ sessionId: String, context: ModelContext) async throws {

@@ -12,6 +12,11 @@ protocol PostRepositoryProtocol: AnyObject {
     func unlikePost(_ postId: String, userId: String) async throws
     func deletePost(_ postId: String) async throws
     func deletePostBySessionId(_ sessionId: String) async throws
+    /// Sync the denormalized session snapshot (grade, counts, gym, sequences)
+    /// onto any feed post that references `sessionId`, after the user edits the
+    /// session. No-op when the session was never shared (no matching post). The
+    /// post's own fields — caption, images, likes, comments — are left untouched.
+    func updatePost(forSessionId sessionId: String, snapshot: PostSessionSnapshot) async throws
     func fetchPosts(for userId: String) async throws -> [PostModel]
     /// Fetch a single post by id, regardless of feed membership. Used for
     /// deep links (e.g. a like or comment notification) where the target
@@ -110,6 +115,19 @@ final class MockPostRepository: PostRepositoryProtocol, @unchecked Sendable {
     func deletePostBySessionId(_ sessionId: String) async throws {
         try await Task.sleep(nanoseconds: 200_000_000)
         posts.removeAll { $0.sessionId == sessionId }
+    }
+
+    func updatePost(forSessionId sessionId: String, snapshot: PostSessionSnapshot) async throws {
+        try await Task.sleep(nanoseconds: 150_000_000)
+        for idx in posts.indices where posts[idx].sessionId == sessionId {
+            posts[idx].gymName = snapshot.gymName
+            posts[idx].topGrade = snapshot.topGrade
+            posts[idx].topGradeNumeric = snapshot.topGradeNumeric
+            posts[idx].totalClimbs = snapshot.totalClimbs
+            posts[idx].gradeCounts = snapshot.gradeCounts
+            posts[idx].gradeSequence = snapshot.gradeSequence
+            posts[idx].outcomeSequence = snapshot.outcomeSequence
+        }
     }
 
     func fetchPosts(for userId: String) async throws -> [PostModel] {
