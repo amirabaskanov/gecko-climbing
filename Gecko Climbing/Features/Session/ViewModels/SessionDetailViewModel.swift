@@ -9,10 +9,16 @@ final class SessionDetailViewModel {
     var error: Error?
 
     private let sessionRepository: any SessionRepositoryProtocol
+    private let postRepository: any PostRepositoryProtocol
 
-    init(session: SessionModel, sessionRepository: any SessionRepositoryProtocol) {
+    init(
+        session: SessionModel,
+        sessionRepository: any SessionRepositoryProtocol,
+        postRepository: any PostRepositoryProtocol
+    ) {
         self.session = session
         self.sessionRepository = sessionRepository
+        self.postRepository = postRepository
     }
 
     /// Chronological (oldest → newest) — first logged climb appears first.
@@ -35,21 +41,13 @@ final class SessionDetailViewModel {
         )
         session.climbs.append(climb)
         session.updateStats()
-        do {
-            try await sessionRepository.updateSession(session)
-        } catch {
-            self.error = error
-        }
+        await persist()
     }
 
     func deleteClimb(_ climb: ClimbModel) async {
         session.climbs.removeAll { $0.climbId == climb.climbId }
         session.updateStats()
-        do {
-            try await sessionRepository.updateSession(session)
-        } catch {
-            self.error = error
-        }
+        await persist()
     }
 
     func updateClimb(_ climb: ClimbModel, grade: String, outcome: ClimbOutcome, attempts: Int) async {
@@ -59,11 +57,7 @@ final class SessionDetailViewModel {
         climb.climbOutcome = outcome
         climb.attempts = attempts
         session.updateStats()
-        do {
-            try await sessionRepository.updateSession(session)
-        } catch {
-            self.error = error
-        }
+        await persist()
     }
 
     func deleteSession(context: ModelContext) async {
@@ -85,8 +79,21 @@ final class SessionDetailViewModel {
         session.notes = notes
         session.date = date
         session.durationMinutes = max(0, durationMinutes)
+        await persist()
+    }
+
+    /// Persist the edited session, then cascade its denormalized snapshot onto
+    /// the linked feed post so the feed reflects the edit. The post sync is a
+    /// no-op when the session was never shared, and leaves the post's caption,
+    /// images, likes, and comments untouched. Both writes share one error path:
+    /// the session save is the source of truth, the post sync mirrors it.
+    private func persist() async {
         do {
             try await sessionRepository.updateSession(session)
+            try await postRepository.updatePost(
+                forSessionId: session.sessionId,
+                snapshot: PostSessionSnapshot(session: session)
+            )
         } catch {
             self.error = error
         }
