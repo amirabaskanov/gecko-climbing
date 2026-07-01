@@ -23,6 +23,39 @@ extension SessionRepositoryProtocol {
         let sessions = try await fetchSessions(for: userId)
         return sessions.sorted { $0.date > $1.date }.map(\.gymName).dedupedGymNames()
     }
+
+    /// One-time self-heal: merge gym-name spelling variants (a stray trailing
+    /// space or casing) across the user's sessions to a single canonical form —
+    /// the trimmed spelling of the most recent session in each cluster — so
+    /// gym-grouped stats and the linked feed posts converge on stored data too
+    /// (read-time normalization already fixes the display).
+    ///
+    /// Reuses `updateSession`, which re-syncs the linked post's gym name and the
+    /// user's denormalized stats. Idempotent: a no-op once names are normalized.
+    /// Returns `true` only if every needed write succeeded, so the caller can
+    /// safely mark the migration done and skip it on future launches.
+    @discardableResult
+    func normalizeGymNames(for userId: String) async -> Bool {
+        guard let sessions = try? await fetchSessions(for: userId) else { return false }
+
+        var clusters: [String: [SessionModel]] = [:]
+        for session in sessions {
+            let key = session.gymName.trimmedGymName.lowercased()
+            guard !key.isEmpty else { continue }
+            clusters[key, default: []].append(session)
+        }
+
+        var allSucceeded = true
+        for group in clusters.values {
+            guard let canonical = group.max(by: { $0.date < $1.date })?.gymName.trimmedGymName
+            else { continue }
+            for session in group where session.gymName != canonical {
+                session.gymName = canonical
+                do { try await updateSession(session) } catch { allSucceeded = false }
+            }
+        }
+        return allSucceeded
+    }
 }
 
 // MARK: - Gym name normalization
