@@ -111,7 +111,7 @@ final class NewSessionViewModel {
 
         let session = SessionModel(
             userId: userId,
-            gymName: gymName,
+            gymName: gymName.trimmedGymName,
             date: date,
             durationMinutes: finalDuration,
             notes: notes,

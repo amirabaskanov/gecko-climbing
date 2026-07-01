@@ -32,8 +32,8 @@ enum FeedEnricher {
         if post.userId != viewer.userId,
            !viewer.homeGyms.isEmpty,
            !post.gymName.isEmpty,
-           viewer.homeGyms.contains(post.gymName.lowercased()) {
-            result.append(.yourGym(name: post.gymName))
+           viewer.homeGyms.contains(post.gymName.trimmedGymName.lowercased()) {
+            result.append(.yourGym(name: post.gymName.trimmedGymName))
         }
 
         // Your level — the post's top grade is within ±1 of the viewer's

@@ -21,9 +21,46 @@ protocol SessionRepositoryProtocol: AnyObject {
 extension SessionRepositoryProtocol {
     func fetchRecentGymNames(for userId: String) async throws -> [String] {
         let sessions = try await fetchSessions(for: userId)
-        let gyms = sessions.sorted { $0.date > $1.date }.map(\.gymName).filter { !$0.isEmpty }
+        return sessions.sorted { $0.date > $1.date }.map(\.gymName).dedupedGymNames()
+    }
+}
+
+// MARK: - Gym name normalization
+//
+// Colocated here (rather than its own file in Core/Extensions) so it ships in
+// the build target without a project-file edit. Shared by the recent-gym
+// suggestion list and by session save, so a gym name is stored and compared in
+// one canonical form.
+
+extension String {
+    /// Canonical display form of a gym name: surrounding whitespace/newlines
+    /// removed. A stray trailing space (common from iOS keyboard autocomplete)
+    /// otherwise makes the same name diverge from a cleanly-typed one.
+    var trimmedGymName: String {
+        trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
+extension Sequence where Element == String {
+    /// De-duplicate gym names ignoring surrounding whitespace and case, keeping
+    /// the first occurrence's trimmed form and the original (recency) order.
+    /// Blank names are dropped.
+    ///
+    /// Exact `Set<String>` de-duplication let visually-identical names slip
+    /// through when the stored strings differed only by trailing whitespace or
+    /// casing (e.g. "Dogpatch Boulders" vs "Dogpatch Boulders "), which is why a
+    /// gym could appear twice in the suggestion list.
+    func dedupedGymNames() -> [String] {
         var seen = Set<String>()
-        return gyms.filter { seen.insert($0).inserted }
+        var result: [String] = []
+        for name in self {
+            let display = name.trimmedGymName
+            guard !display.isEmpty else { continue }
+            if seen.insert(display.lowercased()).inserted {
+                result.append(display)
+            }
+        }
+        return result
     }
 }
 
