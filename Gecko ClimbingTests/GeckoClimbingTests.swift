@@ -1,4 +1,5 @@
 import XCTest
+import SwiftData
 @testable import Gecko_Climbing
 
 // MARK: - ClimbOutcome Tests
@@ -531,6 +532,63 @@ final class MockSessionRepositoryTests: XCTestCase {
             XCTAssertGreaterThan(session.totalClimbs, 0)
         }
     }
+
+    /// The in-app self-heal migration: existing sessions logged under gym-name
+    /// variants (trailing space / casing) converge to one canonical spelling —
+    /// the most recent session's trimmed form.
+    func testNormalizeGymNamesMergesVariants() async throws {
+        let repo = MockSessionRepository(currentUserId: "gymmig")
+        let container = try ModelContainer(
+            for: SessionModel.self, ClimbModel.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let ctx = ModelContext(container)
+
+        // Same gym, three spellings; the newest is the clean "ZZ Test Gym".
+        let variants: [(String, Date)] = [
+            ("zz test gym",  Date(timeIntervalSince1970: 1_000)),
+            ("ZZ Test Gym ", Date(timeIntervalSince1970: 2_000)),
+            ("ZZ Test Gym",  Date(timeIntervalSince1970: 3_000)),
+        ]
+        for (name, date) in variants {
+            try await repo.createSession(
+                SessionModel(userId: "gymmig", gymName: name, date: date), context: ctx
+            )
+        }
+
+        let ok = await repo.normalizeGymNames(for: "gymmig")
+        XCTAssertTrue(ok)
+
+        let names = try await repo.fetchSessions(for: "gymmig")
+            .map(\.gymName)
+            .filter { $0.lowercased().contains("zz test gym") }
+        XCTAssertEqual(names.count, 3)
+        XCTAssertEqual(Set(names), ["ZZ Test Gym"]) // all merged to the canonical spelling
+    }
+}
+
+// MARK: - Gym Name Dedupe Tests
+
+final class GymNameDedupeTests: XCTestCase {
+
+    /// The reported bug: the same gym typed with a stray trailing space (common
+    /// from iOS keyboard autocomplete) appeared twice in the suggestion list,
+    /// because exact Set<String> de-duplication treated it as a distinct name.
+    func testDedupeIgnoresSurroundingWhitespace() {
+        let raw = ["Dogpatch Boulders", "Dogpatch Boulders ", " Dogpatch Boulders"]
+        XCTAssertEqual(raw.dedupedGymNames(), ["Dogpatch Boulders"])
+    }
+
+    func testDedupeIgnoresCase() {
+        XCTAssertEqual(["Movement", "movement", "MOVEMENT"].dedupedGymNames(), ["Movement"])
+    }
+
+    /// Preserves recency order, trims the surviving display value, drops blanks,
+    /// and keeps genuinely distinct gyms.
+    func testDedupePreservesOrderTrimsAndDropsBlanks() {
+        let raw = ["Dogpatch Boulders ", "", "   ", "The Spot", "dogpatch boulders", "The Spot"]
+        XCTAssertEqual(raw.dedupedGymNames(), ["Dogpatch Boulders", "The Spot"])
+    }
 }
 
 // MARK: - Mock User Repository Tests
@@ -964,6 +1022,28 @@ final class StatsViewModelTests: XCTestCase {
         XCTAssertFalse(vm.sessions.isEmpty)
         XCTAssertFalse(vm.isLoading)
         XCTAssertNil(vm.error)
+    }
+
+    /// The same gym typed inconsistently (trailing space, casing) must count as
+    /// one gym in the Top Gyms breakdown — the historical-stats side of the
+    /// duplicate-gym bug.
+    func testTopGymsMergesGymNameVariants() {
+        let vm = StatsViewModel(
+            sessionRepository: MockSessionRepository(currentUserId: "u1"),
+            userId: "u1"
+        )
+        vm.sessions = [
+            SessionModel(userId: "u1", gymName: "Dogpatch Boulders"),
+            SessionModel(userId: "u1", gymName: "Dogpatch Boulders "),
+            SessionModel(userId: "u1", gymName: "dogpatch boulders"),
+            SessionModel(userId: "u1", gymName: "The Spot"),
+        ]
+
+        let gyms = vm.topGyms
+        XCTAssertEqual(gyms.count, 2)
+        let dogpatch = gyms.first { $0.name.lowercased().contains("dogpatch") }
+        XCTAssertEqual(dogpatch?.sessionCount, 3)
+        XCTAssertEqual(dogpatch?.name.trimmedGymName, dogpatch?.name) // display is trimmed
     }
 }
 
