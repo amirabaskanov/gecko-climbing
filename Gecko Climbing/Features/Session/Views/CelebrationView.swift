@@ -337,9 +337,7 @@ struct CelebrationView: View {
                     sortBy: [SortDescriptor(\.date, order: .reverse)]
                 )
                 if let local = try? modelContext.fetch(descriptor) {
-                    let gyms = local.map(\.gymName).filter { !$0.isEmpty }
-                    var seen = Set<String>()
-                    recentGyms = gyms.filter { seen.insert($0).inserted }.prefix(5).map { $0 }
+                    recentGyms = Array(local.map(\.gymName).dedupedGymNames().prefix(5))
                 }
             }
         }

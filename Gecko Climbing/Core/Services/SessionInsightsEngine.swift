@@ -161,7 +161,10 @@ enum SessionInsightsEngine {
 
     /// Gym visit milestone
     private static func gymMilestone(current: SessionModel, past: [SessionModel]) -> SessionInsight? {
-        let gymSessions = past.filter { $0.gymName == current.gymName }
+        // Match on a normalized key so inconsistently-typed spellings of the
+        // same gym (trailing space, casing) count toward the same milestone.
+        let currentKey = current.gymName.trimmedGymName.lowercased()
+        let gymSessions = past.filter { $0.gymName.trimmedGymName.lowercased() == currentKey }
         let count = gymSessions.count + 1 // include current
 
         // Only trigger on nice milestones

@@ -94,10 +94,17 @@ final class StatsViewModel {
 
     /// Top gyms by session count, capped at 3. Skips empty gym names.
     var topGyms: [GymCount] {
-        let grouped = Dictionary(grouping: sessions, by: { $0.gymName })
-            .filter { !$0.key.isEmpty }
-        return grouped
-            .map { GymCount(name: $0.key, sessionCount: $0.value.count) }
+        // Group by a normalized key (trimmed + case-folded) so the same gym
+        // typed inconsistently — e.g. a stray trailing space — counts once.
+        // Display the most recent session's spelling for the merged group.
+        let grouped = Dictionary(grouping: sessions.filter { !$0.gymName.trimmedGymName.isEmpty }) {
+            $0.gymName.trimmedGymName.lowercased()
+        }
+        return grouped.values
+            .map { group in
+                let display = group.max(by: { $0.date < $1.date })?.gymName.trimmedGymName ?? ""
+                return GymCount(name: display, sessionCount: group.count)
+            }
             .sorted { $0.sessionCount > $1.sessionCount }
             .prefix(3)
             .map { $0 }

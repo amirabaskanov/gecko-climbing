@@ -30,13 +30,16 @@ struct FeedViewerContext: Equatable {
     /// don't miss "Movement Denver" vs "movement denver".
     static func make(user: UserModel, sessionGymNames: [String]) -> FeedViewerContext {
         let gyms: Set<String>
-        if let override = user.homeGymOverride, !override.isEmpty {
-            gyms = [override.lowercased()]
+        if let override = user.homeGymOverride, !override.trimmedGymName.isEmpty {
+            gyms = [override.trimmedGymName.lowercased()]
         } else {
-            // Frequency-sort the gym names.
+            // Frequency-sort the gym names, keyed on a normalized form so the
+            // same gym typed inconsistently (trailing space, casing) counts once.
             var counts: [String: Int] = [:]
-            for name in sessionGymNames where !name.isEmpty {
-                counts[name.lowercased(), default: 0] += 1
+            for name in sessionGymNames {
+                let key = name.trimmedGymName.lowercased()
+                guard !key.isEmpty else { continue }
+                counts[key, default: 0] += 1
             }
             let topGyms = counts
                 .sorted { $0.value > $1.value }

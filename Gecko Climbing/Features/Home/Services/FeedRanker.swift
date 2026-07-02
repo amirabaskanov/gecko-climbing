@@ -22,7 +22,7 @@ enum FeedRanker {
         var bonus: Double = 0
         if !viewer.homeGyms.isEmpty,
            !post.gymName.isEmpty,
-           viewer.homeGyms.contains(post.gymName.lowercased()) {
+           viewer.homeGyms.contains(post.gymName.trimmedGymName.lowercased()) {
             bonus += FeedConfig.gymMatchBonus
         }
         if viewer.highestGradeNumeric >= 0,

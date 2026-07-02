@@ -84,6 +84,18 @@ struct MainTabView: View {
                 }
             )
         }
+        .task {
+            // One-time per user: merge any gym-name spelling variants on their
+            // existing sessions (and linked posts) to a single canonical form.
+            // Runs off the main path; the flag makes it a no-op on later launches.
+            let uid = appEnv.authRepository.currentUserId
+            guard !uid.isEmpty else { return }
+            let migratedKey = "gymNameMigration.v1.\(uid)"
+            guard !UserDefaults.standard.bool(forKey: migratedKey) else { return }
+            if await appEnv.sessionRepository.normalizeGymNames(for: uid) {
+                UserDefaults.standard.set(true, forKey: migratedKey)
+            }
+        }
         .onChange(of: selectedTab) { oldTab, newTab in
             previousTab = oldTab
             if newTab == .feed {

@@ -147,7 +147,7 @@ final class WeekInReviewViewModel {
 
     /// True if more than one distinct gym this week — controls whether to show the gym card.
     var hasMultipleGyms: Bool {
-        Set(thisWeekSessions.map { $0.gymName }.filter { !$0.isEmpty }).count > 1
+        Set(thisWeekSessions.map { $0.gymName.trimmedGymName.lowercased() }.filter { !$0.isEmpty }).count > 1
     }
 
     var gradeBreakdown: [GradeCount] {

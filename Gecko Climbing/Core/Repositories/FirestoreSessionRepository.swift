@@ -188,12 +188,9 @@ final class FirestoreSessionRepository: SessionRepositoryProtocol, @unchecked Se
             .limit(to: 50)
             .getDocuments()
 
-        var seen = Set<String>()
-        return snapshot.documents.compactMap { doc in
-            let gym = doc.data()["gymName"] as? String ?? ""
-            guard !gym.isEmpty, seen.insert(gym).inserted else { return nil }
-            return gym
-        }
+        return snapshot.documents
+            .map { $0.data()["gymName"] as? String ?? "" }
+            .dedupedGymNames()
     }
 
     // MARK: - Private
