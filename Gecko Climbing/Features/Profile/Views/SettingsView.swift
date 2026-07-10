@@ -98,6 +98,25 @@ struct SettingsView: View {
                 }
                 .staggeredAppear(index: 3, appeared: appeared)
 
+                #if DEBUG
+                // DEBUG ONLY — preview the first-run guide on demand. Placed above
+                // About so it isn't hidden under the floating tab bar. Remove this
+                // block (and the wiring in MainTabView) before shipping.
+                VStack(alignment: .leading, spacing: 12) {
+                    sectionHeader("Developer")
+
+                    settingsRow(
+                        icon: "sparkles",
+                        title: "Replay onboarding guide",
+                        subtitle: "Debug only",
+                        iconColor: .geckoPrimary
+                    ) {
+                        NotificationCenter.default.post(name: .debugReplayOnboarding, object: nil)
+                    }
+                }
+                .staggeredAppear(index: 4, appeared: appeared)
+                #endif
+
                 // MARK: - About
 
                 VStack(spacing: 16) {

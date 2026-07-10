@@ -127,6 +127,13 @@ struct MainTabView: View {
         .sheet(isPresented: $showNotificationPrompt) {
             NotificationPrePromptView()
         }
+        #if DEBUG
+        // DEBUG ONLY — force-present the first-run guide from Settings for QA.
+        // Remove this, the Settings row, and the Notification.Name below to ship.
+        .onReceive(NotificationCenter.default.publisher(for: .debugReplayOnboarding)) { _ in
+            showOnboarding = true
+        }
+        #endif
         .onChange(of: selectedTab) { oldTab, newTab in
             previousTab = oldTab
             if newTab == .feed {
@@ -388,3 +395,10 @@ private struct OnboardingView: View {
         .cardStyle()
     }
 }
+
+#if DEBUG
+// DEBUG ONLY — remove before shipping (see the Settings "Replay guide" row).
+extension Notification.Name {
+    static let debugReplayOnboarding = Notification.Name("debugReplayOnboarding")
+}
+#endif
