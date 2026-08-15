@@ -45,22 +45,6 @@ extension Color {
         LinearGradient(colors: [geckoPrimary, geckoPrimaryDark], startPoint: .top, endPoint: .bottom)
     }
 
-    static var warmGlow: LinearGradient {
-        LinearGradient(colors: [geckoFlashGold, Color(hex: "#FF9800")], startPoint: .topLeading, endPoint: .bottomTrailing)
-    }
-
-    // MARK: - Outcome Gradients
-    static func outcomeGradient(for outcome: ClimbOutcome) -> LinearGradient {
-        switch outcome {
-        case .flash:
-            return LinearGradient(colors: [geckoFlashGoldLight, geckoFlashGold], startPoint: .top, endPoint: .bottom)
-        case .sent:
-            return LinearGradient(colors: [geckoSentGreen, Color(hex: "#388E3C")], startPoint: .top, endPoint: .bottom)
-        case .attempt:
-            return LinearGradient(colors: [geckoAttemptBlue, Color(hex: "#1E88E5")], startPoint: .top, endPoint: .bottom)
-        }
-    }
-
     // MARK: - Grade Colors ("Approach to Summit" ramp)
     // Hue walks the CVD-preserved blue↔yellow axis (chalk-slate → sandstone →
     // copper → ember → dusk violet → basalt) while relative luminance descends

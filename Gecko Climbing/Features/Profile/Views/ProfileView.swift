@@ -35,9 +35,9 @@ struct ProfileView: View {
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink {
-                        SettingsView()
-                    } label: {
+                    // Value-based link so Settings is reachable by route
+                    // (deep links / notifications can land there).
+                    NavigationLink(value: ProfileRoute.settings) {
                         Image(systemName: "gearshape")
                             .font(.system(size: 15, weight: .medium))
                             .foregroundStyle(Color.geckoPrimary)
@@ -50,6 +50,8 @@ struct ProfileView: View {
                     StatsView()
                 case .weekInReview:
                     WeekInReviewView()
+                case .settings:
+                    SettingsView()
                 }
             }
         }

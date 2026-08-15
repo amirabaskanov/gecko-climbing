@@ -6,7 +6,6 @@ struct GradeBarrelView: View {
 
     @State private var scrollPosition: String?
     @State private var containerWidth: CGFloat = 0
-    @State private var showHint = false
 
     /// Responsive item width: roughly 1/3 of container, clamped to reasonable range
     private var itemWidth: CGFloat {
@@ -69,38 +68,6 @@ struct GradeBarrelView: View {
         .onChange(of: scrollPosition) { _, newValue in
             if let newValue {
                 selectedGrade = newValue
-            }
-        }
-        .onAppear {
-            // Subtle bounce hint after a short delay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                withAnimation(.easeInOut(duration: 0.5)) {
-                    showHint = true
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                    withAnimation(.easeInOut(duration: 0.5)) {
-                        showHint = false
-                    }
-                }
-            }
-        }
-        // Hint arrows on first appearance
-        .overlay(alignment: .leading) {
-            if showHint {
-                Image(systemName: "chevron.left")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(.secondary.opacity(0.4))
-                    .padding(.leading, 8)
-                    .transition(.opacity)
-            }
-        }
-        .overlay(alignment: .trailing) {
-            if showHint {
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(.secondary.opacity(0.4))
-                    .padding(.trailing, 8)
-                    .transition(.opacity)
             }
         }
     }

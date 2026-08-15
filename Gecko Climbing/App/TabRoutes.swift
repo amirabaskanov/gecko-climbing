@@ -22,4 +22,5 @@ enum StatsRoute: Hashable {
 enum ProfileRoute: Hashable {
     case fullStats
     case weekInReview
+    case settings
 }

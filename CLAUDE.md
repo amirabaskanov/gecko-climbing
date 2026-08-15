@@ -35,6 +35,10 @@ Gecko Climbing/
 - Models: SwiftData `@Model` classes named `*Model`
 - DTOs: `*DTO` with `toModel()` and `asDictionary()` methods
 - Colors: Use `Color.geckoPrimary` (forest green brand, #2A6B55 light / #3FA07F dark), `Color.geckoSentGreen` (success/sent), `Color.geckoFlashGold`, etc. from Color+Brand.swift. Legacy `Color.geckoGreen` aliases to `geckoPrimary`
+- Grade colors: `Color.gradeColor(for:)` is the "Approach to Summit" ramp (slate→sandstone→copper→ember→dusk→basalt) — luminance-monotonic so it's color-blind-safe; pair with `VGrade.textColor(for:)`. Flat fills only, no gradients
+- Grade display: canonical data is always V-scale (`gradeNumeric`); render user-visible grade strings via `GradeDisplaySettings.shared.label(for:)` / `.label(forStored:)` (viewer's V/Fontainebleau/Circuit preference); grade input controls use `.inputLabel(forStored:)`
+- Signature shape: `GeckoHoldShape` (Shared/Components) for grade chips, badges, and grade heroes — the app's ownable "hold" silhouette
+- Surfaces: `cardStyle()` = flat bordered card (radius 14); `cardStyleElevated()` = the one shadowed hero per screen (radius 22); eyebrows are 11pt bold rounded, tracking 1.4, `geckoPrimary`
 - Logo: Use `GeckoLogoView(size:color:showWordmark:)` from Shared/Components/GeckoLogoView.swift
 - Font: `.design(.rounded)` for brand text (SF Pro Rounded)
 - Animations: Use `Animation.geckoSpring`, `.geckoSnappy`, `.geckoBounce` from Animation+Gecko.swift

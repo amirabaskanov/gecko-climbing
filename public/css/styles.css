@@ -26,13 +26,14 @@
   --gecko-text: #132E25;
   --gecko-text-muted: #6B6B6B;
 
-  /* Grade ladder (matches iOS app) */
-  --grade-0: #4CAF50;
-  --grade-3: #FFC107;
-  --grade-5: #FF9800;
-  --grade-7: #F44336;
-  --grade-9: #9C27B0;
-  --grade-12: #212121;
+  /* Grade ladder — "Approach to Summit" ramp (matches iOS app).
+     Luminance descends monotonically so ordering survives color blindness. */
+  --grade-0: #86ADC8;
+  --grade-3: #C09140;
+  --grade-5: #C97231;
+  --grade-7: #A63A22;
+  --grade-9: #5E3A78;
+  --grade-12: #1E2A26;
 
   /* Motion */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -467,9 +468,9 @@ section {
   transition: transform 0.3s var(--ease-out);
 }
 .grade-pill:hover { transform: translateY(-4px) scale(1.05); }
-.grade-pill.grade-v0, .grade-pill.grade-v1, .grade-pill.grade-v2 { background: var(--grade-0); }
-.grade-pill.grade-v3, .grade-pill.grade-v4 { background: var(--grade-3); color: #3E2723; }
-.grade-pill.grade-v5, .grade-pill.grade-v6 { background: var(--grade-5); }
+.grade-pill.grade-v0, .grade-pill.grade-v1, .grade-pill.grade-v2 { background: var(--grade-0); color: #10181A; }
+.grade-pill.grade-v3, .grade-pill.grade-v4 { background: var(--grade-3); color: #10181A; }
+.grade-pill.grade-v5, .grade-pill.grade-v6 { background: var(--grade-5); color: #10181A; }
 .grade-pill.grade-v7, .grade-pill.grade-v8 { background: var(--grade-7); }
 .grade-pill.grade-v9, .grade-pill.grade-v10, .grade-pill.grade-v11 { background: var(--grade-9); }
 .grade-pill.grade-v12, .grade-pill.grade-v13, .grade-pill.grade-v14,
