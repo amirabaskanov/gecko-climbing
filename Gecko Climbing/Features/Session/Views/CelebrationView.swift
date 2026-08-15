@@ -131,7 +131,7 @@ struct CelebrationView: View {
                     celebrationStat(label: "Duration", delay: 0.75, text: viewModel.elapsedMinutes.durationFormatted)
                 }
                 if !session.highestGrade.isEmpty {
-                    celebrationStat(label: "Top Send", delay: 0.8, text: session.highestGrade)
+                    celebrationStat(label: "Top Send", delay: 0.8, text: GradeDisplaySettings.shared.label(for: session.highestGradeNumeric))
                 }
             }
             .padding(.horizontal, 8)

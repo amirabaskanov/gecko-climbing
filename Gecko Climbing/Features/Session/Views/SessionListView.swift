@@ -234,7 +234,7 @@ struct SessionRowView: View {
         let onColor = VGrade.textColor(for: numeric)
 
         HStack(spacing: 4) {
-            Text(grade)
+            Text(GradeDisplaySettings.shared.label(for: numeric))
                 .font(.system(size: 12, weight: .bold, design: .rounded))
                 .foregroundStyle(isAttempt ? color : onColor)
 

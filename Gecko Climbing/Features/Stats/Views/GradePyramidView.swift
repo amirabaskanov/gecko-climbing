@@ -45,7 +45,8 @@ struct GradePyramidView: View {
                     AxisMarks(values: .automatic) { value in
                         AxisValueLabel {
                             if let grade = value.as(String.self) {
-                                Text(grade)
+                                // Plotted category stays the canonical V-string; only the axis label converts.
+                                Text(GradeDisplaySettings.shared.label(forStored: grade))
                                     .font(.caption.weight(.bold))
                                     .foregroundStyle(Color.gradeColor(for: VGrade.numeric(for: grade)))
                             }

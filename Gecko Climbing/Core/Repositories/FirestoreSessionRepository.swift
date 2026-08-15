@@ -234,8 +234,10 @@ final class FirestoreSessionRepository: SessionRepositoryProtocol, @unchecked Se
         let sessions = try await fetchSessions(for: userId)
         let totalSessions = sessions.count
         let totalClimbs = sessions.reduce(0) { $0 + $1.totalClimbs }
+        // Note: a V0-only history is a real history — the old `> 0` check
+        // erased it to "". Empty only when there are no sessions at all.
         let highestGradeNumeric = sessions.map(\.highestGradeNumeric).max() ?? 0
-        let highestGrade = highestGradeNumeric > 0 ? "V\(highestGradeNumeric)" : ""
+        let highestGrade = sessions.isEmpty ? "" : VGrade.label(for: highestGradeNumeric)
 
         try await db.collection("users").document(userId).setData([
             "totalSessions": totalSessions,

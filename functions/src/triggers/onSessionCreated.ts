@@ -5,6 +5,7 @@ import { db } from '../admin';
 import { sendNotification } from '../helpers/fcm';
 import { lookupDisplayName } from '../helpers/users';
 import { paginateFollowers } from '../helpers/followers';
+import { formatGrade, lookupGradeSystem, GradeSystem } from '../helpers/grades';
 
 const MIN_GRADE_NUMERIC = 3;
 const MIN_PRIOR_SESSIONS = 2;
@@ -88,10 +89,11 @@ export const onSessionCreated = onDocumentCreated(
       return;
     }
 
-    const gradeString =
-      session.highestGrade.length > 0 ? session.highestGrade : `V${session.highestGradeNumeric}`;
     const actorName = await lookupDisplayName(session.userId);
-    const title = `${actorName} just sent their first ${gradeString}! 🧗`;
+    // Grade text is formatted PER RECIPIENT in their preferred grade system
+    // (displayPrefs.gradeSystem) — a French climber reads "7A", not "V6".
+    const titleFor = (system: GradeSystem) =>
+      `${actorName} just sent their first ${formatGrade(session.highestGradeNumeric, system)}! 🧗`;
 
     let totalFollowers = 0;
     for await (const page of paginateFollowers(session.userId)) {
@@ -99,22 +101,25 @@ export const onSessionCreated = onDocumentCreated(
       for (let i = 0; i < page.length; i += PREF_CHECK_CONCURRENCY) {
         const slice = page.slice(i, i + PREF_CHECK_CONCURRENCY);
         await Promise.all(
-          slice.map((recipientUid) =>
-            sendNotification({
-              recipientUid,
-              actorUid: session.userId,
-              category: 'friends',
-              title,
-              body: '',
-              route: { kind: 'profile', userId: session.userId },
-            }).catch((err: unknown) => {
+          slice.map(async (recipientUid) => {
+            try {
+              const system = await lookupGradeSystem(recipientUid);
+              await sendNotification({
+                recipientUid,
+                actorUid: session.userId,
+                category: 'friends',
+                title: titleFor(system),
+                body: '',
+                route: { kind: 'profile', userId: session.userId },
+              });
+            } catch (err: unknown) {
               logger.warn('onSessionCreated: recipient send failed', {
                 sessionId,
                 recipientUid,
                 err: err instanceof Error ? err.message : String(err),
               });
-            })
-          )
+            }
+          })
         );
       }
     }
@@ -122,7 +127,7 @@ export const onSessionCreated = onDocumentCreated(
     logger.info('onSessionCreated: F1 fan-out complete', {
       sessionId,
       userId: session.userId,
-      grade: gradeString,
+      gradeNumeric: session.highestGradeNumeric,
       totalFollowers,
     });
   }

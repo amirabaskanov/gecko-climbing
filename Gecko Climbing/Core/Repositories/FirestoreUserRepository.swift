@@ -224,6 +224,22 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
         )
     }
 
+    // MARK: - Display Preferences
+
+    func fetchGradeSystem(for userId: String) async throws -> GradeSystem? {
+        let snapshot = try await usersRef.document(userId).getDocument()
+        let displayPrefs = snapshot.data()?["displayPrefs"] as? [String: Any]
+        guard let raw = displayPrefs?["gradeSystem"] as? String else { return nil }
+        return GradeSystem(rawValue: raw)
+    }
+
+    func updateGradeSystem(_ system: GradeSystem, for userId: String) async throws {
+        try await usersRef.document(userId).setData(
+            ["displayPrefs": ["gradeSystem": system.rawValue]],
+            merge: true
+        )
+    }
+
     func registerFCMToken(_ token: String, for userId: String) async throws {
         try await usersRef.document(userId).setData(
             ["fcmTokens": FieldValue.arrayUnion([token])],

@@ -88,6 +88,13 @@ struct MainTabView: View {
             )
         }
         .task {
+            // Pull the account-level grade-display preference so the local
+            // mirror follows the signed-in account across devices.
+            let uid = appEnv.authRepository.currentUserId
+            guard !uid.isEmpty else { return }
+            await GradeDisplaySettings.shared.sync(userRepository: appEnv.userRepository, userId: uid)
+        }
+        .task {
             // One-time per user: merge any gym-name spelling variants on their
             // existing sessions (and linked posts) to a single canonical form.
             // Runs off the main path; the flag makes it a no-op on later launches.

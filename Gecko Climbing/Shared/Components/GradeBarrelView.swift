@@ -90,7 +90,8 @@ struct GradeBarrelView: View {
         let gradeColor = Color.gradeColor(for: grade)
         let currentItemWidth = itemWidth
 
-        return Text(grade)
+        // Input control: selection stays the canonical V-string; only the label converts.
+        return Text(GradeDisplaySettings.shared.inputLabel(forStored: grade))
             .font(.system(size: 100, weight: .black, design: .rounded))
             .foregroundStyle(gradeColor)
             .minimumScaleFactor(0.25)

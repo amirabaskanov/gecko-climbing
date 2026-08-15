@@ -29,6 +29,7 @@
 		A1000004 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A2000005 /* GoogleService-Info.plist */; };
 		A1000010 /* GeckoClimbingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000010 /* GeckoClimbingTests.swift */; };
 		A1000020 /* GeckoClimbingUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000020 /* GeckoClimbingUITests.swift */; };
+		A5AE196EC6344A66E158966D /* GradeDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16153BEEDA8B4C90C056B2A3 /* GradeDisplay.swift */; };
 		AA000201 /* TabRoutes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000101 /* TabRoutes.swift */; };
 		AA000202 /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000102 /* AppRouter.swift */; };
 		AA000203 /* SessionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000103 /* SessionModel.swift */; };
@@ -154,6 +155,7 @@
 		0DC52164E07007813F0BE721 /* CommentsViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CommentsViewModel.swift; sourceTree = "<group>"; };
 		0F1E2D3C4B5A6F7E8D9C0B1A /* WeekInReviewShareCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeekInReviewShareCard.swift; sourceTree = "<group>"; };
 		14054D5E8ADD54268E971351 /* WeekInReviewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeekInReviewView.swift; sourceTree = "<group>"; };
+		16153BEEDA8B4C90C056B2A3 /* GradeDisplay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GradeDisplay.swift; sourceTree = "<group>"; };
 		1A2B3C4D5E6F7A8B9C0D1E2F /* StatsShareCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StatsShareCard.swift; sourceTree = "<group>"; };
 		210A18FB1D170D1A318A5D9D /* Animation+Gecko.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Animation+Gecko.swift"; sourceTree = "<group>"; };
 		2BD1EBB65F03EABE1DEA6EDC /* FirestoreFeedbackRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FirestoreFeedbackRepository.swift; sourceTree = "<group>"; };
@@ -369,6 +371,7 @@
 				CA9370EA6F1FE7C0E87273E7 /* CommentModel.swift */,
 				5F7C51D1DCBA17F7391C88F8 /* SessionInsight.swift */,
 				AA000304 /* NotificationPrefs.swift */,
+				16153BEEDA8B4C90C056B2A3 /* GradeDisplay.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1014,6 +1017,7 @@
 				FE000208 /* SuggestedClimbersCarousel.swift in Sources */,
 				34A10F533AEEE585B152AB2A /* OnboardingView.swift in Sources */,
 				3F4EA5AB867A77C8C24E61AE /* AppTips.swift in Sources */,
+				A5AE196EC6344A66E158966D /* GradeDisplay.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

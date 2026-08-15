@@ -159,7 +159,7 @@ struct FeedCardView: View {
             if !post.topGrade.isEmpty {
                 let textColor = VGrade.textColor(for: post.topGradeNumeric)
                 VStack(spacing: 2) {
-                    Text(post.topGrade)
+                    Text(GradeDisplaySettings.shared.label(for: post.topGradeNumeric))
                         .font(.system(size: 20, weight: .black, design: .rounded))
                         .foregroundStyle(textColor)
                     Text("TOP SEND")
@@ -375,7 +375,7 @@ struct FeedCardView: View {
             )
 
             HStack(spacing: 2) {
-                Text(grade)
+                Text(GradeDisplaySettings.shared.label(forStored: grade))
                     .font(.system(size: 10, weight: .bold, design: .rounded))
                     .foregroundStyle(color)
 

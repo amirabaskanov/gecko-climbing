@@ -118,9 +118,12 @@ struct WeekInReviewShareCard: View {
                         radius: 28, x: 0, y: 0
                     )
 
-                Text(hardestSendLabel)
+                Text(GradeDisplaySettings.shared.label(forStored: hardestSendLabel))
                     .font(.system(size: 86, weight: .black, design: .rounded))
                     .foregroundStyle(VGrade.textColor(for: hardestSendNumeric))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.35)
+                    .frame(maxWidth: 170)
             }
 
             if isPR {
@@ -238,9 +241,12 @@ struct WeekInReviewShareCard: View {
                     .fill(Color.gradeColor(for: grade.numeric))
                     .frame(width: 18, height: 18)
                     .overlay(
-                        Text(grade.grade)
+                        Text(GradeDisplaySettings.shared.label(for: grade.numeric))
                             .font(.system(size: 9, weight: .black, design: .rounded))
                             .foregroundStyle(VGrade.textColor(for: grade.numeric))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.4)
+                            .frame(maxWidth: 16)
                     )
                 Text("\(grade.count) sends")
                     .font(.system(size: 13, weight: .bold, design: .rounded))
@@ -253,7 +259,7 @@ struct WeekInReviewShareCard: View {
         HStack(spacing: 8) {
             Image(systemName: "bolt.fill")
                 .foregroundStyle(Color.geckoFlashGold)
-            Text("\(flash.count) flashes · top \(flash.grade)")
+            Text("\(flash.count) flashes · top \(GradeDisplaySettings.shared.label(for: flash.numeric))")
                 .font(.system(size: 13, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
         }

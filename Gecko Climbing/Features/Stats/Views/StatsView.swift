@@ -196,8 +196,11 @@ private struct IdentityHero: View {
                         radius: glow ? 30 : 18,
                         x: 0, y: 0
                     )
-                Text(grade)
+                Text(GradeDisplaySettings.shared.label(forStored: grade))
                     .font(.system(size: 56, weight: .black, design: .rounded))
+                    .minimumScaleFactor(0.35)
+                    .lineLimit(1)
+                    .frame(maxWidth: 126)
                     .foregroundStyle(VGrade.textColor(for: gradeNumeric))
             }
             .scaleEffect(appeared ? 1 : 0.5)
@@ -226,7 +229,7 @@ private struct IdentityHero: View {
 
     private var headline: String {
         if gradeNumeric < 0 { return "New climber" }
-        return "\(grade) climber"
+        return "\(GradeDisplaySettings.shared.label(for: gradeNumeric)) climber"
     }
 }
 
@@ -349,9 +352,11 @@ private struct PyramidBar: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Text(item.grade)
+            Text(GradeDisplaySettings.shared.label(for: item.numeric))
                 .font(.system(size: 13, weight: .black, design: .rounded))
                 .foregroundStyle(Color.gradeColor(for: item.numeric))
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
                 .frame(width: 28, alignment: .trailing)
 
             GeometryReader { geo in

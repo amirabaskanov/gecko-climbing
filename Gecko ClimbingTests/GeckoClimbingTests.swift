@@ -1395,3 +1395,75 @@ final class EdgeCaseTests: XCTestCase {
         XCTAssertEqual(updatedPost.likesCount, 0) // Should not go negative
     }
 }
+
+// MARK: - GradeDisplay Tests
+
+final class GradeDisplayTests: XCTestCase {
+
+    // Full canonical table: every V-numeric 0-17 in every system.
+    func testVScaleLabels() {
+        for n in 0...17 {
+            XCTAssertEqual(GradeDisplay.label(for: n, system: .vScale), "V\(n)")
+        }
+    }
+
+    func testFontLabelsFullTable() {
+        let expected = [
+            "4", "5", "5+", "6A", "6B", "6C", "7A", "7A+", "7B",
+            "7C", "7C+", "8A", "8A+", "8B", "8B+", "8C", "8C+", "9A"
+        ]
+        for (n, label) in expected.enumerated() {
+            XCTAssertEqual(GradeDisplay.label(for: n, system: .font), label, "V\(n) should map to \(label)")
+        }
+    }
+
+    func testCircuitBands() {
+        let expectations: [(Int, String)] = [
+            (0, "VB–V2"), (1, "VB–V2"), (2, "VB–V2"),
+            (3, "V3–V4"), (4, "V3–V4"),
+            (5, "V5–V6"), (6, "V5–V6"),
+            (7, "V7–V8"), (8, "V7–V8"),
+            (9, "V9–V11"), (10, "V9–V11"), (11, "V9–V11"),
+            (12, "V12+"), (17, "V12+")
+        ]
+        for (n, band) in expectations {
+            XCTAssertEqual(GradeDisplay.label(for: n, system: .circuit), band, "V\(n) should band to \(band)")
+        }
+    }
+
+    func testOutOfRangeNumerics() {
+        XCTAssertEqual(GradeDisplay.label(for: -1, system: .vScale), "?")
+        XCTAssertEqual(GradeDisplay.label(for: -1, system: .font), "?")
+        XCTAssertEqual(GradeDisplay.label(for: -1, system: .circuit), "?")
+        XCTAssertEqual(GradeDisplay.label(for: 18, system: .font), "?")
+        XCTAssertEqual(GradeDisplay.label(for: 18, system: .circuit), "V12+")
+    }
+
+    // Stored-string convenience: converts parseable V-strings, passes through junk.
+    func testStoredStringConversion() {
+        XCTAssertEqual(GradeDisplay.label(forStored: "V5", system: .font), "6C")
+        XCTAssertEqual(GradeDisplay.label(forStored: "V5", system: .circuit), "V5–V6")
+        XCTAssertEqual(GradeDisplay.label(forStored: "V5", system: .vScale), "V5")
+        XCTAssertEqual(GradeDisplay.label(forStored: "", system: .font), "")
+        XCTAssertEqual(GradeDisplay.label(forStored: "garbage", system: .font), "garbage")
+    }
+
+    // Canonical invariance: display conversion never changes what would be stored.
+    func testCanonicalRoundTripInvariance() {
+        for n in 0...17 {
+            let stored = VGrade.label(for: n)
+            XCTAssertEqual(VGrade.numeric(for: stored), n)
+            // Converting for display must not touch the canonical string.
+            _ = GradeDisplay.label(forStored: stored, system: .font)
+            XCTAssertEqual(stored, "V\(n)")
+        }
+    }
+
+    // Input controls: Font converts, Circuit falls back to precise V labels.
+    func testInputLabelCircuitFallback() {
+        let settings = GradeDisplaySettings()
+        UserDefaults.standard.removeObject(forKey: GradeDisplaySettings.defaultsKey)
+        XCTAssertEqual(settings.system, .vScale)
+        XCTAssertEqual(settings.inputLabel(forStored: "V5"), "V5")
+    }
+}

@@ -133,7 +133,7 @@ struct SuggestedClimberCard: View {
                             HStack(spacing: 2) {
                                 Image(systemName: "chart.bar.fill")
                                     .font(.system(size: 8, weight: .heavy))
-                                Text(user.highestGrade)
+                                Text(GradeDisplaySettings.shared.label(for: user.highestGradeNumeric))
                                     .font(.system(size: 10, weight: .heavy, design: .rounded))
                             }
                             .foregroundStyle(gradeColor)

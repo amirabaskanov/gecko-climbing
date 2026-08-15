@@ -203,9 +203,12 @@ private struct HardestSendCard: View {
                     .scaleEffect(appeared ? 1 : 0.4)
                     .animation(.geckoBounce.delay(0.1), value: appeared)
 
-                Text(grade)
+                Text(GradeDisplaySettings.shared.label(forStored: grade))
                     .font(.system(size: 64, weight: .black, design: .rounded))
                     .foregroundStyle(VGrade.textColor(for: numeric))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.4)
+                    .frame(maxWidth: 170)
                     .scaleEffect(appeared ? 1 : 0.2)
                     .opacity(appeared ? 1 : 0)
                     .animation(.geckoBounce.delay(0.25), value: appeared)
@@ -540,16 +543,19 @@ private struct WheelhouseCard: View {
                     .frame(width: 70, height: 70)
                     .shadow(color: Color.gradeColor(for: grade.numeric).opacity(0.35),
                             radius: 8, x: 0, y: 4)
-                Text(grade.grade)
+                Text(GradeDisplaySettings.shared.label(for: grade.numeric))
                     .font(.system(size: 22, weight: .black, design: .rounded))
                     .foregroundStyle(VGrade.textColor(for: grade.numeric))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                    .frame(maxWidth: 60)
             }
             VStack(alignment: .leading, spacing: 4) {
                 Text("Your wheelhouse")
                     .font(.caption.weight(.bold))
                     .tracking(1.2)
                     .foregroundStyle(.secondary)
-                Text("\(grade.grade) was your home")
+                Text("\(GradeDisplaySettings.shared.label(for: grade.numeric)) was your home")
                     .font(.headline.weight(.bold))
                 Text("\(grade.count) \(grade.count == 1 ? "send" : "sends") this week")
                     .font(.subheadline)
@@ -583,7 +589,7 @@ private struct FlashCard: View {
                     .foregroundStyle(.secondary)
                 Text("\(flash.count) \(flash.count == 1 ? "flash" : "flashes")")
                     .font(.headline.weight(.bold))
-                Text("Hardest: \(flash.grade)")
+                Text("Hardest: \(GradeDisplaySettings.shared.label(for: flash.numeric))")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -788,7 +794,7 @@ private struct EmptyReturning: View {
             HStack(spacing: 12) {
                 LifetimeTile(
                     label: "Top grade",
-                    value: vm.lifetimeHardestGrade,
+                    value: GradeDisplaySettings.shared.label(forStored: vm.lifetimeHardestGrade),
                     tint: Color.gradeColor(for: vm.allTimeHighestGradeNumeric),
                     big: true
                 )

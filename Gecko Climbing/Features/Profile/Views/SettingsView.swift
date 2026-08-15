@@ -33,6 +33,19 @@ struct SettingsView: View {
                     }
                     .buttonStyle(.plain)
                     .bouncePress()
+
+                    NavigationLink {
+                        GradeScaleSettingsView()
+                    } label: {
+                        settingsRowContent(
+                            icon: "chart.bar",
+                            title: "Grade Scale",
+                            subtitle: GradeDisplaySettings.shared.system.displayName,
+                            iconColor: .geckoPrimary
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .bouncePress()
                 }
                 .staggeredAppear(index: 0, appeared: appeared)
 
@@ -443,5 +456,84 @@ struct BlockedUsersView: View {
             }
             self.error = error
         }
+    }
+}
+
+// MARK: - Grade Scale Settings
+
+/// Picker for the viewer's grade-display system (V scale / Fontainebleau /
+/// Circuit ranges). Display-only preference: stored data stays V-scale
+/// canonical; the choice mirrors locally and syncs to the account so it
+/// follows the user across devices. Colocated with SettingsView like
+/// BlockedUsersView — no separate project-file entry needed.
+struct GradeScaleSettingsView: View {
+    @Environment(AppEnvironment.self) private var appEnv
+    @State private var error: Error?
+
+    var body: some View {
+        let settings = GradeDisplaySettings.shared
+
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("How grades appear across Gecko — your climbs, friends' posts, and stats. Your logged data doesn't change.")
+                    .font(.footnote)
+                    .fontDesign(.rounded)
+                    .foregroundStyle(Color.geckoSecondaryText)
+                    .padding(.horizontal, 4)
+
+                VStack(spacing: 0) {
+                    ForEach(Array(GradeSystem.allCases.enumerated()), id: \.element) { index, system in
+                        if index > 0 {
+                            Divider().padding(.horizontal, 16)
+                        }
+                        Button {
+                            guard system != settings.system else { return }
+                            Task {
+                                let userId = appEnv.authRepository.currentUserId
+                                if let updateError = await settings.update(
+                                    system,
+                                    userRepository: appEnv.userRepository,
+                                    userId: userId
+                                ) {
+                                    error = updateError
+                                }
+                            }
+                        } label: {
+                            HStack(spacing: 12) {
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(system.displayName)
+                                        .font(.subheadline.weight(.semibold))
+                                        .fontDesign(.rounded)
+                                        .foregroundStyle(.primary)
+                                    Text(system.subtitle)
+                                        .font(.caption)
+                                        .foregroundStyle(Color.geckoSecondaryText)
+                                    Text(system.previewText)
+                                        .font(.caption.weight(.medium))
+                                        .fontDesign(.rounded)
+                                        .foregroundStyle(Color.geckoPrimary)
+                                }
+                                Spacer()
+                                if settings.system == system {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .font(.system(size: 20))
+                                        .foregroundStyle(Color.geckoPrimary)
+                                }
+                            }
+                            .padding(16)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .cardStyle()
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+        }
+        .background(Color.geckoBackground)
+        .navigationTitle("Grade Scale")
+        .navigationBarTitleDisplayMode(.inline)
+        .errorAlert(error: $error)
     }
 }

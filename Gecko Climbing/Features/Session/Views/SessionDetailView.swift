@@ -170,7 +170,7 @@ struct SessionDetailView: View {
                 Divider().frame(height: 32).opacity(0.3)
                 statCard(value: "\(vm.flashes.count + vm.sends.count)", label: "Sends")
                 Divider().frame(height: 32).opacity(0.3)
-                statCard(value: vm.session.highestGrade.isEmpty ? "—" : vm.session.highestGrade,
+                statCard(value: vm.session.highestGrade.isEmpty ? "—" : GradeDisplaySettings.shared.label(for: vm.session.highestGradeNumeric),
                          label: "Top Send",
                          valueColor: vm.session.highestGrade.isEmpty ? .secondary : Color.gradeColor(for: vm.session.highestGradeNumeric))
             }

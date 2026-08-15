@@ -447,7 +447,7 @@ struct NewSessionView: View {
                 Text("New Personal Best!")
                     .font(.subheadline.weight(.black))
                     .foregroundStyle(.primary)
-                Text("\(newPBGrade) — you've never sent this grade before!")
+                Text("\(GradeDisplaySettings.shared.label(forStored: newPBGrade)) — you've never sent this grade before!")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
             }

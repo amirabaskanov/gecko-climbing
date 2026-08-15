@@ -23,6 +23,10 @@ protocol UserRepositoryProtocol: AnyObject {
     func suggestedClimbers(excluding excludedUIDs: Set<String>, limit: Int) async throws -> [UserModel]
     func fetchNotificationPrefs(for userId: String) async throws -> NotificationPrefs
     func updateNotificationPrefs(_ prefs: NotificationPrefs, for userId: String) async throws
+    /// The viewer's grade-system display preference, stored under
+    /// `users/{uid}.displayPrefs.gradeSystem`. Nil when the user never set one.
+    func fetchGradeSystem(for userId: String) async throws -> GradeSystem?
+    func updateGradeSystem(_ system: GradeSystem, for userId: String) async throws
     func registerFCMToken(_ token: String, for userId: String) async throws
     func updateTimeZone(_ identifier: String, for userId: String) async throws
 
@@ -163,6 +167,17 @@ final class MockUserRepository: UserRepositoryProtocol, @unchecked Sendable {
     func updateNotificationPrefs(_ prefs: NotificationPrefs, for userId: String) async throws {
         try await Task.sleep(nanoseconds: 100_000_000)
         notificationPrefsStore[userId] = prefs
+    }
+
+    private var gradeSystemStore: [String: GradeSystem] = [:]
+
+    func fetchGradeSystem(for userId: String) async throws -> GradeSystem? {
+        return gradeSystemStore[userId]
+    }
+
+    func updateGradeSystem(_ system: GradeSystem, for userId: String) async throws {
+        try await Task.sleep(nanoseconds: 100_000_000)
+        gradeSystemStore[userId] = system
     }
 
     func registerFCMToken(_ token: String, for userId: String) async throws {}

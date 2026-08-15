@@ -129,9 +129,12 @@ struct StatsShareCard: View {
                         color: Color.gradeColor(for: highestGradeNumeric).opacity(0.45),
                         radius: 14, x: 0, y: 6
                     )
-                Text(highestGrade)
+                Text(GradeDisplaySettings.shared.label(forStored: highestGrade))
                     .font(.system(size: 38, weight: .black, design: .rounded))
                     .foregroundStyle(VGrade.textColor(for: highestGradeNumeric))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.4)
+                    .frame(maxWidth: 82)
             }
 
             VStack(alignment: .leading, spacing: 6) {
@@ -165,7 +168,7 @@ struct StatsShareCard: View {
             let first = trimmed.split(separator: " ").first.map(String.init) ?? trimmed
             return first.isEmpty ? "New climber" : "\(first), climber"
         }
-        return "\(highestGrade) climber"
+        return "\(GradeDisplaySettings.shared.label(for: highestGradeNumeric)) climber"
     }
 
     // MARK: - Stats grid (4-up)
@@ -227,9 +230,11 @@ struct StatsShareCard: View {
 
     private func pyramidRow(item: GradeCount, maxCount: Int) -> some View {
         HStack(spacing: 8) {
-            Text(item.grade)
+            Text(GradeDisplaySettings.shared.label(for: item.numeric))
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .foregroundStyle(Color.gradeColor(for: item.numeric))
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
                 .frame(width: 24, alignment: .trailing)
 
             GeometryReader { geo in

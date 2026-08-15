@@ -8,7 +8,7 @@ struct ClimbPillView: View {
 
     var body: some View {
         HStack(spacing: 5) {
-            Text(climb.grade)
+            Text(GradeDisplaySettings.shared.label(for: climb.gradeNumeric))
                 .font(.system(size: 14, weight: .black, design: .rounded))
                 .foregroundStyle(gradeColor)
 

@@ -160,7 +160,7 @@ struct ProfileView: View {
                     )
                     Divider().frame(height: 32).opacity(0.3)
                     statItem(
-                        value: user.highestGrade.isEmpty ? "—" : user.highestGrade,
+                        value: user.highestGrade.isEmpty ? "—" : GradeDisplaySettings.shared.label(for: user.highestGradeNumeric),
                         label: "Top Grade"
                     )
                     Divider().frame(height: 32).opacity(0.3)

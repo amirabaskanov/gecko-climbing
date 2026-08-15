@@ -106,7 +106,7 @@ struct FriendProfileView: View {
                 }
                 .buttonStyle(.plain)
 
-                statPill(value: user.highestGrade.isEmpty ? "—" : user.highestGrade, label: "Top Grade")
+                statPill(value: user.highestGrade.isEmpty ? "—" : GradeDisplaySettings.shared.label(for: user.highestGradeNumeric), label: "Top Grade")
             }
 
             Button {
