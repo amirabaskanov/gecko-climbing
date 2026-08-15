@@ -1,4 +1,5 @@
 import SwiftUI
+import TipKit
 
 enum AppTab: Int, CaseIterable {
     case feed, sessions, log, social, profile
@@ -80,6 +81,7 @@ struct CustomTabBar: View {
 
     private var centerButton: some View {
         Button {
+            LogButtonTip().invalidate(reason: .actionPerformed)
             if isOnLogTab {
                 onFinishTap?()
             } else {
@@ -118,6 +120,10 @@ struct CustomTabBar: View {
             }
         }
         .frame(maxWidth: .infinity)
+        // Teaches the +/checkmark/X morph once, after onboarding completes
+        // (rule-gated in LogButtonTip). Anchored to the Button, outside the
+        // TimelineView closure, so the pulse animation doesn't re-anchor it.
+        .popoverTip(LogButtonTip(), arrowEdge: .bottom)
         .accessibilityLabel(centerButtonAccessibilityLabel)
         .animation(.geckoSpring, value: isOnLogTab)
         .animation(.geckoSpring, value: hasClimbs)
