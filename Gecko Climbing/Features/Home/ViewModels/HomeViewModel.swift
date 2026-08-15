@@ -331,8 +331,7 @@ final class HomeViewModel {
 
     private func fetchFollowingIds() async -> Set<String> {
         do {
-            let users = try await userRepository.fetchFollowing(uid: userId)
-            return Set(users.map(\.uid))
+            return try await userRepository.fetchFollowingIds(uid: userId)
         } catch {
             return []
         }

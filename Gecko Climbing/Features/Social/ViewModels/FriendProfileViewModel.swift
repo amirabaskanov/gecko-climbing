@@ -8,6 +8,9 @@ final class FriendProfileViewModel {
     var isFollowing = false
     var isLoading = false
     var error: Error?
+    /// Sessions are secondary content — if their fetch fails (e.g. a missing
+    /// Firestore index) the profile and Follow button must still work.
+    var sessionsUnavailable = false
 
     private let uid: String
     private let userRepository: any UserRepositoryProtocol
@@ -24,25 +27,29 @@ final class FriendProfileViewModel {
     func load() async {
         isLoading = true
         async let userTask = userRepository.fetchUser(uid: uid)
-        async let sessionsTask = sessionRepository.fetchSessions(for: uid)
         async let followingTask = userRepository.isFollowing(targetUID: uid)
 
         do {
-            let (u, s, f) = try await (userTask, sessionsTask, followingTask)
+            let (u, f) = try await (userTask, followingTask)
             user = u
-            sessions = s
             isFollowing = f
-            // Reconcile follow counts in background to fix any drift
-            Task {
-                try? await userRepository.reconcileFollowCounts(uid: uid)
-                if let refreshed = try? await userRepository.fetchUser(uid: uid) {
-                    self.user = refreshed
-                }
-            }
         } catch {
             self.error = error
+            isLoading = false
+            return
         }
+
+        await loadSessions()
         isLoading = false
+    }
+
+    func loadSessions() async {
+        do {
+            sessions = try await sessionRepository.fetchSessions(for: uid)
+            sessionsUnavailable = false
+        } catch {
+            sessionsUnavailable = true
+        }
     }
 
     func toggleFollow() async {

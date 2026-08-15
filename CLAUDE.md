@@ -34,7 +34,7 @@ Gecko Climbing/
 - Repositories: protocol `*RepositoryProtocol` + `Mock*Repository` for testing
 - Models: SwiftData `@Model` classes named `*Model`
 - DTOs: `*DTO` with `toModel()` and `asDictionary()` methods
-- Colors: Use `Color.geckoPrimary` (coral red brand), `Color.geckoSentGreen` (success/sent), `Color.geckoFlashGold`, etc. from Color+Brand.swift. Legacy `Color.geckoGreen` aliases to `geckoPrimary`
+- Colors: Use `Color.geckoPrimary` (forest green brand, #2A6B55 light / #3FA07F dark), `Color.geckoSentGreen` (success/sent), `Color.geckoFlashGold`, etc. from Color+Brand.swift. Legacy `Color.geckoGreen` aliases to `geckoPrimary`
 - Logo: Use `GeckoLogoView(size:color:showWordmark:)` from Shared/Components/GeckoLogoView.swift
 - Font: `.design(.rounded)` for brand text (SF Pro Rounded)
 - Animations: Use `Animation.geckoSpring`, `.geckoSnappy`, `.geckoBounce` from Animation+Gecko.swift

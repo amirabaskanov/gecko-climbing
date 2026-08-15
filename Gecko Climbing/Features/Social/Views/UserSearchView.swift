@@ -66,7 +66,10 @@ struct UserSearchView: View {
                     )
                     .clipShape(Capsule())
             }
-            .buttonStyle(.plain)
+            // .borderless (not .plain) so the button keeps its own hit-testing
+            // inside the row's NavigationLink — with .plain the List row
+            // swallows the tap and navigates instead of following.
+            .buttonStyle(.borderless)
         }
         .padding()
         .background(Color.geckoCard)

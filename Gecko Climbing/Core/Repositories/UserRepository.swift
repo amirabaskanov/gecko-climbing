@@ -10,13 +10,17 @@ protocol UserRepositoryProtocol: AnyObject {
     func isFollowing(targetUID: String) async throws -> Bool
     func fetchFollowers(uid: String) async throws -> [UserModel]
     func fetchFollowing(uid: String) async throws -> [UserModel]
+    /// The complete set of user IDs the given user follows. Unlike
+    /// `fetchFollowing(uid:)` (display list, capped at 50), this pages the
+    /// whole subcollection and is the source of truth for isFollowing checks
+    /// in search results and suggestion carousels.
+    func fetchFollowingIds(uid: String) async throws -> Set<String>
     func searchUsers(query: String) async throws -> [UserModel]
     /// Real climbers to suggest as potential follows. Excludes the current user,
     /// demo accounts, and (when possible) users already followed.
     /// Used to populate the "Climbers you might know" carousel injected into
     /// empty Following feeds and into Discover.
     func suggestedClimbers(excluding excludedUIDs: Set<String>, limit: Int) async throws -> [UserModel]
-    func reconcileFollowCounts(uid: String) async throws
     func fetchNotificationPrefs(for userId: String) async throws -> NotificationPrefs
     func updateNotificationPrefs(_ prefs: NotificationPrefs, for userId: String) async throws
     func registerFCMToken(_ token: String, for userId: String) async throws
@@ -125,6 +129,10 @@ final class MockUserRepository: UserRepositoryProtocol, @unchecked Sendable {
         return users.filter { followingSet.contains($0.uid) }
     }
 
+    func fetchFollowingIds(uid: String) async throws -> Set<String> {
+        return followingSet
+    }
+
     func searchUsers(query: String) async throws -> [UserModel] {
         try await Task.sleep(nanoseconds: 300_000_000)
         guard !query.isEmpty else { return [] }
@@ -143,10 +151,6 @@ final class MockUserRepository: UserRepositoryProtocol, @unchecked Sendable {
             .sorted { $0.totalSessions > $1.totalSessions }
             .prefix(limit)
             .map { $0 }
-    }
-
-    func reconcileFollowCounts(uid: String) async throws {
-        // No-op for mock
     }
 
     private var notificationPrefsStore: [String: NotificationPrefs] = [:]

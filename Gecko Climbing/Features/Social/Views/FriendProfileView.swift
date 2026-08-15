@@ -38,9 +38,22 @@ struct FriendProfileView: View {
                 Divider().padding(.vertical, 16)
 
                 // Sessions
-                if vm.sessions.isEmpty {
+                if vm.sessionsUnavailable {
+                    VStack(spacing: 10) {
+                        Text("Couldn't load sessions")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.secondary)
+                        Button("Try Again") {
+                            Task { await vm.loadSessions() }
+                        }
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.geckoPrimary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 120)
+                } else if vm.sessions.isEmpty {
                     EmptyStateView(
-                        
+
                         title: "No sessions shared yet",
                         subtitle: ""
                     )

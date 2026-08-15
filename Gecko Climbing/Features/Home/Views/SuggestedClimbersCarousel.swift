@@ -197,7 +197,10 @@ struct SuggestedClimberCard: View {
                         .strokeBorder(Color.geckoDivider, lineWidth: localFollowing ? 1 : 0)
                 )
         }
-        .buttonStyle(.plain)
+        // .borderless keeps this button's hit region its own — nested inside
+        // the whole-card Button, .plain can let the card steal the tap and
+        // navigate instead of following.
+        .buttonStyle(.borderless)
         .sensoryFeedback(.selection, trigger: localFollowing)
     }
 }
