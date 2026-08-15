@@ -26,6 +26,7 @@ struct GeckoClimbingApp: App {
             FirebaseApp.configure()
         }
         AnalyticsService.configure()
+        AppTips.configure()
         if let clientID = FirebaseApp.app()?.options.clientID {
             GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
         }

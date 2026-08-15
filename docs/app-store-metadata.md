@@ -15,7 +15,7 @@ Secondary: Sports
 
 ## Description
 
-Gecko Climbing is the simplest way to track your bouldering sessions and watch yourself improve over time.
+Log your climbs in seconds. Gecko Climbing is the simplest way to track your bouldering sessions and watch yourself improve over time.
 
 LOG EVERY CLIMB
 Start a session, add climbs with V-grades (V0–V17), and record your outcome — flash, send, project, or attempt. Track the number of attempts, add photos, and note which gym you're climbing at.
@@ -37,7 +37,7 @@ Gecko is designed by climbers, for climbers. No bloat, no clutter — just a cle
 - Works offline with local data storage
 
 ## Promotional Text (170 char max, can be updated without review)
-Track your bouldering sessions, see your V-grade progression, and share sends with friends. Simple, clean, and built for climbers.
+Log your climbs in seconds. Track your V-grade progression and share sends with friends. Simple, clean, and built for climbers.
 
 ## What's New (for version 1.0)
 Welcome to Gecko Climbing! Start tracking your bouldering sessions today.

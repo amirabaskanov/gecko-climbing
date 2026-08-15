@@ -69,6 +69,16 @@ struct SettingsView: View {
                     ) {
                         showFeedback = true
                     }
+
+                    settingsRow(
+                        icon: "sparkles",
+                        title: "Replay the Guide",
+                        subtitle: "Revisit the quick-start tour",
+                        iconColor: .geckoPrimary
+                    ) {
+                        AnalyticsService.capture(.onboardingReplayed)
+                        NotificationCenter.default.post(name: .replayOnboarding, object: nil)
+                    }
                 }
                 .staggeredAppear(index: 2, appeared: appeared)
 
@@ -97,25 +107,6 @@ struct SettingsView: View {
                     .disabled(isDeleting)
                 }
                 .staggeredAppear(index: 3, appeared: appeared)
-
-                #if DEBUG
-                // DEBUG ONLY — preview the first-run guide on demand. Placed above
-                // About so it isn't hidden under the floating tab bar. Remove this
-                // block (and the wiring in MainTabView) before shipping.
-                VStack(alignment: .leading, spacing: 12) {
-                    sectionHeader("Developer")
-
-                    settingsRow(
-                        icon: "sparkles",
-                        title: "Replay onboarding guide",
-                        subtitle: "Debug only",
-                        iconColor: .geckoPrimary
-                    ) {
-                        NotificationCenter.default.post(name: .debugReplayOnboarding, object: nil)
-                    }
-                }
-                .staggeredAppear(index: 4, appeared: appeared)
-                #endif
 
                 // MARK: - About
 
