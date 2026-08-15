@@ -8,32 +8,26 @@ extension String: @retroactive Identifiable {
 
 // MARK: - CardStyleModifier
 
-/// Shared card chrome that adapts shadows + border to the current color scheme.
-/// In light mode we use soft black shadows for lift; in dark mode shadows are
-/// invisible, so we lean on a subtle border + slightly stronger shadow to keep
-/// the card distinct from the background.
+/// Shared card chrome. Surface hierarchy rule: list cards get a hairline
+/// border and NO shadow (flat, editorial); the elevated card — at most one
+/// per screen (stats hero, personal-best moment) — gets the screen's only
+/// shadow and a larger radius. Radius scale 10 / 14 / 22 encodes depth.
 private struct CardStyleModifier: ViewModifier {
     let cornerRadius: CGFloat
     let elevated: Bool
-    @Environment(\.colorScheme) private var colorScheme
 
     func body(content: Content) -> some View {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-        let isDark = colorScheme == .dark
-        let shadowOpacity1 = isDark ? 0.35 : (elevated ? 0.04 : 0.04)
-        let shadowOpacity2 = isDark ? 0.45 : (elevated ? 0.08 : 0.06)
-        let strokeOpacity = isDark ? 0.18 : (elevated ? 0.10 : 0.06)
-        let strokeColor = isDark ? Color.white.opacity(strokeOpacity)
-                                 : Color.geckoPrimary.opacity(strokeOpacity)
 
         return content
             .background(Color.geckoCard)
             .clipShape(shape)
-            .overlay(shape.stroke(strokeColor, lineWidth: 1))
-            .shadow(color: .black.opacity(shadowOpacity1),
-                    radius: elevated ? 2 : 1, x: 0, y: 1)
-            .shadow(color: .black.opacity(shadowOpacity2),
-                    radius: elevated ? 12 : 8, x: 0, y: elevated ? 6 : 4)
+            .overlay(shape.stroke(elevated ? Color.clear : Color.geckoDivider, lineWidth: 1))
+            .shadow(
+                color: .black.opacity(elevated ? 0.06 : 0),
+                radius: elevated ? 16 : 0,
+                x: 0, y: elevated ? 4 : 0
+            )
     }
 }
 
@@ -160,11 +154,11 @@ extension View {
         #endif
     }
 
-    func cardStyle(cornerRadius: CGFloat = 16) -> some View {
+    func cardStyle(cornerRadius: CGFloat = 14) -> some View {
         modifier(CardStyleModifier(cornerRadius: cornerRadius, elevated: false))
     }
 
-    func cardStyleElevated(cornerRadius: CGFloat = 16) -> some View {
+    func cardStyleElevated(cornerRadius: CGFloat = 22) -> some View {
         modifier(CardStyleModifier(cornerRadius: cornerRadius, elevated: true))
     }
 

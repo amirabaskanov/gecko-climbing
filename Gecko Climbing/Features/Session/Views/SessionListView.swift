@@ -127,6 +127,7 @@ struct SessionListView: View {
 }
 
 struct SessionRowView: View {
+    @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
     let session: SessionModel
 
     /// All climbs (including attempts) in chronological order, grouped into consecutive
@@ -234,31 +235,43 @@ struct SessionRowView: View {
         let onColor = VGrade.textColor(for: numeric)
 
         HStack(spacing: 4) {
+            // Flash always shows its bolt; under Differentiate Without Color
+            // sends show a check too, so outcomes never rely on hue alone.
+            if outcome == .flash {
+                Image(systemName: "bolt.fill")
+                    .font(.system(size: 9, weight: .black))
+                    .foregroundStyle(onColor)
+            } else if differentiateWithoutColor && outcome == .sent {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 9, weight: .black))
+                    .foregroundStyle(onColor)
+            }
+
             Text(GradeDisplaySettings.shared.label(for: numeric))
                 .font(.system(size: 12, weight: .bold, design: .rounded))
-                .foregroundStyle(isAttempt ? color : onColor)
+                .monospacedDigit()
+                .foregroundStyle(isAttempt ? Color.primary : onColor)
 
             if count > 1 {
                 Text("\u{00D7}\(count)")
                     .font(.system(size: 10, weight: .bold, design: .rounded))
-                    .foregroundStyle((isAttempt ? color : onColor).opacity(0.8))
+                    .foregroundStyle((isAttempt ? Color.primary : onColor).opacity(0.8))
             }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(GradeDisplaySettings.shared.label(for: numeric)), \(outcome.label)\(count > 1 ? ", \(count) climbs" : "")")
         .padding(.horizontal, 10)
-        .padding(.vertical, 5)
+        .frame(height: 26)
         .background {
             ZStack {
-                Capsule().fill(isAttempt ? color.opacity(0.15) : color)
+                GeckoHoldShape().fill(isAttempt ? color.opacity(0.16) : color)
                 if isAttempt {
                     DiagonalStripes(spacing: 4, lineWidth: 1.5)
-                        .stroke(color.opacity(0.85), lineWidth: 1.5)
-                        .clipShape(Capsule())
+                        .stroke(color.opacity(0.6), lineWidth: 1.5)
+                        .clipShape(GeckoHoldShape())
                 }
             }
         }
-        .overlay(
-            Capsule().stroke(color.opacity(isAttempt ? 0.85 : 0), lineWidth: 1)
-        )
     }
 
     // MARK: - Mini Stat

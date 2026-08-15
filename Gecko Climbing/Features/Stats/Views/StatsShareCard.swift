@@ -122,13 +122,13 @@ struct StatsShareCard: View {
     private var identityRow: some View {
         HStack(alignment: .center, spacing: 16) {
             ZStack {
-                Circle()
-                    .fill(Color.gradeGradient(for: highestGradeNumeric))
-                    .frame(width: 96, height: 96)
-                    .shadow(
-                        color: Color.gradeColor(for: highestGradeNumeric).opacity(0.45),
-                        radius: 14, x: 0, y: 6
-                    )
+                GeckoHoldShape()
+                    .stroke(Color.gradeColor(for: highestGradeNumeric).opacity(0.22), lineWidth: 1.5)
+                    .frame(width: 104, height: 84)
+                    .scaleEffect(1.12)
+                GeckoHoldShape()
+                    .fill(Color.gradeColor(for: highestGradeNumeric))
+                    .frame(width: 104, height: 84)
                 Text(GradeDisplaySettings.shared.label(forStored: highestGrade))
                     .font(.system(size: 38, weight: .black, design: .rounded))
                     .foregroundStyle(VGrade.textColor(for: highestGradeNumeric))

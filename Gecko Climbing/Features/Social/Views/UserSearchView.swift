@@ -70,6 +70,7 @@ struct UserSearchView: View {
             // inside the row's NavigationLink — with .plain the List row
             // swallows the tap and navigates instead of following.
             .buttonStyle(.borderless)
+            .accessibilityLabel(following ? "Unfollow \(user.displayName)" : "Follow \(user.displayName)")
         }
         .padding()
         .background(Color.geckoCard)

@@ -22,6 +22,7 @@
 		6FBDBD0D53D63B6DE4E55E1C /* FirestoreFeedbackRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD1EBB65F03EABE1DEA6EDC /* FirestoreFeedbackRepository.swift */; };
 		777D9EBD784B52DAFAE51C2A /* SkeletonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34D56FBC16636B26129FD496 /* SkeletonView.swift */; };
 		7A1B2C3D4E5F6A7B8C9D0E1F /* WeekInReviewShareCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1E2D3C4B5A6F7E8D9C0B1A /* WeekInReviewShareCard.swift */; };
+		7C5B8CA9D9127934F3502BAF /* GeckoHoldShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002401FD3FB0914E3ACCED5B /* GeckoHoldShape.swift */; };
 		8B2C3D4E5F6A7B8C9D0E1F2A /* StatsShareCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F7A8B9C0D1E2F /* StatsShareCard.swift */; };
 		A1000001 /* GeckoClimbingApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001 /* GeckoClimbingApp.swift */; };
 		A1000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000002 /* ContentView.swift */; };
@@ -152,6 +153,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		002401FD3FB0914E3ACCED5B /* GeckoHoldShape.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GeckoHoldShape.swift; sourceTree = "<group>"; };
 		0DC52164E07007813F0BE721 /* CommentsViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CommentsViewModel.swift; sourceTree = "<group>"; };
 		0F1E2D3C4B5A6F7E8D9C0B1A /* WeekInReviewShareCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeekInReviewShareCard.swift; sourceTree = "<group>"; };
 		14054D5E8ADD54268E971351 /* WeekInReviewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeekInReviewView.swift; sourceTree = "<group>"; };
@@ -683,6 +685,7 @@
 				DD00F001 /* GeckoLogoView.swift */,
 				34D56FBC16636B26129FD496 /* SkeletonView.swift */,
 				64954CF733DCF19AFCB1CCF2 /* SessionShareCard.swift */,
+				002401FD3FB0914E3ACCED5B /* GeckoHoldShape.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -1018,6 +1021,7 @@
 				34A10F533AEEE585B152AB2A /* OnboardingView.swift in Sources */,
 				3F4EA5AB867A77C8C24E61AE /* AppTips.swift in Sources */,
 				A5AE196EC6344A66E158966D /* GradeDisplay.swift in Sources */,
+				7C5B8CA9D9127934F3502BAF /* GeckoHoldShape.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

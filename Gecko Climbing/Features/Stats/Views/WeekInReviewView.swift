@@ -184,7 +184,6 @@ private struct HardestSendCard: View {
     let numeric: Int
     let isPR: Bool
     let appeared: Bool
-    @State private var glowPulse = false
 
     var body: some View {
         VStack(spacing: 16) {
@@ -194,12 +193,13 @@ private struct HardestSendCard: View {
                 .foregroundStyle(.secondary)
 
             ZStack {
-                Circle()
-                    .fill(Color.gradeGradient(for: numeric))
-                    .frame(width: 200, height: 200)
-                    .shadow(color: Color.gradeColor(for: numeric).opacity(0.45),
-                            radius: glowPulse ? 30 : 15,
-                            x: 0, y: 0)
+                GeckoHoldShape()
+                    .stroke(Color.gradeColor(for: numeric).opacity(0.22), lineWidth: 1.5)
+                    .frame(width: 200, height: 160)
+                    .scaleEffect(1.12)
+                GeckoHoldShape()
+                    .fill(Color.gradeColor(for: numeric))
+                    .frame(width: 200, height: 160)
                     .scaleEffect(appeared ? 1 : 0.4)
                     .animation(.geckoBounce.delay(0.1), value: appeared)
 
@@ -212,11 +212,6 @@ private struct HardestSendCard: View {
                     .scaleEffect(appeared ? 1 : 0.2)
                     .opacity(appeared ? 1 : 0)
                     .animation(.geckoBounce.delay(0.25), value: appeared)
-            }
-            .onAppear {
-                withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) {
-                    glowPulse = true
-                }
             }
 
             if isPR {
@@ -538,11 +533,9 @@ private struct WheelhouseCard: View {
     var body: some View {
         HStack(spacing: 16) {
             ZStack {
-                Circle()
-                    .fill(Color.gradeGradient(for: grade.numeric))
-                    .frame(width: 70, height: 70)
-                    .shadow(color: Color.gradeColor(for: grade.numeric).opacity(0.35),
-                            radius: 8, x: 0, y: 4)
+                GeckoHoldShape()
+                    .fill(Color.gradeColor(for: grade.numeric))
+                    .frame(width: 74, height: 58)
                 Text(GradeDisplaySettings.shared.label(for: grade.numeric))
                     .font(.system(size: 22, weight: .black, design: .rounded))
                     .foregroundStyle(VGrade.textColor(for: grade.numeric))

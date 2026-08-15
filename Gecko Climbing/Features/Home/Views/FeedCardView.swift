@@ -18,6 +18,7 @@ struct FeedCardView: View {
     /// Block the post's author. Nil hides the block action.
     var onBlock: (() -> Void)?
 
+    @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
     @State private var heartScale: CGFloat = 1.0
     @State private var currentPhotoIndex = 0
     @State private var showDoubleTapHeart = false
@@ -155,20 +156,24 @@ struct FeedCardView: View {
                 moderationMenu
             }
 
-            // Top send badge
+            // Top send badge — the signature hold shape in the climb's own
+            // grade-bucket color, so the badge itself tells you how hard the
+            // send was before you read the number.
             if !post.topGrade.isEmpty {
                 let textColor = VGrade.textColor(for: post.topGradeNumeric)
                 VStack(spacing: 2) {
                     Text(GradeDisplaySettings.shared.label(for: post.topGradeNumeric))
                         .font(.system(size: 20, weight: .black, design: .rounded))
+                        .monospacedDigit()
                         .foregroundStyle(textColor)
                     Text("TOP SEND")
-                        .font(.system(size: 7, weight: .bold))
+                        .font(.system(size: 7, weight: .bold, design: .rounded))
+                        .tracking(1.0)
                         .foregroundStyle(textColor.opacity(0.85))
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
-                .background(Color.gradeColor(for: post.topGradeNumeric), in: RoundedRectangle(cornerRadius: 12))
+                .background(Color.gradeColor(for: post.topGradeNumeric), in: GeckoHoldShape())
             }
         }
     }
@@ -336,12 +341,12 @@ struct FeedCardView: View {
     private var sendsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("CLIMBS THIS SESSION")
-                .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(.secondary)
-                .tracking(0.5)
+                .font(.system(size: 11, weight: .bold, design: .rounded))
+                .tracking(1.4)
+                .foregroundStyle(Color.geckoPrimary)
 
             ScrollView(.horizontal) {
-                HStack(alignment: .bottom, spacing: 6) {
+                HStack(spacing: 6) {
                     ForEach(gradeChips, id: \.index) { chip in
                         gradePill(grade: chip.grade, outcome: chip.outcome, count: chip.count)
                     }
@@ -354,38 +359,53 @@ struct FeedCardView: View {
     private func gradePill(grade: String, outcome: ClimbOutcome, count: Int) -> some View {
         let numeric = VGrade.numeric(for: grade)
         let color = Color.gradeColor(for: numeric)
-        let pillHeight: CGFloat = 32 + CGFloat(min(numeric, 10)) * 2.4
         let isAttempt = outcome == .attempt
+        let ink = VGrade.textColor(for: numeric)
+        // Attempt chips sit on a pale tint, so their label uses adaptive ink,
+        // not the bucket color (pale buckets would fail contrast).
+        let labelColor = isAttempt ? Color.primary : ink
 
-        return VStack(spacing: 4) {
+        return HStack(spacing: 3) {
+            // Flash carries its bolt on the chip — flash vs sent must never
+            // be distinguishable by color alone. Under the system's
+            // Differentiate Without Color setting, sends get their checkmark
+            // too so every outcome has a shape channel.
+            if outcome == .flash {
+                Image(systemName: "bolt.fill")
+                    .font(.system(size: 9, weight: .black))
+                    .foregroundStyle(labelColor)
+            } else if differentiateWithoutColor && outcome == .sent {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 9, weight: .black))
+                    .foregroundStyle(labelColor)
+            }
+
+            Text(GradeDisplaySettings.shared.label(forStored: grade))
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .monospacedDigit()
+                .foregroundStyle(labelColor)
+
+            if count > 1 {
+                Text("×\(count)")
+                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                    .foregroundStyle(labelColor.opacity(0.7))
+            }
+        }
+        .padding(.horizontal, 10)
+        .frame(height: 26)
+        .background {
             ZStack {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(color.opacity(isAttempt ? 0.18 : 0.85))
-
+                GeckoHoldShape()
+                    .fill(color.opacity(isAttempt ? 0.16 : 1.0))
                 if isAttempt {
                     DiagonalStripes(spacing: 5, lineWidth: 2)
-                        .stroke(color.opacity(0.85), lineWidth: 2)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                }
-            }
-            .frame(width: 36, height: pillHeight)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(color.opacity(isAttempt ? 0.85 : 0), lineWidth: 1.2)
-            )
-
-            HStack(spacing: 2) {
-                Text(GradeDisplaySettings.shared.label(forStored: grade))
-                    .font(.system(size: 10, weight: .bold, design: .rounded))
-                    .foregroundStyle(color)
-
-                if count > 1 {
-                    Text("×\(count)")
-                        .font(.system(size: 9, weight: .heavy, design: .rounded))
-                        .foregroundStyle(color.opacity(0.6))
+                        .stroke(color.opacity(0.6), lineWidth: 2)
+                        .clipShape(GeckoHoldShape())
                 }
             }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(GradeDisplaySettings.shared.label(forStored: grade)), \(outcome.label)\(count > 1 ? ", \(count) climbs" : "")")
     }
 
     // MARK: - Footer

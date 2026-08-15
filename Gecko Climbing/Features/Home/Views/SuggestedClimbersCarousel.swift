@@ -33,9 +33,9 @@ struct SuggestedClimbersCarousel: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .firstTextBaseline) {
                 Text("CLIMBERS YOU MIGHT KNOW")
-                    .font(.system(size: 11, weight: .heavy, design: .rounded))
-                    .tracking(0.8)
-                    .foregroundStyle(Color.geckoSecondaryText)
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .tracking(1.4)
+                    .foregroundStyle(Color.geckoPrimary)
                 Spacer()
             }
             .padding(.horizontal, 16)
@@ -201,6 +201,7 @@ struct SuggestedClimberCard: View {
         // the whole-card Button, .plain can let the card steal the tap and
         // navigate instead of following.
         .buttonStyle(.borderless)
+        .accessibilityLabel(localFollowing ? "Unfollow \(user.displayName)" : "Follow \(user.displayName)")
         .sensoryFeedback(.selection, trigger: localFollowing)
     }
 }

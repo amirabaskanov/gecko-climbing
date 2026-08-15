@@ -126,6 +126,7 @@ struct FriendProfileView: View {
                     )
                     .clipShape(Capsule())
             }
+            .accessibilityLabel(vm.isFollowing ? "Unfollow \(user.displayName)" : "Follow \(user.displayName)")
         }
         .padding(.top, 20)
         .padding(.horizontal, 16)

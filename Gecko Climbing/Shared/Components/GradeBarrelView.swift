@@ -33,6 +33,25 @@ struct GradeBarrelView: View {
         .frame(height: viewHeight)
         .clipShape(Rectangle())
         .sensoryFeedback(.selection, trigger: selectedGrade)
+        // VoiceOver drives the barrel as a single adjustable control instead
+        // of a horizontal scroll of 18 text items.
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Grade")
+        .accessibilityValue(GradeDisplaySettings.shared.label(forStored: selectedGrade))
+        .accessibilityAdjustableAction { direction in
+            guard let idx = grades.firstIndex(of: selectedGrade) else { return }
+            switch direction {
+            case .increment:
+                guard idx < grades.count - 1 else { return }
+                selectedGrade = grades[idx + 1]
+            case .decrement:
+                guard idx > 0 else { return }
+                selectedGrade = grades[idx - 1]
+            @unknown default:
+                break
+            }
+            scrollPosition = selectedGrade
+        }
         .background {
             GeometryReader { geo in
                 Color.clear.onAppear {

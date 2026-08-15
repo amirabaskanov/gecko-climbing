@@ -183,43 +183,40 @@ private struct IdentityHero: View {
     let grade: String
     let gradeNumeric: Int
     let appeared: Bool
-    @State private var glow = false
 
     var body: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 16) {
+            // The hero IS the grade system: a hold in the lifetime-peak bucket
+            // color, ringed once in "chalk" — no glow, no gradient, no shadow.
             ZStack {
-                Circle()
-                    .fill(Color.gradeGradient(for: gradeNumeric))
-                    .frame(width: 150, height: 150)
-                    .shadow(
-                        color: Color.gradeColor(for: gradeNumeric).opacity(0.45),
-                        radius: glow ? 30 : 18,
-                        x: 0, y: 0
-                    )
+                GeckoHoldShape()
+                    .stroke(Color.gradeColor(for: gradeNumeric).opacity(0.22), lineWidth: 1.5)
+                    .frame(width: 150, height: 120)
+                    .scaleEffect(1.12)
+                GeckoHoldShape()
+                    .fill(Color.gradeColor(for: gradeNumeric))
+                    .frame(width: 150, height: 120)
                 Text(GradeDisplaySettings.shared.label(forStored: grade))
-                    .font(.system(size: 56, weight: .black, design: .rounded))
+                    .font(.system(size: 54, weight: .heavy, design: .rounded))
+                    .tracking(-1)
+                    .monospacedDigit()
                     .minimumScaleFactor(0.35)
                     .lineLimit(1)
-                    .frame(maxWidth: 126)
+                    .frame(maxWidth: 128)
                     .foregroundStyle(VGrade.textColor(for: gradeNumeric))
             }
+            .rotationEffect(.degrees(-5))
             .scaleEffect(appeared ? 1 : 0.5)
             .animation(.geckoBounce, value: appeared)
-            .onAppear {
-                withAnimation(.easeInOut(duration: 1.8).repeatForever(autoreverses: true)) {
-                    glow = true
-                }
-            }
 
-            VStack(spacing: 4) {
+            VStack(spacing: 5) {
                 Text(headline)
                     .font(.system(size: 24, weight: .black, design: .rounded))
                     .foregroundStyle(.primary)
-                Text("Lifetime peak")
-                    .font(.caption.weight(.semibold))
-                    .tracking(1.2)
-                    .foregroundStyle(.secondary)
-                    .textCase(.uppercase)
+                Text("LIFETIME PEAK")
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .tracking(1.4)
+                    .foregroundStyle(Color.geckoPrimary)
             }
         }
         .frame(maxWidth: .infinity)
@@ -275,25 +272,18 @@ private struct CountUpTile: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
             Text(label.uppercased())
-                .font(.system(size: 9, weight: .bold, design: .rounded))
-                .tracking(0.8)
-                .foregroundStyle(.secondary)
+                .font(.system(size: 11, weight: .bold, design: .rounded))
+                .tracking(1.4)
+                .foregroundStyle(Color.geckoPrimary)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 16)
+        // Inset surface: flat fill, radius 10, nothing else. Icon carries the
+        // semantic color; the numeral stays ink.
         .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(LinearGradient(
-                    colors: [tint.opacity(0.10), tint.opacity(0.02)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ))
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Color.geckoInputBackground)
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(tint.opacity(0.18), lineWidth: 1)
-        )
-        .cardStyle()
         .onAppear {
             withAnimation(.easeOut(duration: 1.0).delay(delay)) {
                 displayValue = Double(value)
@@ -404,9 +394,24 @@ private struct OutcomeDonutCard: View {
                     )
                     .foregroundStyle(share.outcome.color)
                     .cornerRadius(4)
+                    // Each wedge carries its outcome glyph so the split is
+                    // readable without relying on hue (color-vision safety).
+                    .annotation(position: .overlay) {
+                        if share.fraction >= 0.10 {
+                            Image(systemName: share.outcome.icon)
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundStyle(.white)
+                        }
+                    }
                 }
                 .frame(width: 140, height: 140)
                 .animation(.easeOut(duration: 0.9), value: animated)
+                .accessibilityLabel("Outcome split")
+                .accessibilityValue(
+                    distribution
+                        .map { "\($0.outcome.label) \(Int(($0.fraction * 100).rounded())) percent" }
+                        .joined(separator: ", ")
+                )
 
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(distribution) { share in
@@ -428,9 +433,10 @@ private struct OutcomeDonutCard: View {
 
     private func outcomeRow(_ share: OutcomeShare) -> some View {
         HStack(spacing: 8) {
-            Circle()
-                .fill(share.outcome.color)
-                .frame(width: 9, height: 9)
+            Image(systemName: share.outcome.icon)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(share.outcome.color)
+                .frame(width: 14)
             Text(share.outcome.label)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.primary)
@@ -440,6 +446,7 @@ private struct OutcomeDonutCard: View {
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
         }
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -462,6 +469,10 @@ private struct ActivityHeatmapCard: View {
                 weekdayLabels
                 heatmapGrid
             }
+            // 91 tiny cells would swamp VoiceOver — summarize instead.
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Activity heatmap")
+            .accessibilityValue(accessibilitySummary)
 
             HStack(spacing: 6) {
                 Text("Less")
@@ -530,6 +541,14 @@ private struct ActivityHeatmapCard: View {
                 calendar.date(byAdding: .day, value: dow, to: weekStart)
             }
         }
+    }
+
+    private var accessibilitySummary: String {
+        let calendar = Calendar.current
+        let cutoff = calendar.date(byAdding: .day, value: -7 * Self.weekCount, to: Date()) ?? Date()
+        let recent = dailyCounts.filter { $0.key >= cutoff && $0.value > 0 }
+        let totalClimbs = recent.values.reduce(0, +)
+        return "\(recent.count) active days, \(totalClimbs) climbs in the last \(Self.weekCount) weeks"
     }
 
     private func intensity(for count: Int) -> Int {
