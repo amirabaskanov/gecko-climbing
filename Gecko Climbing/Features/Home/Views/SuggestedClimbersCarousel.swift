@@ -25,6 +25,8 @@ import SwiftUI
 struct SuggestedClimbersCarousel: View {
     let users: [UserModel]
     var followingIds: Set<String> = []
+    /// Per-uid reason labels from the suggestion engine ("Followed by Phuc").
+    var reasons: [String: String] = [:]
     var onFollow: (UserModel) -> Void = { _ in }
     var onUnfollow: (UserModel) -> Void = { _ in }
     var onTap: (UserModel) -> Void = { _ in }
@@ -45,6 +47,7 @@ struct SuggestedClimbersCarousel: View {
                     ForEach(users, id: \.uid) { user in
                         SuggestedClimberCard(
                             user: user,
+                            reason: reasons[user.uid],
                             isFollowing: followingIds.contains(user.uid),
                             onFollow: { onFollow(user) },
                             onUnfollow: { onUnfollow(user) },
@@ -65,6 +68,7 @@ struct SuggestedClimbersCarousel: View {
 /// card optimistically updates the visual state immediately on tap.
 struct SuggestedClimberCard: View {
     let user: UserModel
+    var reason: String? = nil
     let isFollowing: Bool
     let onFollow: () -> Void
     let onUnfollow: () -> Void
@@ -128,6 +132,15 @@ struct SuggestedClimberCard: View {
                         .lineLimit(1)
                         .truncationMode(.tail)
 
+                    if let reason {
+                        Text(reason)
+                            .font(.system(size: 10, weight: .semibold, design: .rounded))
+                            .foregroundStyle(Color.geckoPrimary)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                            .padding(.top, 1)
+                    }
+
                     HStack(spacing: 6) {
                         if !user.highestGrade.isEmpty {
                             HStack(spacing: 2) {
@@ -185,7 +198,7 @@ struct SuggestedClimberCard: View {
         } label: {
             Text(localFollowing ? "Following" : "Follow")
                 .font(.system(size: 12, weight: .bold, design: .rounded))
-                .foregroundStyle(localFollowing ? Color.primary : Color.white)
+                .foregroundStyle(localFollowing ? Color.primary : Color.geckoOnPrimary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 7)
                 .background(

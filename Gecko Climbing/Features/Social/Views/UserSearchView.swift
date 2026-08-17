@@ -60,7 +60,7 @@ struct UserSearchView: View {
                     .background(
                         following ? AnyShapeStyle(Color.geckoInputBackground) : AnyShapeStyle(Color.geckoPrimary)
                     )
-                    .foregroundStyle(following ? Color.primary : Color.white)
+                    .foregroundStyle(following ? Color.primary : Color.geckoOnPrimary)
                     .overlay(
                         Capsule().stroke(Color.geckoDivider, lineWidth: following ? 1 : 0)
                     )
@@ -73,8 +73,6 @@ struct UserSearchView: View {
             .accessibilityLabel(following ? "Unfollow \(user.displayName)" : "Follow \(user.displayName)")
         }
         .padding()
-        .background(Color.geckoCard)
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-        .shadow(color: .black.opacity(0.08), radius: 4)
+        .cardStyle()
     }
 }

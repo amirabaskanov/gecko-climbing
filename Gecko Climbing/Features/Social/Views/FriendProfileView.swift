@@ -120,7 +120,7 @@ struct FriendProfileView: View {
                     .background(
                         vm.isFollowing ? AnyShapeStyle(Color.geckoInputBackground) : AnyShapeStyle(Color.geckoPrimary)
                     )
-                    .foregroundStyle(vm.isFollowing ? Color.primary : Color.white)
+                    .foregroundStyle(vm.isFollowing ? Color.primary : Color.geckoOnPrimary)
                     .overlay(
                         Capsule().stroke(Color.geckoDivider, lineWidth: vm.isFollowing ? 1 : 0)
                     )

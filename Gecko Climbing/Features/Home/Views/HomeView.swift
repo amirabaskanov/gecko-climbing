@@ -194,6 +194,9 @@ struct HomeView: View {
                     SuggestedClimbersCarousel(
                         users: vm.suggestedClimbers,
                         followingIds: vm.followingIds,
+                        reasons: Dictionary(uniqueKeysWithValues: vm.suggestions.compactMap { s in
+                            vm.suggestionReason(for: s.user.uid).map { (s.user.uid, $0) }
+                        }),
                         onFollow: { user in Task { await vm.follow(user) } },
                         onUnfollow: { user in Task { await vm.unfollow(user) } },
                         onTap: { user in router.push(.friendProfile(uid: user.uid)) }
@@ -230,6 +233,9 @@ struct HomeView: View {
                         SuggestedClimbersCarousel(
                             users: vm.suggestedClimbers,
                             followingIds: vm.followingIds,
+                            reasons: Dictionary(uniqueKeysWithValues: vm.suggestions.compactMap { s in
+                                vm.suggestionReason(for: s.user.uid).map { (s.user.uid, $0) }
+                            }),
                             onFollow: { user in Task { await vm.follow(user) } },
                             onUnfollow: { user in Task { await vm.unfollow(user) } },
                             onTap: { user in router.push(.friendProfile(uid: user.uid)) }
