@@ -20,6 +20,7 @@ struct PostDTO: Codable, Identifiable {
     let gradeCounts: [String: Int]
     let gradeSequence: [String]
     let outcomeSequence: [String]
+    let sessionDurationMinutes: Int?
     let visibility: String
 
     func asDictionary() -> [String: Any] {
@@ -44,6 +45,7 @@ struct PostDTO: Codable, Identifiable {
             "visibility": visibility
         ]
         if let imageURL { dict["imageURL"] = imageURL }
+        if let sessionDurationMinutes { dict["sessionDurationMinutes"] = sessionDurationMinutes }
         return dict
     }
 
@@ -68,6 +70,7 @@ struct PostDTO: Codable, Identifiable {
             gradeCounts: gradeCounts,
             gradeSequence: gradeSequence,
             outcomeSequence: outcomeSequence,
+            sessionDurationMinutes: sessionDurationMinutes,
             visibility: visibility
         )
     }
@@ -95,6 +98,7 @@ extension PostModel {
             gradeCounts: gradeCounts,
             gradeSequence: gradeSequence,
             outcomeSequence: outcomeSequence,
+            sessionDurationMinutes: sessionDurationMinutes,
             visibility: visibility
         )
     }

@@ -420,7 +420,7 @@ final class DTORoundtripTests: XCTestCase {
             type: "session", caption: "Test", imageURL: nil, imageURLs: [],
             likesCount: 0, commentsCount: 0, createdAt: Date(),
             topGrade: "V5", topGradeNumeric: 5, totalClimbs: 1,
-            gradeCounts: ["V5": 1], gradeSequence: [], outcomeSequence: [], visibility: "followers"
+            gradeCounts: ["V5": 1], gradeSequence: [], outcomeSequence: [], sessionDurationMinutes: nil, visibility: "followers"
         )
         let dict = dto.asDictionary()
         XCTAssertNil(dict["imageURL"])
@@ -1419,7 +1419,7 @@ final class GradeDisplayTests: XCTestCase {
 
     func testCircuitBands() {
         let expectations: [(Int, String)] = [
-            (0, "VB–V2"), (1, "VB–V2"), (2, "VB–V2"),
+            (0, "V0"), (1, "V1–V2"), (2, "V1–V2"),
             (3, "V3–V4"), (4, "V3–V4"),
             (5, "V5–V6"), (6, "V5–V6"),
             (7, "V7–V8"), (8, "V7–V8"),
@@ -1465,5 +1465,263 @@ final class GradeDisplayTests: XCTestCase {
         UserDefaults.standard.removeObject(forKey: GradeDisplaySettings.defaultsKey)
         XCTAssertEqual(settings.system, .vScale)
         XCTAssertEqual(settings.inputLabel(forStored: "V5"), "V5")
+    }
+}
+
+// MARK: - SuggestionEngine Tests
+
+final class SuggestionEngineTests: XCTestCase {
+
+    private func user(
+        _ uid: String,
+        name: String? = nil,
+        followers: Int = 0,
+        grade: Int = -1
+    ) -> UserModel {
+        UserModel(
+            uid: uid,
+            displayName: name ?? "User \(uid)",
+            username: "user_\(uid)",
+            followersCount: followers,
+            highestGradeNumeric: grade
+        )
+    }
+
+    private func signals(
+        following: Set<String> = [],
+        followers: Set<String> = [],
+        friendsOfFriends: [String: [String]] = [:],
+        candidateGyms: [String: Set<String>] = [:],
+        viewerGyms: Set<String> = [],
+        viewerGrade: Int = -1,
+        blocked: Set<String> = [],
+        demo: Set<String> = []
+    ) -> SuggestionSignals {
+        SuggestionSignals(
+            viewerFollowingIds: following,
+            viewerFollowerIds: followers,
+            friendsOfFriends: friendsOfFriends,
+            candidateGyms: candidateGyms,
+            viewerGyms: viewerGyms,
+            viewerGradeNumeric: viewerGrade,
+            blockedIds: blocked,
+            demoIds: demo,
+            viewerUid: "viewer"
+        )
+    }
+
+    func testMutualBeatsGymPlusGradeCombined() {
+        let mutual = user("mutual")
+        let local = user("local", grade: 5)
+        let ranked = SuggestionEngine.rank(
+            candidates: [local, mutual],
+            signals: signals(
+                friendsOfFriends: ["mutual": ["Phuc"]],
+                candidateGyms: ["local": ["dogpatch boulders"]],
+                viewerGyms: ["dogpatch boulders"],
+                viewerGrade: 5
+            )
+        )
+        XCTAssertEqual(ranked.map(\.user.uid), ["mutual", "local"])
+        XCTAssertGreaterThan(ranked[0].score, ranked[1].score)
+        XCTAssertEqual(ranked[0].reason, .mutualFollow(name: "Phuc"))
+        XCTAssertEqual(ranked[0].reason.label, "Followed by Phuc")
+    }
+
+    func testFollowsYouOutranksGym() {
+        let fan = user("fan")
+        let local = user("local")
+        let ranked = SuggestionEngine.rank(
+            candidates: [local, fan],
+            signals: signals(
+                followers: ["fan"],
+                candidateGyms: ["local": ["dogpatch boulders"]],
+                viewerGyms: ["dogpatch boulders"]
+            )
+        )
+        XCTAssertEqual(ranked.map(\.user.uid), ["fan", "local"])
+        XCTAssertEqual(ranked[0].reason, .followsYou)
+        XCTAssertEqual(ranked[1].reason, .sameGym(gym: "dogpatch boulders"))
+    }
+
+    func testReasonPrecedencePicksMutualOverEverything() {
+        let ranked = SuggestionEngine.rank(
+            candidates: [user("a", grade: 5)],
+            signals: signals(
+                followers: ["a"],
+                friendsOfFriends: ["a": ["Dana"]],
+                candidateGyms: ["a": ["dogpatch boulders"]],
+                viewerGyms: ["dogpatch boulders"],
+                viewerGrade: 5
+            )
+        )
+        XCTAssertEqual(ranked.count, 1)
+        // Every signal fires, but the reason is the highest-precedence one.
+        XCTAssertEqual(ranked[0].reason, .mutualFollow(name: "Dana"))
+        let expectedScore = FeedConfig.suggestionMutualWeight
+            + FeedConfig.suggestionFollowsYouWeight
+            + FeedConfig.suggestionGymWeight
+            + FeedConfig.suggestionGradePeerWeight
+        XCTAssertEqual(ranked[0].score, expectedScore, accuracy: 0.001)
+    }
+
+    func testExcludedCandidatesNeverAppear() {
+        let candidates = [
+            user("viewer"),
+            user("demo1"),
+            user("blocked1"),
+            user("followed1"),
+            user("fresh")
+        ]
+        let ranked = SuggestionEngine.rank(
+            candidates: candidates,
+            signals: signals(
+                following: ["followed1"],
+                // Signals firing on excluded users must not resurrect them.
+                followers: ["blocked1", "demo1"],
+                friendsOfFriends: ["followed1": ["Dana"]],
+                blocked: ["blocked1"],
+                demo: ["demo1"]
+            )
+        )
+        XCTAssertEqual(ranked.map(\.user.uid), ["fresh"])
+    }
+
+    func testFollowersCountBreaksTies() {
+        // No graph signals for either; uid order alone would put "aa" first.
+        let unknown = user("aa", followers: 0)
+        let known = user("zz", followers: 100)
+        let ranked = SuggestionEngine.rank(candidates: [unknown, known], signals: signals())
+        XCTAssertEqual(ranked.map(\.user.uid), ["zz", "aa"])
+        XCTAssertTrue(ranked.allSatisfy { $0.reason == .popular })
+    }
+
+    func testEmptySignalsFallBackToPopular() {
+        let ranked = SuggestionEngine.rank(candidates: [user("a")], signals: signals())
+        XCTAssertEqual(ranked.count, 1)
+        XCTAssertEqual(ranked[0].reason, .popular)
+        XCTAssertEqual(ranked[0].reason.label, "Popular in the community")
+        XCTAssertEqual(ranked[0].score, 0, accuracy: 0.001)
+    }
+
+    func testGradePeerOnlyWithinWindow() {
+        let viewerGrade = 5
+        let inWindow = viewerGrade + FeedConfig.gradeProximityWindow
+        let outOfWindow = viewerGrade + FeedConfig.gradeProximityWindow + 1
+
+        let ranked = SuggestionEngine.rank(
+            candidates: [user("near", grade: inWindow), user("far", grade: outOfWindow)],
+            signals: signals(viewerGrade: viewerGrade)
+        )
+        XCTAssertEqual(ranked.map(\.user.uid), ["near", "far"])
+        XCTAssertEqual(ranked[0].reason, .gradePeer(numeric: inWindow))
+        XCTAssertEqual(ranked[1].reason, .popular)
+
+        // No viewer grade → no peers at all.
+        let ungraded = SuggestionEngine.rank(
+            candidates: [user("near", grade: inWindow)],
+            signals: signals(viewerGrade: -1)
+        )
+        XCTAssertEqual(ungraded[0].reason, .popular)
+    }
+
+    func testMutualScoreCapsAtThree() {
+        let ranked = SuggestionEngine.rank(
+            candidates: [user("a"), user("b")],
+            signals: signals(friendsOfFriends: [
+                "a": ["One", "Two", "Three", "Four", "Five"],
+                "b": ["One", "Two", "Three"]
+            ])
+        )
+        XCTAssertEqual(ranked[0].score, ranked[1].score, accuracy: 0.001)
+    }
+}
+
+
+// MARK: - Post Climb Sequence Tests
+
+final class PostClimbSequenceTests: XCTestCase {
+
+    private func makePost(gradeSequence: [String], outcomeSequence: [String], gradeCounts: [String: Int] = [:]) -> PostModel {
+        PostModel(
+            userId: "u1",
+            sessionId: "s1",
+            gradeCounts: gradeCounts,
+            gradeSequence: gradeSequence,
+            outcomeSequence: outcomeSequence
+        )
+    }
+
+    func testAllAttemptSessionHasNonEmptySequence() {
+        // Regression: gating on gradeCounts hid all-attempt sessions entirely.
+        let post = makePost(
+            gradeSequence: ["V4", "V4", "V5"],
+            outcomeSequence: ["attempt", "attempt", "attempt"]
+        )
+        XCTAssertTrue(post.gradeCounts.isEmpty)
+        XCTAssertEqual(post.climbSequence.count, 3)
+        let tally = post.outcomeTally
+        XCTAssertEqual(tally.sends, 0)
+        XCTAssertEqual(tally.flashes, 0)
+        XCTAssertEqual(tally.attempts, 3)
+    }
+
+    func testLegacyGradeCountsFallback() {
+        let post = makePost(gradeSequence: [], outcomeSequence: [], gradeCounts: ["V3": 2, "V5": 1])
+        let sequence = post.climbSequence
+        XCTAssertEqual(sequence.count, 3)
+        XCTAssertEqual(sequence.map(\.grade), ["V3", "V3", "V5"])
+        XCTAssertTrue(sequence.allSatisfy { $0.outcome == .sent })
+    }
+
+    func testShortSessionsStayUngrouped() {
+        let post = makePost(
+            gradeSequence: ["V3", "V3", "V3"],
+            outcomeSequence: ["sent", "sent", "sent"]
+        )
+        let chips = post.groupedChips()
+        XCTAssertEqual(chips.count, 3)
+        XCTAssertTrue(chips.allSatisfy { $0.count == 1 })
+    }
+
+    func testLongSessionsGroupConsecutiveRuns() {
+        // 10 climbs: V3 sent x3, V3 attempt x2, V3 sent x2, V4 sent x3 —
+        // sends and attempts at the same grade never merge; non-adjacent
+        // repeats stay separate (RLE, not a histogram).
+        let grades = ["V3","V3","V3","V3","V3","V3","V3","V4","V4","V4"]
+        let outcomes = ["sent","sent","sent","attempt","attempt","sent","sent","sent","sent","sent"]
+        let chips = makePost(gradeSequence: grades, outcomeSequence: outcomes).groupedChips()
+        XCTAssertEqual(chips.map(\.count), [3, 2, 2, 3])
+        XCTAssertEqual(chips[0].outcome, .sent)
+        XCTAssertEqual(chips[1].outcome, .attempt)
+        XCTAssertEqual(chips[2].outcome, .sent)
+        XCTAssertEqual(chips[3].grade, "V4")
+    }
+
+    func testMissingOutcomeIndexDefaultsToSent() {
+        let post = makePost(gradeSequence: ["V2", "V3"], outcomeSequence: ["flash"])
+        let sequence = post.climbSequence
+        XCTAssertEqual(sequence[0].outcome, .flash)
+        XCTAssertEqual(sequence[1].outcome, .sent)
+    }
+
+    func testDurationFormatting() {
+        XCTAssertEqual(SessionStripView.formatDuration(45), "45m")
+        XCTAssertEqual(SessionStripView.formatDuration(60), "1h")
+        XCTAssertEqual(SessionStripView.formatDuration(95), "1h 35m")
+    }
+
+    func testPostDTORoundtripWithDuration() {
+        let post = makePost(gradeSequence: ["V3"], outcomeSequence: ["sent"])
+        post.sessionDurationMinutes = 95
+        let dict = post.toDTO().asDictionary()
+        XCTAssertEqual(dict["sessionDurationMinutes"] as? Int, 95)
+    }
+
+    func testPostDTOOmitsNilDuration() {
+        let post = makePost(gradeSequence: ["V3"], outcomeSequence: ["sent"])
+        XCTAssertNil(post.sessionDurationMinutes)
+        let dict = post.toDTO().asDictionary()
+        XCTAssertNil(dict["sessionDurationMinutes"])
     }
 }

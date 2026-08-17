@@ -257,7 +257,8 @@ struct CelebrationView: View {
                     totalClimbs: snapshot.totalClimbs,
                     gradeCounts: snapshot.gradeCounts,
                     gradeSequence: snapshot.gradeSequence,
-                    outcomeSequence: snapshot.outcomeSequence
+                    outcomeSequence: snapshot.outcomeSequence,
+                    sessionDurationMinutes: snapshot.sessionDurationMinutes
                 )
                 onDone(saved, post)
             }

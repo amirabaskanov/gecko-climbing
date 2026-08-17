@@ -104,12 +104,14 @@ struct FeedCardSkeleton: View {
             .padding(.horizontal, 16)
             .padding(.top, 16)
 
-            // Grade pills
-            HStack(spacing: 6) {
-                ForEach(0..<3, id: \.self) { _ in
-                    SkeletonRect(height: 36, cornerRadius: 8)
-                        .frame(width: 36)
-                }
+            // Photo block
+            SkeletonRect(height: 340, cornerRadius: 12)
+                .padding(.horizontal, 16)
+
+            // Session strip + stat line
+            VStack(alignment: .leading, spacing: 7) {
+                SkeletonRect(height: 12, cornerRadius: 6)
+                SkeletonLine(width: 180, height: 10)
             }
             .padding(.horizontal, 16)
 

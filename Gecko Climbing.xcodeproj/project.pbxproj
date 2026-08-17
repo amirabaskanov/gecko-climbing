@@ -15,6 +15,8 @@
 		39656D43252B8C229F59E85F /* WeekInReviewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65A4DD6F9FD0BA0361398AAB /* WeekInReviewViewModel.swift */; };
 		3E8D04A82F6C4B6B8F700101 /* FeedConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E8D04A92F6C4B6B8F700101 /* FeedConfig.swift */; };
 		3F4EA5AB867A77C8C24E61AE /* AppTips.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38E9F82FE70A3BB985D35CF6 /* AppTips.swift */; };
+		44778BF817CA0EB03E35934E /* SuggestionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26966905F3359C3E15A9E9B2 /* SuggestionEngine.swift */; };
+		4BBA5DE813AC9BAA7ABDF014 /* SessionStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1208F383CAE0318534762B /* SessionStripView.swift */; };
 		55804C2FCF62956FC9CD0313 /* Animation+Gecko.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210A18FB1D170D1A318A5D9D /* Animation+Gecko.swift */; };
 		5F742BB5AECF9030F1A5B2D2 /* AnimatedCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF087C0C87D75CC545532A78 /* AnimatedCounter.swift */; };
 		6164F35BD5F28F338841FB15 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7952659A9D0EC939FB359ED /* AnalyticsService.swift */; };
@@ -160,9 +162,11 @@
 		16153BEEDA8B4C90C056B2A3 /* GradeDisplay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GradeDisplay.swift; sourceTree = "<group>"; };
 		1A2B3C4D5E6F7A8B9C0D1E2F /* StatsShareCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StatsShareCard.swift; sourceTree = "<group>"; };
 		210A18FB1D170D1A318A5D9D /* Animation+Gecko.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Animation+Gecko.swift"; sourceTree = "<group>"; };
+		26966905F3359C3E15A9E9B2 /* SuggestionEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SuggestionEngine.swift; sourceTree = "<group>"; };
 		2BD1EBB65F03EABE1DEA6EDC /* FirestoreFeedbackRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FirestoreFeedbackRepository.swift; sourceTree = "<group>"; };
 		34D56FBC16636B26129FD496 /* SkeletonView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SkeletonView.swift; sourceTree = "<group>"; };
 		38E9F82FE70A3BB985D35CF6 /* AppTips.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppTips.swift; sourceTree = "<group>"; };
+		3B1208F383CAE0318534762B /* SessionStripView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionStripView.swift; sourceTree = "<group>"; };
 		3E8D04A92F6C4B6B8F700101 /* FeedConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedConfig.swift; sourceTree = "<group>"; };
 		4E780868851652FD92A4C115 /* OnboardingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		5DFCE518CEAAC010499D7267 /* ConfettiView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConfettiView.swift; sourceTree = "<group>"; };
@@ -420,6 +424,7 @@
 				AA000302 /* NotificationService.swift */,
 				AA000303 /* DeepLinkRouter.swift */,
 				38E9F82FE70A3BB985D35CF6 /* AppTips.swift */,
+				26966905F3359C3E15A9E9B2 /* SuggestionEngine.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -686,6 +691,7 @@
 				34D56FBC16636B26129FD496 /* SkeletonView.swift */,
 				64954CF733DCF19AFCB1CCF2 /* SessionShareCard.swift */,
 				002401FD3FB0914E3ACCED5B /* GeckoHoldShape.swift */,
+				3B1208F383CAE0318534762B /* SessionStripView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -1022,6 +1028,8 @@
 				3F4EA5AB867A77C8C24E61AE /* AppTips.swift in Sources */,
 				A5AE196EC6344A66E158966D /* GradeDisplay.swift in Sources */,
 				7C5B8CA9D9127934F3502BAF /* GeckoHoldShape.swift in Sources */,
+				44778BF817CA0EB03E35934E /* SuggestionEngine.swift in Sources */,
+				4BBA5DE813AC9BAA7ABDF014 /* SessionStripView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

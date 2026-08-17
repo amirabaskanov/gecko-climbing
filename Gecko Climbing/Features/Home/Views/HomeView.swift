@@ -33,7 +33,7 @@ struct HomeView: View {
                 case .postDetail(let postId):
                     let candidates = (viewModel?.followingPosts ?? []) + (viewModel?.discoverPosts ?? [])
                     if let post = candidates.first(where: { $0.postId == postId }) {
-                        PostDetailView(post: post)
+                        PostDetailView(post: post, badges: viewModel?.badges(for: post) ?? [])
                     } else {
                         // Deep-linked from a notification — the post isn't in
                         // the loaded feed, so load it by id.
