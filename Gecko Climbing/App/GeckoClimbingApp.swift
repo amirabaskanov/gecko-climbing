@@ -19,7 +19,14 @@ private enum AppBootstrap {
 @main
 struct GeckoClimbingApp: App {
     @UIApplicationDelegateAdaptor(GeckoAppDelegate.self) private var appDelegate
+    @AppStorage(AppearanceMode.defaultsKey) private var appearanceRaw = AppearanceMode.system.rawValue
     private let bootstrap: AppBootstrap
+
+    /// Manual theme override; nil follows the system. Applied at the root so
+    /// every screen, sheet, and cover inherits it — signed-out state included.
+    private var appearanceScheme: ColorScheme? {
+        (AppearanceMode(rawValue: appearanceRaw) ?? .system).colorScheme
+    }
 
     init() {
         if Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist") != nil {
@@ -84,9 +91,11 @@ struct GeckoClimbingApp: App {
                     .onOpenURL { url in
                         GIDSignIn.sharedInstance.handle(url)
                     }
+                    .preferredColorScheme(appearanceScheme)
             case let .failed(error):
                 StorageErrorView(error: error)
                     .tint(Color.geckoPrimary)
+                    .preferredColorScheme(appearanceScheme)
             }
         }
     }

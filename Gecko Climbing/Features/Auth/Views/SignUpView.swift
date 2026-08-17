@@ -2,6 +2,7 @@ import SwiftUI
 import AuthenticationServices
 
 struct SignUpView: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(AuthViewModel.self) private var authViewModel
     @Binding var showSignUp: Bool
 
@@ -68,7 +69,7 @@ struct SignUpView: View {
                                 authViewModel.handleAppleAuthorizationFailure(error)
                             }
                         }
-                        .signInWithAppleButtonStyle(.black)
+                        .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
                         .frame(height: 52)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                         .disabled(authViewModel.isLoading)

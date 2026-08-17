@@ -48,8 +48,11 @@ struct CustomTabBar: View {
         .padding(.top, 12)
         .padding(.bottom, 8)
         .background(
+            // Light mode separates via shadow; dark mode needs the hairline —
+            // black shadows vanish on a near-black background.
             Capsule()
                 .fill(.ultraThinMaterial)
+                .overlay(Capsule().stroke(Color.geckoDivider.opacity(0.6), lineWidth: 1))
                 .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: -2)
                 .shadow(color: .black.opacity(0.04), radius: 2, x: 0, y: -1)
         )

@@ -194,9 +194,7 @@ struct ProfileView: View {
             }
             .padding(.vertical, 16)
             .frame(maxWidth: .infinity)
-            .background(Color.geckoCard)
-            .clipShape(RoundedRectangle(cornerRadius: 14))
-            .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 2)
+            .cardStyle()
         }
         .buttonStyle(.plain)
         .bouncePress()
