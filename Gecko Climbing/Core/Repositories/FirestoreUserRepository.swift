@@ -350,23 +350,39 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
     // MARK: - Search
 
     func searchUsers(query: String) async throws -> [UserModel] {
-        guard !query.isEmpty else { return [] }
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return [] }
 
         let uid = authRepository.currentUserId
-        let lowered = query.lowercased()
+        let lowered = trimmed.lowercased()
 
-        // Firestore prefix search on username field
-        let snapshot = try await usersRef
-            .whereField("username", isGreaterThanOrEqualTo: lowered)
-            .whereField("username", isLessThanOrEqualTo: lowered + "\u{f8ff}")
+        // Two prefix queries: the username field plus the derived lowercased
+        // display name (`searchName`, written by UserDTO.asDictionary — legacy
+        // docs without it just never match that leg). Merged client-side,
+        // deduped by uid, username matches first.
+        async let usernameDocs = prefixQuery(field: "username", prefix: lowered)
+        async let searchNameDocs = prefixQuery(field: "searchName", prefix: lowered)
+        let docs = try await usernameDocs + searchNameDocs
+
+        var seen: Set<String> = []
+        var results: [UserModel] = []
+        for doc in docs {
+            guard doc.documentID != uid,
+                  !FeedConfig.demoUserIds.contains(doc.documentID),
+                  seen.insert(doc.documentID).inserted else { continue }
+            results.append(decodeUser(from: doc.data(), uid: doc.documentID))
+            if results.count == 20 { break }
+        }
+        return results
+    }
+
+    private func prefixQuery(field: String, prefix: String) async throws -> [QueryDocumentSnapshot] {
+        try await usersRef
+            .whereField(field, isGreaterThanOrEqualTo: prefix)
+            .whereField(field, isLessThanOrEqualTo: prefix + "\u{f8ff}")
             .limit(to: 20)
             .getDocuments()
-
-        return snapshot.documents.compactMap { doc in
-            guard doc.documentID != uid else { return nil }
-            let data = doc.data()
-            return decodeUser(from: data, uid: doc.documentID)
-        }
+            .documents
     }
 
     // MARK: - Suggested climbers

@@ -139,11 +139,15 @@ final class MockUserRepository: UserRepositoryProtocol, @unchecked Sendable {
 
     func searchUsers(query: String) async throws -> [UserModel] {
         try await Task.sleep(nanoseconds: 300_000_000)
-        guard !query.isEmpty else { return [] }
+        // Same trimming + demo filtering as the Firestore implementation so
+        // tests and previews don't lie about search behavior.
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return [] }
         return users.filter {
-            $0.displayName.localizedCaseInsensitiveContains(query) ||
-            $0.username.localizedCaseInsensitiveContains(query)
-        }.filter { $0.uid != currentUserId }
+            $0.displayName.localizedCaseInsensitiveContains(trimmed) ||
+            $0.username.localizedCaseInsensitiveContains(trimmed)
+        }
+        .filter { $0.uid != currentUserId && !FeedConfig.demoUserIds.contains($0.uid) }
     }
 
     func suggestedClimbers(excluding excludedUIDs: Set<String>, limit: Int) async throws -> [UserModel] {
