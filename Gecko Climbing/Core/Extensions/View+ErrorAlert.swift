@@ -15,16 +15,21 @@ extension String: @retroactive Identifiable {
 private struct CardStyleModifier: ViewModifier {
     let cornerRadius: CGFloat
     let elevated: Bool
+    @Environment(\.colorScheme) private var colorScheme
 
     func body(content: Content) -> some View {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        let isDark = colorScheme == .dark
+        // Dark mode: a 6% black shadow on a near-black background is invisible,
+        // so elevated cards lift via a brighter surface + hairline instead.
+        let elevatedStroke = isDark ? Color.white.opacity(0.10) : Color.clear
 
         return content
-            .background(Color.geckoCard)
+            .background(elevated && isDark ? Color.geckoSurfaceElevated : Color.geckoCard)
             .clipShape(shape)
-            .overlay(shape.stroke(elevated ? Color.clear : Color.geckoDivider, lineWidth: 1))
+            .overlay(shape.stroke(elevated ? elevatedStroke : Color.geckoDivider, lineWidth: 1))
             .shadow(
-                color: .black.opacity(elevated ? 0.06 : 0),
+                color: .black.opacity(elevated && !isDark ? 0.06 : 0),
                 radius: elevated ? 16 : 0,
                 x: 0, y: elevated ? 4 : 0
             )

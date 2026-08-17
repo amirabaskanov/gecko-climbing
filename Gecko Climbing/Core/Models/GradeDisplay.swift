@@ -65,13 +65,15 @@ enum GradeDisplay {
         "9A",  // V17
     ]
 
-    /// Circuit bands intentionally mirror the `Color.gradeColor` buckets so a
-    /// redesign of the grade color ramp flows through to circuit labels'
-    /// colors automatically.
+    /// Circuit bands intentionally mirror the Gym Tape color bands in
+    /// `Color.gradeColor` so Circuit mode literally reads as gym tape:
+    /// yellow / green / blue / red / purple / pink / black.
+    /// Keep in sync with `functions/src/helpers/grades.ts`.
     static func circuitBand(for numeric: Int) -> String {
         switch numeric {
         case ..<0:   return "?"
-        case 0...2:  return "VB–V2"
+        case 0:      return "V0"
+        case 1...2:  return "V1–V2"
         case 3...4:  return "V3–V4"
         case 5...6:  return "V5–V6"
         case 7...8:  return "V7–V8"

@@ -29,7 +29,8 @@ const FONT_LABELS: readonly string[] = [
 
 function circuitBand(numeric: number): string {
   if (numeric < 0) return '?';
-  if (numeric <= 2) return 'VB–V2';
+  if (numeric === 0) return 'V0';
+  if (numeric <= 2) return 'V1–V2';
   if (numeric <= 4) return 'V3–V4';
   if (numeric <= 6) return 'V5–V6';
   if (numeric <= 8) return 'V7–V8';
