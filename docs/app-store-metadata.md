@@ -1,4 +1,4 @@
-# App Store Metadata — Gecko Climbing
+# App Store Metadata: Gecko Climbing
 
 ## App Name
 Gecko Climbing
@@ -15,38 +15,48 @@ Secondary: Sports
 
 ## Description
 
-Log your climbs in seconds. Gecko Climbing is the simplest way to track your bouldering sessions and watch yourself improve over time.
+Log your climbs in seconds. Gecko is the simplest way to track your bouldering sessions and watch yourself get stronger.
+
+A LOOK BUILT FROM THE GYM
+Every grade has its own hold color, and each session appears as a colorful strip you can read at a glance.
 
 LOG EVERY CLIMB
-Start a session, add climbs with V-grades (V0–V17), and record your outcome — flash, send, project, or attempt. Track the number of attempts, add photos, and note which gym you're climbing at.
+Start a session, pick a grade, tap an outcome: flash, send, or attempt. Add tries, photos, and your gym. Logging takes seconds, so you stay on the wall.
+
+YOUR GRADES, YOUR SCALE
+See grades the way your gym shows them: V Scale, Fontainebleau, or circuit colors. Your data stays the same, the display is up to you.
 
 SEE YOUR PROGRESS
-View your climbing stats at a glance: highest grade sent, flash rate, total sessions, and more. Weekly recaps show how your climbing shaped up each week.
+Highest grade, flash rate, grade pyramid, weekly streaks, and a week in review that shows how your climbing is trending.
 
-SHARE WITH FRIENDS
-Post your sessions to the social feed. Follow friends, like their sends, and leave comments. See what your climbing crew is working on.
+CLIMB WITH YOUR CREW
+Share sessions to the feed, like and comment on sends, and meet climbers like you with suggestions based on how and where you climb.
 
 BUILT FOR CLIMBERS
-Gecko is designed by climbers, for climbers. No bloat, no clutter — just a clean, focused tool to help you climb harder.
+No bloat, no clutter. A clean, focused tool that helps you climb harder.
 
-- Log sessions with V-grades and outcomes
-- Track flash rate, send rate, and progression
-- Weekly recap notifications
-- Social feed with likes and comments
-- Dark mode
+- Log sessions with grades and outcomes in seconds
+- Session strips show your whole session in one glance
+- V Scale, Fontainebleau, and circuit grade display
+- Flash rate, send rate, grade pyramid, and streaks
+- Weekly recaps
+- Social feed with likes, comments, and photos
+- Light and dark mode with an appearance setting
 - Works offline with local data storage
 
 ## Promotional Text (170 char max, can be updated without review)
-Log your climbs in seconds. Track your V-grade progression and share sends with friends. Simple, clean, and built for climbers.
+Now with a fresh look inspired by the gym: every grade has its own hold color. Log climbs in seconds, track your progression, and climb with your crew.
 
-## What's New (for version 1.0)
-Welcome to Gecko Climbing! Start tracking your bouldering sessions today.
+## What's New (for version 1.1)
+Gecko has a new look, inspired by the colors of the gym. Every grade now has its own hold color, and each session appears as a colorful strip you can read at a glance.
 
-- Log climbs with V-grades and outcomes (flash, send, project, attempt)
-- Track your climbing stats and progression
-- Weekly recap notifications
-- Social feed — follow friends and share sessions
-- Dark mode support
+Also in this update:
+- Following friends is now seamless and reliable
+- Find Your Crew: friend suggestions based on how and where you climb
+- Search for climbers by name or username
+- Grade Scale setting: V Scale, Fontainebleau, or circuit colors
+- Refined dark mode, plus a new appearance setting
+- A short interactive guide to get you started
 
 ## URLs
 - Support URL: https://trygecko.app/support.html
