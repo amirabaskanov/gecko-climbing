@@ -116,7 +116,7 @@ struct PostDetailView: View {
                 detailStat(value: "\(tally.sends)", label: "Sends")
                 detailStat(value: "\(tally.flashes)", label: "Flashes")
                 if let minutes = post.sessionDurationMinutes, minutes > 0 {
-                    detailStat(value: SessionStripView.formatDuration(minutes), label: "Time")
+                    detailStat(value: SessionChipsView.formatDuration(minutes), label: "Time")
                 }
                 Spacer(minLength: 0)
             }

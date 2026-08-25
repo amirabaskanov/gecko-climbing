@@ -22,47 +22,61 @@ struct DiagonalStripes: Shape {
     }
 }
 
-// MARK: - Session Strip
+// MARK: - Session Chips
 
-/// The feed card's session fingerprint: one slim bar, one equal-width segment
-/// per climb in logging order, colored by grade — with the Gym Tape palette it
-/// reads like a strip of route tape. Attempts render as a pale hatched
-/// segment. A 3-climb and a 25-climb session occupy identical space.
-struct SessionStripView: View {
+/// The feed card's climbs display: grouped hold-shaped chips with grade
+/// labels, capped so a 25-climb session never dominates the card. Identical
+/// consecutive climbs collapse into one chip with a multiplier, attempts get
+/// the hatch texture, and anything past the cap sits behind a "+N more"
+/// expander that unfolds in place.
+struct SessionChipsView: View {
     let climbs: [PostClimb]
+    let groups: [PostClimbGroup]
     var durationMinutes: Int?
 
+    @State private var expanded = false
+
+    /// Collapsed cap. Seven grouped chips is at most two rows in a feed card.
+    private let maxGroups = 7
+
+    private var visibleGroups: [PostClimbGroup] {
+        expanded ? groups : Array(groups.prefix(maxGroups))
+    }
+
+    private var hiddenClimbCount: Int {
+        groups.dropFirst(maxGroups).reduce(0) { $0 + $1.count }
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 7) {
-            strip
+        VStack(alignment: .leading, spacing: 8) {
+            FlowLayout(spacing: 6, rowSpacing: 6) {
+                ForEach(visibleGroups) { group in
+                    ClimbChipView(grade: group.grade, outcome: group.outcome, count: group.count)
+                }
+                if !expanded && hiddenClimbCount > 0 {
+                    Button {
+                        withAnimation(.geckoSpring) { expanded = true }
+                    } label: {
+                        moreChip
+                    }
+                    .buttonStyle(.borderless)
+                }
+            }
             statLine
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilitySummary)
+        .accessibilityAction(named: "Show all climbs") { expanded = true }
     }
 
-    private var strip: some View {
-        HStack(spacing: climbs.count > 20 ? 1 : 2) {
-            ForEach(Array(climbs.enumerated()), id: \.offset) { _, climb in
-                segment(climb)
-            }
-        }
-        .frame(height: 12)
-        .clipShape(Capsule())
-    }
-
-    private func segment(_ climb: PostClimb) -> some View {
-        let color = Color.gradeColor(for: climb.grade)
-        let isAttempt = climb.outcome == .attempt
-        return ZStack {
-            Rectangle()
-                .fill(color.opacity(isAttempt ? 0.30 : 1.0))
-            if isAttempt {
-                DiagonalStripes(spacing: 3, lineWidth: 1)
-                    .stroke(color.opacity(0.9), lineWidth: 1)
-            }
-        }
-        .frame(maxWidth: .infinity)
+    private var moreChip: some View {
+        Text("+\(hiddenClimbCount) more")
+            .font(.system(size: 13, weight: .bold, design: .rounded))
+            .monospacedDigit()
+            .foregroundStyle(Color.geckoSecondaryText)
+            .padding(.horizontal, 10)
+            .frame(height: 26)
+            .background(GeckoHoldShape().fill(Color.geckoInputBackground))
     }
 
     private var statLine: some View {
@@ -98,7 +112,7 @@ struct SessionStripView: View {
     }
 
     private var dot: some View {
-        Text("·")
+        Text("\u{B7}")
             .font(.system(size: 12, weight: .bold))
             .foregroundStyle(Color.geckoSecondaryText.opacity(0.6))
     }
@@ -193,10 +207,11 @@ struct ClimbChipView: View {
 }
 
 #if DEBUG
-#Preview("Session strip + chips") {
+#Preview("Session chips") {
     VStack(alignment: .leading, spacing: 20) {
-        SessionStripView(
+        SessionChipsView(
             climbs: PostModel.preview.climbSequence,
+            groups: PostModel.preview.groupedChips(),
             durationMinutes: 95
         )
         HStack(spacing: 6) {

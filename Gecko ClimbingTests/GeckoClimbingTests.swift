@@ -1706,9 +1706,9 @@ final class PostClimbSequenceTests: XCTestCase {
     }
 
     func testDurationFormatting() {
-        XCTAssertEqual(SessionStripView.formatDuration(45), "45m")
-        XCTAssertEqual(SessionStripView.formatDuration(60), "1h")
-        XCTAssertEqual(SessionStripView.formatDuration(95), "1h 35m")
+        XCTAssertEqual(SessionChipsView.formatDuration(45), "45m")
+        XCTAssertEqual(SessionChipsView.formatDuration(60), "1h")
+        XCTAssertEqual(SessionChipsView.formatDuration(95), "1h 35m")
     }
 
     func testPostDTORoundtripWithDuration() {

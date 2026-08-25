@@ -23,7 +23,6 @@ struct FeedCardView: View {
     @State private var currentPhotoIndex = 0
     @State private var showDoubleTapHeart = false
     @State private var captionExpanded = false
-    @State private var climbsExpanded = false
     @State private var showReportDialog = false
     @State private var showBlockDialog = false
     @State private var reportSubmitted = false
@@ -271,22 +270,13 @@ struct FeedCardView: View {
                 .tracking(1.4)
                 .foregroundStyle(Color.geckoPrimary)
 
-            // The session fingerprint. Tapping toggles the chip breakdown;
-            // its own gesture wins over the whole-card tap.
-            SessionStripView(climbs: post.climbSequence, durationMinutes: post.sessionDurationMinutes)
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    withAnimation(.geckoSpring) { climbsExpanded.toggle() }
-                }
-
-            if climbsExpanded {
-                FlowLayout(spacing: 6, rowSpacing: 6) {
-                    ForEach(post.groupedChips()) { group in
-                        ClimbChipView(grade: group.grade, outcome: group.outcome, count: group.count)
-                    }
-                }
-                .transition(.opacity.combined(with: .move(edge: .top)))
-            }
+            // Grouped chips, capped at two rows; "+N more" expands in place.
+            // The expander button's own hit-testing wins over the whole-card tap.
+            SessionChipsView(
+                climbs: post.climbSequence,
+                groups: post.groupedChips(),
+                durationMinutes: post.sessionDurationMinutes
+            )
         }
     }
 
