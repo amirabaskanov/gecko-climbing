@@ -29,4 +29,12 @@
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
   }
+
+  // Hero demo video: play at 1.5x so logging reads as fast as it feels.
+  const heroVideo = document.querySelector('.hero video');
+  if (heroVideo) {
+    const speedUp = () => { heroVideo.playbackRate = 1.5; };
+    speedUp();
+    heroVideo.addEventListener('loadedmetadata', speedUp);
+  }
 })();
