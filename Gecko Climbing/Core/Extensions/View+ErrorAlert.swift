@@ -96,8 +96,8 @@ enum UserFacingError {
         case 7:  return "You don't have permission to do that."
         case 5:  return "That content is no longer available."
         case 4, 14: return "Couldn't reach the server. Check your connection and try again."
-        case 8:  return "We're a bit overloaded right now — try again in a minute."
-        case 9:  return "Something's not ready on our end — try again in a minute."
+        case 8:  return "We're a bit overloaded right now. Try again in a minute."
+        case 9:  return "Something's not ready on our end. Try again in a minute."
         case 16: return "Please sign in again to continue."
         default: return genericMessage
         }
@@ -111,7 +111,7 @@ enum UserFacingError {
         case 17011: return "No account found with that email."
         case 17007: return "An account with that email already exists."
         case 17026: return "Please choose a stronger password (at least 6 characters)."
-        case 17010: return "Too many attempts — please wait a moment and try again."
+        case 17010: return "Too many attempts. Wait a moment and try again."
         case 17020: return "You appear to be offline. Check your connection and try again."
         default: return genericMessage
         }

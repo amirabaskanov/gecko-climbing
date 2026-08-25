@@ -488,7 +488,7 @@ struct GradeScaleSettingsView: View {
 
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
-                Text("How grades appear across Gecko — your climbs, friends' posts, and stats. Your logged data doesn't change.")
+                Text("How grades appear across Gecko: your climbs, friends' posts, and stats. Your logged data doesn't change.")
                     .font(.footnote)
                     .fontDesign(.rounded)
                     .foregroundStyle(Color.geckoSecondaryText)

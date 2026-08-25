@@ -765,7 +765,7 @@ private struct EmptyReturning: View {
         }
         switch days {
         case 0:
-            return "You climbed earlier today — refresh after your next session."
+            return "You climbed earlier today. Refresh after your next session."
         case 1:
             return "Last climb was yesterday. Time for round two?"
         case 2...6:
@@ -883,7 +883,7 @@ private struct EmptyFirstTimer: View {
                 Text("Your story starts here")
                     .font(.system(size: 22, weight: .black, design: .rounded))
 
-                Text("Log a climbing session and your week-in-review unlocks — hardest send, send rate, days you climbed, all of it.")
+                Text("Log a climbing session to unlock your week in review: hardest send, send rate, days you climbed, all of it.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)

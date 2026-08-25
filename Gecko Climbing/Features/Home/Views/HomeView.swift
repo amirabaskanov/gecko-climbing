@@ -163,7 +163,7 @@ struct HomeView: View {
                 VStack(spacing: 14) {
                     GeckoLogoView(size: 64, color: .geckoPrimary.opacity(0.7))
                         .padding(.top, 32)
-                    Text("Your feed is quiet — for now")
+                    Text("Your feed is quiet for now")
                         .font(.system(size: 20, weight: .bold, design: .rounded))
                         .multilineTextAlignment(.center)
                     Text("Follow climbers to see their sessions, sends, and projects right here.")
@@ -220,7 +220,7 @@ struct HomeView: View {
             ScrollView {
                 EmptyStateView(
                     title: "No public posts yet",
-                    subtitle: "Be the first to share a session — it'll appear here for everyone."
+                    subtitle: "Be the first to share a session. It'll appear here for everyone."
                 )
                 .frame(maxWidth: .infinity)
                 .padding(.top, 80)

@@ -24,7 +24,7 @@ struct LogButtonTip: Tip {
     }
 
     var message: Text? {
-        Text("Tap + to start logging. While a session is open it turns into a checkmark to finish — or an X to cancel if you haven't logged anything yet.")
+        Text("Tap + to start logging. While a session is open it turns into a checkmark to finish, or an X to cancel if you haven't logged anything yet.")
     }
 
     var image: Image? {
