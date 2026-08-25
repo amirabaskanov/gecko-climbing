@@ -120,7 +120,7 @@ struct WeekInReviewView: View {
             .padding(.bottom, 24)
         }
         .scrollIndicators(.hidden)
-        .contentMargins(.bottom, 56)
+        .tabBarScrollInset()
         .onAppear {
             withAnimation(.geckoBounce.delay(0.05)) { heroAppeared = true }
         }
@@ -710,6 +710,7 @@ private struct EmptyReturning: View {
             .padding(.bottom, 32)
         }
         .scrollIndicators(.hidden)
+        .tabBarScrollInset()
         .onAppear {
             withAnimation(.geckoBounce.delay(0.05)) { appeared = true }
             withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) {

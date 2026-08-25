@@ -121,6 +121,14 @@ enum UserFacingError {
 // MARK: - View Extensions
 
 extension View {
+    /// Bottom content margin so scrollable screens clear the floating tab
+    /// bar. MainTabView's safeAreaInset does not reliably propagate into the
+    /// per-tab NavigationStacks, so every tab-visible scroll surface opts in
+    /// explicitly. 100pt = capsule bar plus the protruding log button.
+    func tabBarScrollInset() -> some View {
+        contentMargins(.bottom, 100, for: .scrollContent)
+    }
+
     func errorAlert(error: Binding<Error?>) -> some View {
         alert("Something went wrong", isPresented: Binding(
             get: { error.wrappedValue != nil },

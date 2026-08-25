@@ -111,7 +111,7 @@ struct SessionListView: View {
                     }
                 }
                 .listStyle(.plain)
-                .contentMargins(.bottom, 48)
+                .tabBarScrollInset()
                 .background(Color.geckoBackground)
                 .onAppear {
                     withAnimation { appeared = true }

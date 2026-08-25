@@ -242,6 +242,7 @@ struct NewSessionView: View {
                     .listStyle(.plain)
                     .scrollContentBackground(.hidden)
                     .background(Color.geckoBackground)
+                    .tabBarScrollInset()
                     .onChange(of: vm.climbs.count) {
                         if let firstClimb = vm.climbs.first {
                             withAnimation {

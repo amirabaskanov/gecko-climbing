@@ -69,6 +69,7 @@ struct FriendProfileView: View {
             }
             .padding(.bottom, 24)
         }
+        .tabBarScrollInset()
         .background(Color.geckoBackground)
         .navigationTitle(vm.user?.displayName ?? "Profile")
         .navigationBarTitleDisplayMode(.inline)

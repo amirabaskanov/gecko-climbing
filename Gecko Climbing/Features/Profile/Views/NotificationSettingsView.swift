@@ -18,6 +18,7 @@ struct NotificationSettingsView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
+        .tabBarScrollInset()
         .background(Color.geckoBackground)
         .navigationTitle("Notifications")
         .navigationBarTitleDisplayMode(.inline)

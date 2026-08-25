@@ -161,6 +161,7 @@ struct SettingsView: View {
             .padding(.top, 8)
             .padding(.bottom, 32)
         }
+        .tabBarScrollInset()
         .background(Color.geckoBackground)
         .navigationTitle("Settings")
         .onAppear { appeared = true }
@@ -544,6 +545,7 @@ struct GradeScaleSettingsView: View {
             .padding(.horizontal, 16)
             .padding(.top, 8)
         }
+        .tabBarScrollInset()
         .background(Color.geckoBackground)
         .navigationTitle("Grade Scale")
         .navigationBarTitleDisplayMode(.inline)
@@ -650,6 +652,7 @@ struct AppearanceSettingsView: View {
             .padding(.horizontal, 16)
             .padding(.top, 8)
         }
+        .tabBarScrollInset()
         .background(Color.geckoBackground)
         .navigationTitle("Appearance")
         .navigationBarTitleDisplayMode(.inline)

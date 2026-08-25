@@ -147,7 +147,7 @@ struct HomeView: View {
                 .padding(.top, 12)
                 .padding(.bottom, 24)
             }
-            .contentMargins(.bottom, 48)
+            .tabBarScrollInset()
             .background(Color.geckoBackground)
             .refreshable { await vm.loadFeed() }
             .onAppear {
@@ -206,7 +206,7 @@ struct HomeView: View {
             }
             .padding(.bottom, 48)
         }
-        .contentMargins(.bottom, 48)
+        .tabBarScrollInset()
         .refreshable { await vm.loadFeed() }
     }
 
@@ -263,7 +263,7 @@ struct HomeView: View {
                 .padding(.top, 4)
                 .padding(.bottom, 24)
             }
-            .contentMargins(.bottom, 48)
+            .tabBarScrollInset()
             .background(Color.geckoBackground)
             .refreshable { await vm.loadFeed() }
             .onAppear {

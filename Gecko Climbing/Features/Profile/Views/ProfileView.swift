@@ -104,7 +104,7 @@ struct ProfileView: View {
             }
             .padding(.bottom, 32)
         }
-        .contentMargins(.bottom, 48)
+        .tabBarScrollInset()
         .background(Color.geckoBackground)
         .refreshable { await vm.load() }
     }

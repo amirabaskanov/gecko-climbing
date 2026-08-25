@@ -15,6 +15,7 @@ struct FollowersListView: View {
 
     var body: some View {
         content
+            .tabBarScrollInset()
             .background(Color.geckoBackground)
         .navigationTitle(mode == .followers ? "Followers" : "Following")
         .errorAlert(error: $error)

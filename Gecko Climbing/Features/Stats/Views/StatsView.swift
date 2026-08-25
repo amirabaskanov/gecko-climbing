@@ -95,7 +95,7 @@ struct StatsView: View {
             .padding(.bottom, 24)
         }
         .scrollIndicators(.hidden)
-        .contentMargins(.bottom, 56)
+        .tabBarScrollInset()
         .background(Color.geckoBackground)
         .refreshable { await vm.loadStats() }
         .onAppear {

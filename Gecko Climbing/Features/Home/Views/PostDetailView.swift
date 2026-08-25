@@ -44,6 +44,7 @@ struct PostDetailView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
+        .tabBarScrollInset()
         .background(Color.geckoBackground)
         .navigationTitle("Post")
         .navigationBarTitleDisplayMode(.inline)

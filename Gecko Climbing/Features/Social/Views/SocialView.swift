@@ -108,7 +108,7 @@ struct SocialView: View {
         }
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
-        .contentMargins(.bottom, 48)
+        .tabBarScrollInset()
         .searchable(
             text: Binding(get: { vm.searchQuery }, set: { vm.searchQuery = $0 }),
             placement: .navigationBarDrawer(displayMode: .always),

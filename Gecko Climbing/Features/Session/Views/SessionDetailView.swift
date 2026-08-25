@@ -140,6 +140,7 @@ struct SessionDetailView: View {
             }
             .padding(.vertical, 16)
         }
+        .tabBarScrollInset()
         .background(Color.geckoBackground)
         .errorAlert(error: Binding(
             get: { vm.error },
