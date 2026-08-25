@@ -385,10 +385,10 @@ struct NewSessionView: View {
 
     private func climbMilestoneBanner(count: Int) -> some View {
         let message: String = switch count {
-        case 5..<10:  "\(count) climbs — nice session!"
-        case 10..<15: "\(count) climbs — on fire!"
-        case 15..<20: "\(count) climbs — crushing it!"
-        default:      "\(count) climbs — beast mode!"
+        case 5..<10:  "\(count) climbs, nice session!"
+        case 10..<15: "\(count) climbs, on fire!"
+        case 15..<20: "\(count) climbs, crushing it!"
+        default:      "\(count) climbs, beast mode!"
         }
 
         return HStack(spacing: 6) {
