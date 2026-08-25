@@ -18,10 +18,12 @@ struct FeedCardView: View {
     /// Block the post's author. Nil hides the block action.
     var onBlock: (() -> Void)?
 
+    @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
     @State private var heartScale: CGFloat = 1.0
     @State private var currentPhotoIndex = 0
     @State private var showDoubleTapHeart = false
     @State private var captionExpanded = false
+    @State private var climbsExpanded = false
     @State private var showReportDialog = false
     @State private var showBlockDialog = false
     @State private var reportSubmitted = false
@@ -90,7 +92,7 @@ struct FeedCardView: View {
                     .padding(.bottom, 12)
                 }
 
-                if !post.gradeCounts.isEmpty {
+                if !post.climbSequence.isEmpty {
                     sendsSection
                         .padding(.horizontal, 16)
                         .padding(.bottom, 12)
@@ -155,20 +157,24 @@ struct FeedCardView: View {
                 moderationMenu
             }
 
-            // Top send badge
+            // Top send badge — the signature hold shape in the climb's own
+            // grade-bucket color, so the badge itself tells you how hard the
+            // send was before you read the number.
             if !post.topGrade.isEmpty {
                 let textColor = VGrade.textColor(for: post.topGradeNumeric)
                 VStack(spacing: 2) {
-                    Text(post.topGrade)
+                    Text(GradeDisplaySettings.shared.label(for: post.topGradeNumeric))
                         .font(.system(size: 20, weight: .black, design: .rounded))
+                        .monospacedDigit()
                         .foregroundStyle(textColor)
                     Text("TOP SEND")
-                        .font(.system(size: 7, weight: .bold))
+                        .font(.system(size: 7, weight: .bold, design: .rounded))
+                        .tracking(1.0)
                         .foregroundStyle(textColor.opacity(0.85))
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
-                .background(Color.gradeColor(for: post.topGradeNumeric), in: RoundedRectangle(cornerRadius: 12))
+                .background(Color.gradeColor(for: post.topGradeNumeric), in: GeckoHoldShape())
             }
         }
     }
@@ -235,158 +241,55 @@ struct FeedCardView: View {
     // MARK: - Photos
 
     private var photoSection: some View {
+        // Taller 4:5-leaning frame crops portrait shots far less than the old
+        // 280pt letterbox; a fixed height keeps carousel pages uniform.
         TabView(selection: $currentPhotoIndex) {
             ForEach(Array(photos.enumerated()), id: \.offset) { index, url in
-                Group {
-                    if let bundleImage = Image.bundled(from: url) {
-                        bundleImage
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 280)
-                            .clipped()
-                    } else {
-                        AsyncImage(url: URL(string: url)) { phase in
-                            switch phase {
-                            case .success(let image):
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 280)
-                                    .clipped()
-                            case .failure:
-                                photoPlaceholder
-                            case .empty:
-                                ProgressView()
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 280)
-                                    .background(Color.geckoInputBackground)
-                            @unknown default:
-                                photoPlaceholder
-                            }
-                        }
-                    }
-                }
-                .tag(index)
+                AsyncImageView(url: url, contentMode: .fill)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 340)
+                    .clipped()
+                    .tag(index)
             }
         }
         .tabViewStyle(.page(indexDisplayMode: photos.count > 1 ? .automatic : .never))
-        .frame(height: 280)
+        .frame(height: 340)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .padding(.horizontal, 16)
     }
 
-    private var photoPlaceholder: some View {
-        Rectangle()
-            .fill(Color.geckoInputBackground)
-            .frame(height: 280)
-            .overlay(
-                VStack(spacing: 8) {
-                    Image(systemName: "photo.on.rectangle")
-                        .foregroundStyle(.secondary)
-                        .font(.title)
-                    Text("Photo unavailable")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
-            )
-    }
 
     // MARK: - Sends Section
 
     /// Max pills that fit without scrolling (~8 at 42pt each + spacing in a card)
-    private let maxUnbundledPills = 8
 
-    /// Paired (grade, outcome) sequence. Falls back to gradeCounts for very old posts
-    /// that predate gradeSequence, where outcomes are assumed to all be sends.
-    private var climbSequence: [(grade: String, outcome: ClimbOutcome)] {
-        if !post.gradeSequence.isEmpty {
-            return post.gradeSequence.enumerated().map { idx, grade in
-                let raw = idx < post.outcomeSequence.count ? post.outcomeSequence[idx] : ClimbOutcome.sent.rawValue
-                return (grade: grade, outcome: ClimbOutcome.fromString(raw))
-            }
-        }
-        // Oldest posts: no sequence info at all. Use gradeCounts (all treated as sent).
-        return post.gradeCounts
-            .sorted { VGrade.numeric(for: $0.key) < VGrade.numeric(for: $1.key) }
-            .flatMap { Array(repeating: (grade: $0.key, outcome: ClimbOutcome.sent), count: $0.value) }
-    }
-
-    /// Groups consecutive identical (grade, outcome) pairs only when the session is too long to show unbundled.
-    /// A send and an attempt at the same grade stay in separate chips so the texture reads correctly.
-    private var gradeChips: [(grade: String, outcome: ClimbOutcome, count: Int, index: Int)] {
-        let sequence = climbSequence
-
-        if sequence.count <= maxUnbundledPills {
-            return sequence.enumerated().map { (grade: $1.grade, outcome: $1.outcome, count: 1, index: $0) }
-        }
-
-        var chips: [(grade: String, outcome: ClimbOutcome, count: Int, index: Int)] = []
-        for item in sequence {
-            if let last = chips.last, last.grade == item.grade, last.outcome == item.outcome {
-                chips[chips.count - 1].count += 1
-            } else {
-                chips.append((grade: item.grade, outcome: item.outcome, count: 1, index: chips.count))
-            }
-        }
-        return chips
-    }
 
     private var sendsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("CLIMBS THIS SESSION")
-                .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(.secondary)
-                .tracking(0.5)
+                .font(.system(size: 11, weight: .bold, design: .rounded))
+                .tracking(1.4)
+                .foregroundStyle(Color.geckoPrimary)
 
-            ScrollView(.horizontal) {
-                HStack(alignment: .bottom, spacing: 6) {
-                    ForEach(gradeChips, id: \.index) { chip in
-                        gradePill(grade: chip.grade, outcome: chip.outcome, count: chip.count)
+            // The session fingerprint. Tapping toggles the chip breakdown;
+            // its own gesture wins over the whole-card tap.
+            SessionStripView(climbs: post.climbSequence, durationMinutes: post.sessionDurationMinutes)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    withAnimation(.geckoSpring) { climbsExpanded.toggle() }
+                }
+
+            if climbsExpanded {
+                FlowLayout(spacing: 6, rowSpacing: 6) {
+                    ForEach(post.groupedChips()) { group in
+                        ClimbChipView(grade: group.grade, outcome: group.outcome, count: group.count)
                     }
                 }
-            }
-            .scrollIndicators(.hidden)
-        }
-    }
-
-    private func gradePill(grade: String, outcome: ClimbOutcome, count: Int) -> some View {
-        let numeric = VGrade.numeric(for: grade)
-        let color = Color.gradeColor(for: numeric)
-        let pillHeight: CGFloat = 32 + CGFloat(min(numeric, 10)) * 2.4
-        let isAttempt = outcome == .attempt
-
-        return VStack(spacing: 4) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(color.opacity(isAttempt ? 0.18 : 0.85))
-
-                if isAttempt {
-                    DiagonalStripes(spacing: 5, lineWidth: 2)
-                        .stroke(color.opacity(0.85), lineWidth: 2)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                }
-            }
-            .frame(width: 36, height: pillHeight)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(color.opacity(isAttempt ? 0.85 : 0), lineWidth: 1.2)
-            )
-
-            HStack(spacing: 2) {
-                Text(grade)
-                    .font(.system(size: 10, weight: .bold, design: .rounded))
-                    .foregroundStyle(color)
-
-                if count > 1 {
-                    Text("×\(count)")
-                        .font(.system(size: 9, weight: .heavy, design: .rounded))
-                        .foregroundStyle(color.opacity(0.6))
-                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
     }
+
 
     // MARK: - Footer
 
@@ -444,7 +347,7 @@ struct FeedCardView: View {
 
             // Climb count
             HStack(spacing: 4) {
-                Image(systemName: "clock")
+                Image(systemName: "figure.climbing")
                     .font(.system(size: 11))
                 Text("\(post.totalClimbs) climbs")
                     .font(.caption.weight(.medium))
@@ -541,22 +444,3 @@ struct FeedBadgeChip: View {
     }
 }
 
-/// Diagonal-stripe pattern used to mark attempts vs completed sends.
-struct DiagonalStripes: Shape {
-    var spacing: CGFloat = 6
-    var lineWidth: CGFloat = 2
-
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        let h = rect.height
-        // Sweep from just above the top-left corner to beyond the right edge so
-        // stripes at both extremes fully cover the shape.
-        var x: CGFloat = -h
-        while x < rect.width + h {
-            path.move(to: CGPoint(x: x, y: h))
-            path.addLine(to: CGPoint(x: x + h, y: 0))
-            x += spacing
-        }
-        return path
-    }
-}

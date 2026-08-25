@@ -25,6 +25,9 @@ final class PostModel {
     /// Parallel to `gradeSequence`: the outcome raw value ("flash"/"sent"/"attempt") for each climb.
     /// Empty for legacy posts; feed card falls back to treating all pills as sent when this is empty.
     var outcomeSequence: [String]
+    /// Nil for legacy posts (field added later) — the card hides the duration
+    /// stat rather than showing a fake zero.
+    var sessionDurationMinutes: Int?
     var visibility: String
 
     init(postId: String = UUID().uuidString,
@@ -47,6 +50,7 @@ final class PostModel {
          gradeCounts: [String: Int] = [:],
          gradeSequence: [String] = [],
          outcomeSequence: [String] = [],
+         sessionDurationMinutes: Int? = nil,
          visibility: String = "followers") {
         self.postId = postId
         self.userId = userId
@@ -68,7 +72,82 @@ final class PostModel {
         self.gradeCounts = gradeCounts
         self.gradeSequence = gradeSequence
         self.outcomeSequence = outcomeSequence
+        self.sessionDurationMinutes = sessionDurationMinutes
         self.visibility = visibility
+    }
+}
+
+// MARK: - Climb sequence (feed rendering)
+
+/// One climb as the feed renders it: canonical grade string + outcome.
+struct PostClimb: Equatable {
+    let grade: String
+    let outcome: ClimbOutcome
+}
+
+/// A run of identical consecutive climbs, for the expanded chip view.
+struct PostClimbGroup: Identifiable {
+    let grade: String
+    let outcome: ClimbOutcome
+    let count: Int
+    let index: Int
+    var id: Int { index }
+}
+
+extension PostModel {
+    /// Chronological (grade, outcome) pairs. Prefers `gradeSequence` (which
+    /// includes attempts); legacy posts that predate it fall back to
+    /// `gradeCounts` with all climbs treated as sent. Consumers must gate the
+    /// climbs UI on THIS being non-empty — gating on `gradeCounts` hides
+    /// all-attempt sessions, whose gradeCounts only counts completed climbs.
+    var climbSequence: [PostClimb] {
+        if !gradeSequence.isEmpty {
+            return gradeSequence.enumerated().map { idx, grade in
+                let raw = idx < outcomeSequence.count ? outcomeSequence[idx] : ClimbOutcome.sent.rawValue
+                return PostClimb(grade: grade, outcome: ClimbOutcome.fromString(raw))
+            }
+        }
+        return gradeCounts
+            .sorted { VGrade.numeric(for: $0.key) < VGrade.numeric(for: $1.key) }
+            .flatMap { entry in
+                Array(repeating: PostClimb(grade: entry.key, outcome: .sent), count: entry.value)
+            }
+    }
+
+    /// Groups consecutive identical (grade, outcome) pairs only when the
+    /// session is too long to show unbundled. A send and an attempt at the
+    /// same grade never merge, so the texture reads correctly.
+    func groupedChips(maxUnbundled: Int = 8) -> [PostClimbGroup] {
+        let sequence = climbSequence
+        if sequence.count <= maxUnbundled {
+            return sequence.enumerated().map {
+                PostClimbGroup(grade: $1.grade, outcome: $1.outcome, count: 1, index: $0)
+            }
+        }
+        var groups: [PostClimbGroup] = []
+        for climb in sequence {
+            if let last = groups.last, last.grade == climb.grade, last.outcome == climb.outcome {
+                groups[groups.count - 1] = PostClimbGroup(
+                    grade: last.grade, outcome: last.outcome, count: last.count + 1, index: last.index
+                )
+            } else {
+                groups.append(PostClimbGroup(grade: climb.grade, outcome: climb.outcome, count: 1, index: groups.count))
+            }
+        }
+        return groups
+    }
+
+    /// Outcome tallies for the stat line, derived from the sequence.
+    var outcomeTally: (sends: Int, flashes: Int, attempts: Int) {
+        var sends = 0, flashes = 0, attempts = 0
+        for climb in climbSequence {
+            switch climb.outcome {
+            case .flash:   flashes += 1
+            case .sent:    sends += 1
+            case .attempt: attempts += 1
+            }
+        }
+        return (sends, flashes, attempts)
     }
 }
 
@@ -89,6 +168,7 @@ struct PostSessionSnapshot {
     let gradeCounts: [String: Int]
     let gradeSequence: [String]
     let outcomeSequence: [String]
+    let sessionDurationMinutes: Int?
 
     init(session: SessionModel) {
         // Chronological (oldest → newest) so the feed renders in logging order.
@@ -105,11 +185,12 @@ struct PostSessionSnapshot {
         // different texture, keyed off the parallel `outcomeSequence`.
         gradeSequence = ordered.map(\.grade)
         outcomeSequence = ordered.map { $0.climbOutcome.rawValue }
+        sessionDurationMinutes = session.durationMinutes > 0 ? session.durationMinutes : nil
     }
 
     /// Field map applied to a post document on edit-sync. Keys match `PostDTO`.
     var firestoreFields: [String: Any] {
-        [
+        var fields: [String: Any] = [
             "gymName": gymName,
             "topGrade": topGrade,
             "topGradeNumeric": topGradeNumeric,
@@ -118,6 +199,10 @@ struct PostSessionSnapshot {
             "gradeSequence": gradeSequence,
             "outcomeSequence": outcomeSequence
         ]
+        if let sessionDurationMinutes {
+            fields["sessionDurationMinutes"] = sessionDurationMinutes
+        }
+        return fields
     }
 }
 

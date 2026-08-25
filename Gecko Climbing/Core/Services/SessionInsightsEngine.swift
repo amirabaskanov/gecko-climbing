@@ -46,7 +46,7 @@ enum SessionInsightsEngine {
         return SessionInsight(
             kind: .personalBest,
             title: "New Top Grade!",
-            description: "First time sending \(current.highestGrade) — up from \(VGrade.label(for: previousBest)).",
+            description: "First time sending \(GradeDisplaySettings.shared.label(for: current.highestGradeNumeric)), up from \(GradeDisplaySettings.shared.label(for: previousBest)).",
             icon: "trophy.fill",
             accentColor: .geckoFlashGold
         )
@@ -67,7 +67,7 @@ enum SessionInsightsEngine {
         return SessionInsight(
             kind: .personalBest,
             title: "Highest Flash!",
-            description: "You flashed \(bestFlash.grade) — previous best was \(previousBestFlash?.grade ?? "none").",
+            description: "You flashed \(GradeDisplaySettings.shared.label(for: bestFlash.gradeNumeric)). Your previous best was \(previousBestFlash.map { GradeDisplaySettings.shared.label(for: $0.gradeNumeric) } ?? "none").",
             icon: "bolt.fill",
             accentColor: .geckoFlashGold
         )
@@ -82,7 +82,7 @@ enum SessionInsightsEngine {
         return SessionInsight(
             kind: .personalBest,
             title: "Most Climbs Ever!",
-            description: "\(current.totalClimbs) climbs — you beat your record of \(previousMax).",
+            description: "\(current.totalClimbs) climbs. That beats your record of \(previousMax).",
             icon: "flame.fill",
             accentColor: .geckoOrange
         )
@@ -133,7 +133,7 @@ enum SessionInsightsEngine {
         return SessionInsight(
             kind: .trend,
             title: "High Send Rate",
-            description: "You sent \(pct)% of your climbs today — above your average.",
+            description: "You sent \(pct)% of your climbs today, above your average.",
             icon: "arrow.up.right",
             accentColor: .geckoSentGreen
         )
@@ -264,8 +264,8 @@ enum SessionInsightsEngine {
 
         guard recentAvg > olderAvg + 0.5 else { return nil }
 
-        let fromGrade = VGrade.label(for: Int(olderAvg.rounded()))
-        let toGrade = VGrade.label(for: Int(recentAvg.rounded()))
+        let fromGrade = GradeDisplaySettings.shared.label(for: Int(olderAvg.rounded()))
+        let toGrade = GradeDisplaySettings.shared.label(for: Int(recentAvg.rounded()))
 
         return SessionInsight(
             kind: .trend,

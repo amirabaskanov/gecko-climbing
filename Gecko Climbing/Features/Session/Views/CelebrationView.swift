@@ -126,12 +126,12 @@ struct CelebrationView: View {
                 if session.flashCount > 0 {
                     celebrationStat(label: "Flashes", delay: 0.6, accentColor: .geckoFlashGold, count: session.flashCount)
                 }
-                celebrationStat(label: "Sends", delay: 0.7, accentColor: .geckoSentGreenLight, count: session.completedClimbs)
+                celebrationStat(label: "Sends", delay: 0.7, accentColor: Color(hex: "#81C784"), count: session.completedClimbs)
                 if viewModel.elapsedMinutes > 0 {
                     celebrationStat(label: "Duration", delay: 0.75, text: viewModel.elapsedMinutes.durationFormatted)
                 }
                 if !session.highestGrade.isEmpty {
-                    celebrationStat(label: "Top Send", delay: 0.8, text: session.highestGrade)
+                    celebrationStat(label: "Top Send", delay: 0.8, text: GradeDisplaySettings.shared.label(for: session.highestGradeNumeric))
                 }
             }
             .padding(.horizontal, 8)
@@ -257,7 +257,8 @@ struct CelebrationView: View {
                     totalClimbs: snapshot.totalClimbs,
                     gradeCounts: snapshot.gradeCounts,
                     gradeSequence: snapshot.gradeSequence,
-                    outcomeSequence: snapshot.outcomeSequence
+                    outcomeSequence: snapshot.outcomeSequence,
+                    sessionDurationMinutes: snapshot.sessionDurationMinutes
                 )
                 onDone(saved, post)
             }

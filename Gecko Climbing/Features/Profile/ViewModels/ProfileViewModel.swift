@@ -46,13 +46,6 @@ final class ProfileViewModel {
             editDisplayName = u.displayName
             editUsername = u.username
             editBio = u.bio
-            // Reconcile follow counts in background to fix any drift
-            Task {
-                try? await userRepository.reconcileFollowCounts(uid: userId)
-                if let refreshed = try? await userRepository.fetchCurrentUser() {
-                    self.user = refreshed
-                }
-            }
         } catch {
             self.error = error
         }

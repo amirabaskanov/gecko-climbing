@@ -37,16 +37,20 @@ service cloud.firestore {
       allow create: if ownerUserWriteIsValid(uid) &&
         usernameReservedBy(uid, request.resource.data.username);
       // Owners can edit their profile only when username ownership is valid.
-      // Other users can only update follow/stat counters.
+      // Other users can only update session-stat counters.
+      // followersCount / followingCount are server-owned (the onFollowChanged
+      // Cloud Function maintains them via the Admin SDK, which bypasses these
+      // rules) — no client may write them, so counts can't be spoofed.
       allow update: if isSignedIn() &&
         (ownerUserWriteIsValid(uid) ||
          // Owners may always manage their block list, independent of any
          // username-validity check — moderation must never be blocked.
          (isOwner(uid) &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['blockedUserIds'])) ||
-         request.resource.data.diff(resource.data).affectedKeys().hasOnly(
-           ['followersCount', 'followingCount', 'totalSessions', 'totalClimbs', 'highestGrade', 'highestGradeNumeric']
-         ));
+         (isOwner(uid) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+            ['totalSessions', 'totalClimbs', 'highestGrade', 'highestGradeNumeric']
+          )));
       // Owners may delete their own profile (App Store Guideline 5.1.1(v)
       // account deletion).
       allow delete: if isOwner(uid);

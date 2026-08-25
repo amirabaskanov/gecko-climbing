@@ -43,7 +43,7 @@ struct SessionShareCard: View {
                     .font(.system(size: 11, weight: .bold))
                     .foregroundStyle(.white.opacity(0.6))
                     .tracking(1.5)
-                Text(topGrade.isEmpty ? "—" : topGrade)
+                Text(topGrade.isEmpty ? "—" : GradeDisplaySettings.shared.label(for: topGradeNumeric))
                     .font(.system(size: 72, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
                     .shadow(color: gradeColor.opacity(0.5), radius: 20)

@@ -375,6 +375,7 @@ final class FirestorePostRepository: PostRepositoryProtocol, @unchecked Sendable
             gradeCounts: data["gradeCounts"] as? [String: Int] ?? [:],
             gradeSequence: data["gradeSequence"] as? [String] ?? [],
             outcomeSequence: data["outcomeSequence"] as? [String] ?? [],
+            sessionDurationMinutes: data["sessionDurationMinutes"] as? Int,
             visibility: data["visibility"] as? String ?? "followers"
         )
     }

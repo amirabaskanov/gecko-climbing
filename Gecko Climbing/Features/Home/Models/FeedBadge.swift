@@ -19,7 +19,7 @@ enum FeedBadge: Hashable {
 
     var label: String {
         switch self {
-        case .personalBest(let g):  return "\(g) personal best"
+        case .personalBest(let g):  return "\(GradeDisplaySettings.shared.label(forStored: g)) personal best"
         case .yourGym(let n):       return n
         case .yourLevel:            return "Your level"
         }

@@ -17,10 +17,15 @@ final class HomeViewModel {
     /// Recent global posts ranked by `FeedRanker`.
     var discoverPosts: [PostModel] = []
 
-    /// Real climbers to suggest as follows. Used in the empty Following state
-    /// and injected into Discover. Excludes demo accounts and people the
-    /// viewer already follows.
-    var suggestedClimbers: [UserModel] = []
+    /// Scored follow suggestions for the empty Following state and the
+    /// Discover rail. Built by `SuggestionLoader` AFTER the follow graph
+    /// resolves so already-followed users never appear; each entry carries
+    /// the reason it was suggested.
+    var suggestions: [ScoredSuggestion] = []
+
+    /// Users-only projection of `suggestions` for views that don't need
+    /// scores or reasons.
+    var suggestedClimbers: [UserModel] { suggestions.map(\.user) }
 
     /// IDs of users the viewer follows. Used by the carousel to flip the
     /// follow button to "Following" optimistically without re-querying.
@@ -88,10 +93,10 @@ final class HomeViewModel {
     // MARK: - Loading
 
     /// Loads everything needed for both rails plus the viewer context. Safe
-    /// to call repeatedly (pull-to-refresh, sign-in change). All work runs
-    /// concurrently — viewer context comes from the user doc + recent
-    /// sessions; rails come from the post repo; suggestions come from the
-    /// user repo.
+    /// to call repeatedly (pull-to-refresh, sign-in change). Context, rails,
+    /// and follow graph load concurrently; suggestions run after, because
+    /// they need the resolved follow graph, viewer profile, and Discover
+    /// posts as ranking inputs.
     func loadFeed() async {
         guard !isLoadingFollowing else { return }
         isLoadingFollowing = true
@@ -102,17 +107,15 @@ final class HomeViewModel {
         // Build viewer context from profile + recent sessions in parallel
         // with the post fetches; even if profile lookup fails we still want
         // to render whatever posts came back.
-        async let contextTask: FeedViewerContext = makeViewerContext()
+        async let contextTask: (context: FeedViewerContext, user: UserModel?) = makeViewerContext()
         async let followingTask: [PostModel] = fetchFollowingSafe()
         async let discoverTask: [PostModel] = fetchDiscoverSafe()
         async let followingIdsTask: Set<String> = fetchFollowingIds()
-        async let suggestionsTask: [UserModel] = fetchSuggestionsSafe()
 
-        let context = await contextTask
+        let (context, viewer) = await contextTask
         let following = await followingTask
         let rawDiscover = await discoverTask
         let ids = await followingIdsTask
-        let suggestions = await suggestionsTask
 
         viewerContext = context
         followingIds = ids
@@ -122,7 +125,20 @@ final class HomeViewModel {
         followingPosts = following.filter { !blockedUserIds.contains($0.userId) }
         let filteredDiscover = rawDiscover.filter { !blockedUserIds.contains($0.userId) }
         discoverPosts = FeedRanker.rank(filteredDiscover, for: context)
-        suggestedClimbers = suggestions.filter { !blockedUserIds.contains($0.uid) }
+
+        // Deliberately serialized after the follow graph: fetching in the
+        // same parallel batch read an empty `followingIds` on first load and
+        // suggested people the viewer already follows.
+        let scored = await SuggestionLoader().load(
+            viewerUid: userId,
+            viewerUser: viewer,
+            followingIds: ids,
+            discoverPosts: rawDiscover,
+            viewerGyms: context.homeGyms,
+            userRepository: userRepository,
+            limit: 10
+        )
+        suggestions = scored.filter { !blockedUserIds.contains($0.user.uid) }
 
         // Resolve author profiles lazily so badge derivation works even when
         // the profile cache is cold. We only fetch profiles we don't already
@@ -284,6 +300,14 @@ final class HomeViewModel {
         )
     }
 
+    // MARK: - Suggestions (called from view)
+
+    /// Reason line for a suggested user ("Followed by Phuc"), nil if the uid
+    /// isn't currently suggested.
+    func suggestionReason(for uid: String) -> String? {
+        suggestions.first { $0.user.uid == uid }?.reason.label
+    }
+
     // MARK: - Private helpers
 
     private func pickInitialRail() -> FeedRail {
@@ -294,15 +318,17 @@ final class HomeViewModel {
         return hasFreshFollowingContent ? .following : .discover
     }
 
-    private func makeViewerContext() async -> FeedViewerContext {
+    private func makeViewerContext() async -> (context: FeedViewerContext, user: UserModel?) {
         // Profile + sessions concurrently; fall back to empty context on any
         // failure so badges/ranking just become no-ops instead of crashing.
+        // The raw user model rides along for the suggestion loader (grade +
+        // block list) so it doesn't have to re-fetch the profile.
         async let userTask: UserModel? = try? userRepository.fetchCurrentUser()
         async let sessionsTask: [SessionModel] = (try? sessionRepository.fetchSessions(for: userId)) ?? []
 
-        guard let user = await userTask else { return .empty }
+        guard let user = await userTask else { return (.empty, nil) }
         let sessions = await sessionsTask
-        return FeedViewerContext.make(user: user, sessionGymNames: sessions.map(\.gymName))
+        return (FeedViewerContext.make(user: user, sessionGymNames: sessions.map(\.gymName)), user)
     }
 
     private func fetchFollowingSafe() async -> [PostModel] {
@@ -331,17 +357,7 @@ final class HomeViewModel {
 
     private func fetchFollowingIds() async -> Set<String> {
         do {
-            let users = try await userRepository.fetchFollowing(uid: userId)
-            return Set(users.map(\.uid))
-        } catch {
-            return []
-        }
-    }
-
-    private func fetchSuggestionsSafe() async -> [UserModel] {
-        let exclude = followingIds.union([userId])
-        do {
-            return try await userRepository.suggestedClimbers(excluding: exclude, limit: 10)
+            return try await userRepository.fetchFollowingIds(uid: userId)
         } catch {
             return []
         }

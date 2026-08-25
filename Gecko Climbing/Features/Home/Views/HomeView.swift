@@ -33,7 +33,7 @@ struct HomeView: View {
                 case .postDetail(let postId):
                     let candidates = (viewModel?.followingPosts ?? []) + (viewModel?.discoverPosts ?? [])
                     if let post = candidates.first(where: { $0.postId == postId }) {
-                        PostDetailView(post: post)
+                        PostDetailView(post: post, badges: viewModel?.badges(for: post) ?? [])
                     } else {
                         // Deep-linked from a notification — the post isn't in
                         // the loaded feed, so load it by id.
@@ -163,7 +163,7 @@ struct HomeView: View {
                 VStack(spacing: 14) {
                     GeckoLogoView(size: 64, color: .geckoPrimary.opacity(0.7))
                         .padding(.top, 32)
-                    Text("Your feed is quiet — for now")
+                    Text("Your feed is quiet for now")
                         .font(.system(size: 20, weight: .bold, design: .rounded))
                         .multilineTextAlignment(.center)
                     Text("Follow climbers to see their sessions, sends, and projects right here.")
@@ -194,6 +194,9 @@ struct HomeView: View {
                     SuggestedClimbersCarousel(
                         users: vm.suggestedClimbers,
                         followingIds: vm.followingIds,
+                        reasons: Dictionary(uniqueKeysWithValues: vm.suggestions.compactMap { s in
+                            vm.suggestionReason(for: s.user.uid).map { (s.user.uid, $0) }
+                        }),
                         onFollow: { user in Task { await vm.follow(user) } },
                         onUnfollow: { user in Task { await vm.unfollow(user) } },
                         onTap: { user in router.push(.friendProfile(uid: user.uid)) }
@@ -217,7 +220,7 @@ struct HomeView: View {
             ScrollView {
                 EmptyStateView(
                     title: "No public posts yet",
-                    subtitle: "Be the first to share a session — it'll appear here for everyone."
+                    subtitle: "Be the first to share a session. It'll appear here for everyone."
                 )
                 .frame(maxWidth: .infinity)
                 .padding(.top, 80)
@@ -230,6 +233,9 @@ struct HomeView: View {
                         SuggestedClimbersCarousel(
                             users: vm.suggestedClimbers,
                             followingIds: vm.followingIds,
+                            reasons: Dictionary(uniqueKeysWithValues: vm.suggestions.compactMap { s in
+                                vm.suggestionReason(for: s.user.uid).map { (s.user.uid, $0) }
+                            }),
                             onFollow: { user in Task { await vm.follow(user) } },
                             onUnfollow: { user in Task { await vm.unfollow(user) } },
                             onTap: { user in router.push(.friendProfile(uid: user.uid)) }

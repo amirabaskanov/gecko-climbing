@@ -60,13 +60,29 @@ struct SocialView: View {
             }
 
             if vm.searchQuery.isEmpty {
+                // Discovery lives here now — reason-labeled suggestions from
+                // the scoring engine, not a global leaderboard.
+                if !vm.suggestions.isEmpty {
+                    Section {
+                        ForEach(Array(vm.suggestions.prefix(5).enumerated()), id: \.element.id) { index, suggestion in
+                            suggestionRow(suggestion, vm: vm)
+                                .staggeredAppear(index: index, appeared: appeared)
+                        }
+                    } header: {
+                        Text("FIND YOUR CREW")
+                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                            .tracking(1.4)
+                            .foregroundStyle(Color.geckoPrimary)
+                    }
+                }
+
                 Section("Following (\(vm.following.count))") {
                     if vm.following.isEmpty {
                         EmptyStateView(
                             title: "No friends yet",
-                            subtitle: "Search for climbers above to start following!"
+                            subtitle: "Follow climbers above to fill your feed"
                         )
-                        .frame(height: 180)
+                        .frame(height: 140)
                         .listRowBackground(Color.clear)
                     } else {
                         ForEach(Array(vm.following.enumerated()), id: \.element.id) { index, user in
@@ -102,6 +118,56 @@ struct SocialView: View {
         .refreshable { await vm.loadFollowing() }
         .onAppear {
             withAnimation { appeared = true }
+        }
+    }
+
+    // MARK: - Suggestion Row
+
+    private func suggestionRow(_ suggestion: ScoredSuggestion, vm: SocialViewModel) -> some View {
+        let user = suggestion.user
+        let following = vm.isFollowing(user.uid)
+
+        return NavigationLink(value: SocialRoute.friendProfile(uid: user.uid)) {
+            HStack(spacing: 12) {
+                AvatarView(url: user.profileImageURL, size: 44, name: user.displayName)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(user.displayName)
+                        .font(.subheadline.weight(.semibold))
+                    Text(suggestion.reason.label)
+                        .font(.caption)
+                        .foregroundStyle(Color.geckoPrimary)
+                        .lineLimit(1)
+                }
+                Spacer()
+
+                Button {
+                    Task {
+                        if following {
+                            await vm.unfollow(user: user)
+                        } else {
+                            await vm.follow(user: user)
+                        }
+                    }
+                } label: {
+                    Text(following ? "Following" : "Follow")
+                        .font(.caption.weight(.semibold))
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 7)
+                        .background(
+                            following ? AnyShapeStyle(Color.geckoInputBackground) : AnyShapeStyle(Color.geckoPrimary)
+                        )
+                        .foregroundStyle(following ? Color.primary : Color.geckoOnPrimary)
+                        .overlay(
+                            Capsule().stroke(Color.geckoDivider, lineWidth: following ? 1 : 0)
+                        )
+                        .clipShape(Capsule())
+                }
+                // .borderless keeps the button's hit-testing its own inside
+                // the row's NavigationLink.
+                .buttonStyle(.borderless)
+                .accessibilityLabel(following ? "Unfollow \(user.displayName)" : "Follow \(user.displayName)")
+            }
+            .padding(.vertical, 4)
         }
     }
 }

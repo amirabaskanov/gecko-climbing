@@ -4,10 +4,6 @@ import FirebaseStorage
 final class FirebaseStorageRepository: StorageRepositoryProtocol, @unchecked Sendable {
     private let storage = Storage.storage()
 
-    func uploadClimbPhoto(userId: String, sessionId: String, climbId: String, imageData: Data) async throws -> String {
-        let path = "users/\(userId)/sessions/\(sessionId)/climbs/\(climbId).jpg"
-        return try await uploadImage(data: imageData, path: path)
-    }
 
     func uploadProfilePhoto(userId: String, imageData: Data) async throws -> String {
         let path = "users/\(userId)/profile.jpg"

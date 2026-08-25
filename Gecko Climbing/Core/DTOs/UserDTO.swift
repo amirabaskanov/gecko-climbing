@@ -131,6 +131,12 @@ struct UserDTO: Codable, Identifiable {
         if let homeGymOverride, !homeGymOverride.isEmpty {
             dict["homeGymOverride"] = homeGymOverride
         }
+        // Derived, write-only search key: lowercased display name for the
+        // second prefix query in `searchUsers`. Written here so every user-doc
+        // write path keeps it in sync automatically (never decoded back).
+        if !displayName.isEmpty {
+            dict["searchName"] = displayName.lowercased()
+        }
         return dict
     }
 }

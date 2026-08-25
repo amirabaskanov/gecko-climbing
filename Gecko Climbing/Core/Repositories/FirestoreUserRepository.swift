@@ -118,11 +118,17 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
 
     // MARK: - Follow / Unfollow
 
+    // Follow/unfollow write ONLY the two edge documents. The followersCount /
+    // followingCount fields on both user docs are maintained server-side by
+    // the `onFollowChanged` Cloud Function trigger — clients never touch
+    // counters (rules enforce this), so a follow can't fail on a missing or
+    // deleted target user document and counts can't be spoofed.
+
     func follow(targetUID: String) async throws {
         let uid = authRepository.currentUserId
         guard !uid.isEmpty else { throw UserError.notFound }
 
-        // Guard against duplicate follows — only increment counts if not already following
+        // Guard against duplicate follows so the server trigger fires once
         let followingRef = usersRef.document(uid).collection("following").document(targetUID)
         let existingDoc = try await followingRef.getDocument()
         guard !existingDoc.exists else { return }
@@ -132,8 +138,6 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
 
         batch.setData(["createdAt": FieldValue.serverTimestamp()], forDocument: followingRef)
         batch.setData(["createdAt": FieldValue.serverTimestamp()], forDocument: followerRef)
-        batch.updateData(["followingCount": FieldValue.increment(Int64(1))], forDocument: usersRef.document(uid))
-        batch.updateData(["followersCount": FieldValue.increment(Int64(1))], forDocument: usersRef.document(targetUID))
 
         try await batch.commit()
     }
@@ -142,7 +146,7 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
         let uid = authRepository.currentUserId
         guard !uid.isEmpty else { throw UserError.notFound }
 
-        // Only decrement if the follow relationship actually exists
+        // Only delete if the follow relationship actually exists
         let followingRef = usersRef.document(uid).collection("following").document(targetUID)
         let followDoc = try await followingRef.getDocument()
         guard followDoc.exists else { return }
@@ -152,8 +156,6 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
 
         batch.deleteDocument(followingRef)
         batch.deleteDocument(followerRef)
-        batch.updateData(["followingCount": FieldValue.increment(Int64(-1))], forDocument: usersRef.document(uid))
-        batch.updateData(["followersCount": FieldValue.increment(Int64(-1))], forDocument: usersRef.document(targetUID))
 
         try await batch.commit()
     }
@@ -163,19 +165,6 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
         guard !uid.isEmpty else { return false }
         let doc = try await usersRef.document(uid).collection("following").document(targetUID).getDocument()
         return doc.exists
-    }
-
-    func reconcileFollowCounts(uid: String) async throws {
-        let followersSnapshot = try await usersRef.document(uid).collection("followers").getDocuments()
-        let followingSnapshot = try await usersRef.document(uid).collection("following").getDocuments()
-
-        let actualFollowers = followersSnapshot.documents.count
-        let actualFollowing = followingSnapshot.documents.count
-
-        try await usersRef.document(uid).updateData([
-            "followersCount": actualFollowers,
-            "followingCount": actualFollowing
-        ])
     }
 
     // MARK: - Followers / Following Lists
@@ -198,6 +187,28 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
         return try await fetchUsers(byIds: snapshot.documents.map(\.documentID))
     }
 
+    func fetchFollowingIds(uid: String) async throws -> Set<String> {
+        // Complete follow-state set for isFollowing checks. Deliberately NOT
+        // ordered by createdAt: an orderBy silently excludes edge docs missing
+        // that field, and the display lists' 50-doc cap would leave stale
+        // "Follow" buttons for anyone beyond it (tapping those no-ops in
+        // follow()'s duplicate guard). Default documentID order paginates
+        // reliably instead.
+        var ids: Set<String> = []
+        let pageSize = 300
+        var cursor: DocumentSnapshot?
+
+        repeat {
+            var query: Query = usersRef.document(uid).collection("following").limit(to: pageSize)
+            if let cursor { query = query.start(afterDocument: cursor) }
+            let snapshot = try await query.getDocuments()
+            snapshot.documents.forEach { ids.insert($0.documentID) }
+            cursor = snapshot.documents.count == pageSize ? snapshot.documents.last : nil
+        } while cursor != nil
+
+        return ids
+    }
+
     // MARK: - Notification Preferences
 
     func fetchNotificationPrefs(for userId: String) async throws -> NotificationPrefs {
@@ -209,6 +220,22 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
     func updateNotificationPrefs(_ prefs: NotificationPrefs, for userId: String) async throws {
         try await usersRef.document(userId).setData(
             ["notificationPrefs": prefs.asDictionary],
+            merge: true
+        )
+    }
+
+    // MARK: - Display Preferences
+
+    func fetchGradeSystem(for userId: String) async throws -> GradeSystem? {
+        let snapshot = try await usersRef.document(userId).getDocument()
+        let displayPrefs = snapshot.data()?["displayPrefs"] as? [String: Any]
+        guard let raw = displayPrefs?["gradeSystem"] as? String else { return nil }
+        return GradeSystem(rawValue: raw)
+    }
+
+    func updateGradeSystem(_ system: GradeSystem, for userId: String) async throws {
+        try await usersRef.document(userId).setData(
+            ["displayPrefs": ["gradeSystem": system.rawValue]],
             merge: true
         )
     }
@@ -323,23 +350,39 @@ final class FirestoreUserRepository: UserRepositoryProtocol, @unchecked Sendable
     // MARK: - Search
 
     func searchUsers(query: String) async throws -> [UserModel] {
-        guard !query.isEmpty else { return [] }
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return [] }
 
         let uid = authRepository.currentUserId
-        let lowered = query.lowercased()
+        let lowered = trimmed.lowercased()
 
-        // Firestore prefix search on username field
-        let snapshot = try await usersRef
-            .whereField("username", isGreaterThanOrEqualTo: lowered)
-            .whereField("username", isLessThanOrEqualTo: lowered + "\u{f8ff}")
+        // Two prefix queries: the username field plus the derived lowercased
+        // display name (`searchName`, written by UserDTO.asDictionary — legacy
+        // docs without it just never match that leg). Merged client-side,
+        // deduped by uid, username matches first.
+        async let usernameDocs = prefixQuery(field: "username", prefix: lowered)
+        async let searchNameDocs = prefixQuery(field: "searchName", prefix: lowered)
+        let docs = try await usernameDocs + searchNameDocs
+
+        var seen: Set<String> = []
+        var results: [UserModel] = []
+        for doc in docs {
+            guard doc.documentID != uid,
+                  !FeedConfig.demoUserIds.contains(doc.documentID),
+                  seen.insert(doc.documentID).inserted else { continue }
+            results.append(decodeUser(from: doc.data(), uid: doc.documentID))
+            if results.count == 20 { break }
+        }
+        return results
+    }
+
+    private func prefixQuery(field: String, prefix: String) async throws -> [QueryDocumentSnapshot] {
+        try await usersRef
+            .whereField(field, isGreaterThanOrEqualTo: prefix)
+            .whereField(field, isLessThanOrEqualTo: prefix + "\u{f8ff}")
             .limit(to: 20)
             .getDocuments()
-
-        return snapshot.documents.compactMap { doc in
-            guard doc.documentID != uid else { return nil }
-            let data = doc.data()
-            return decodeUser(from: data, uid: doc.documentID)
-        }
+            .documents
     }
 
     // MARK: - Suggested climbers

@@ -96,7 +96,7 @@ struct FeedbackView: View {
 
                     screenshotPicker
 
-                    Text("Optional — helps us understand the issue faster.")
+                    Text("Optional, but it helps us understand the issue faster.")
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                         .padding(.leading, 4)

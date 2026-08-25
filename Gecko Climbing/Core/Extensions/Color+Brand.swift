@@ -6,20 +6,28 @@ extension Color {
     /// Primary brand. Deep forest green in light mode, brighter mint-forest in dark mode
     /// so it remains legible against dark surfaces while still reading as "Gecko green."
     static let geckoPrimary = Color.dynamic(light: "#2A6B55", dark: "#3FA07F")
+    /// Text/icon color for content sitting ON a geckoPrimary fill. White is
+    /// fine on the deep light-mode green but ~3.2:1 on the brighter dark-mode
+    /// green — dark mode flips to ink. Never darken dark `geckoPrimary` itself;
+    /// it doubles as text/eyebrow color on dark surfaces.
+    static let geckoOnPrimary = Color.dynamic(light: "#FFFFFF", dark: "#10181A")
     static let geckoPrimaryLight = Color.dynamic(light: "#3D8A6E", dark: "#5FB898")
     static let geckoPrimaryDark = Color.dynamic(light: "#1F5242", dark: "#2F8566")
     static let geckoMint = Color.dynamic(light: "#B8DFD0", dark: "#7FD1B0")
     static let geckoDeepForest = Color.dynamic(light: "#132E25", dark: "#0A1713")
 
     // MARK: - Outcome Colors
-    // These are vivid accents and work well in both modes; they stay fixed so
-    // "gold flash" / "green sent" etc. read consistently across screens.
-    static let geckoSentGreen = Color(hex: "#4CAF50")
-    static let geckoSentGreenLight = Color(hex: "#81C784")
+    // Semantic hues (gold=flash, green=sent, blue=attempt) tuned so each also
+    // works as TEXT on the cream/dark backgrounds at ≥4.5:1 — the previous
+    // #4CAF50/#42A5F5 sat at ~2.6:1 as text. Sent green deliberately shares no
+    // hex with any grade bucket (the old ramp's V0–V2 green collided with it).
+    static let geckoSentGreen = Color.dynamic(light: "#35803D", dark: "#5FBF66")
     static let geckoFlashGold = Color.dynamic(light: "#E6AC00", dark: "#FFC933")
-    static let geckoFlashGoldLight = Color(hex: "#FFD700")
-    static let geckoAttemptBlue = Color.dynamic(light: "#42A5F5", dark: "#64B5F6")
-    static let geckoOrange = Color(hex: "#FF6B6B")
+    /// Flash gold when used as text on the cream background (fills keep
+    /// geckoFlashGold; raw gold text on cream is ~2.9:1).
+    static let geckoFlashGoldDeep = Color.dynamic(light: "#8A6A00", dark: "#FFC933")
+    static let geckoAttemptBlue = Color.dynamic(light: "#1B72B5", dark: "#64B5F6")
+    static let geckoOrange = Color.dynamic(light: "#FF6B6B", dark: "#FF8A80")
 
     // MARK: - Surface System (fully adaptive)
     /// Main screen background. Warm cream in light, near-black forest in dark.
@@ -40,31 +48,27 @@ extension Color {
         LinearGradient(colors: [geckoPrimary, geckoPrimaryDark], startPoint: .top, endPoint: .bottom)
     }
 
-    static var warmGlow: LinearGradient {
-        LinearGradient(colors: [geckoFlashGold, Color(hex: "#FF9800")], startPoint: .topLeading, endPoint: .bottomTrailing)
-    }
-
-    // MARK: - Outcome Gradients
-    static func outcomeGradient(for outcome: ClimbOutcome) -> LinearGradient {
-        switch outcome {
-        case .flash:
-            return LinearGradient(colors: [geckoFlashGoldLight, geckoFlashGold], startPoint: .top, endPoint: .bottom)
-        case .sent:
-            return LinearGradient(colors: [geckoSentGreen, Color(hex: "#388E3C")], startPoint: .top, endPoint: .bottom)
-        case .attempt:
-            return LinearGradient(colors: [geckoAttemptBlue, Color(hex: "#1E88E5")], startPoint: .top, endPoint: .bottom)
-        }
-    }
-
-    // MARK: - Grade Colors (difficulty gradient)
+    // MARK: - Grade Colors ("Gym Tape" ladder)
+    // Vivid hold/tape colors in the ladder every gym climber already knows:
+    // yellow → green → blue → red → purple → pink → black, easiest to hardest.
+    // Each tape band spans two grades with a light and a deep shade, so every
+    // single grade is distinguishable at chip size while the band structure
+    // stays memorable. Bands intentionally align with GradeDisplay.circuitBand
+    // so Circuit mode literally reads as gym tape.
     static func gradeColor(for gradeNumeric: Int) -> Color {
         switch gradeNumeric {
-        case 0...2:  return Color(hex: "#4CAF50") // Green
-        case 3...4:  return Color(hex: "#FFC107") // Yellow
-        case 5...6:  return Color(hex: "#FF9800") // Orange
-        case 7...8:  return Color(hex: "#F44336") // Red
-        case 9...11: return Color(hex: "#9C27B0") // Purple
-        default:     return Color.dynamic(light: "#212121", dark: "#E0E0E0")
+        case 0:  return Color.dynamic(light: "#F5A800", dark: "#FFC933") // Sun yellow
+        case 1:  return Color.dynamic(light: "#6DBE45", dark: "#7FD95A") // Lime
+        case 2:  return Color.dynamic(light: "#2E9E44", dark: "#48C46A") // Forest green
+        case 3:  return Color.dynamic(light: "#2F9BEA", dark: "#55B5FF") // Sky blue
+        case 4:  return Color.dynamic(light: "#1565D8", dark: "#4D8DFF") // Royal blue
+        case 5:  return Color.dynamic(light: "#ED4B3B", dark: "#FF6B5C") // Coral red
+        case 6:  return Color.dynamic(light: "#C81E2E", dark: "#E84557") // Crimson
+        case 7:  return Color.dynamic(light: "#9C4DD1", dark: "#B76EED") // Orchid
+        case 8:  return Color.dynamic(light: "#6C2BB0", dark: "#9153D6") // Deep violet
+        case 9:  return Color.dynamic(light: "#E91E63", dark: "#FF4081") // Hot pink
+        case 10...11: return Color.dynamic(light: "#AD1457", dark: "#E9407A") // Berry
+        default: return Color.dynamic(light: "#141414", dark: "#F2F2F0") // Black holds / Chalk
         }
     }
 
@@ -73,10 +77,13 @@ extension Color {
         return gradeColor(for: numeric)
     }
 
+    /// Flat by design — the design language uses confident flat fills, not
+    /// gradients. Kept as a LinearGradient so ShapeStyle call sites don't
+    /// churn; both stops are the bucket color.
     static func gradeGradient(for gradeNumeric: Int) -> LinearGradient {
         let base = gradeColor(for: gradeNumeric)
         return LinearGradient(
-            colors: [base.opacity(0.85), base],
+            colors: [base, base],
             startPoint: .top,
             endPoint: .bottom
         )
@@ -160,10 +167,15 @@ enum VGrade {
         return "V\(numeric)"
     }
 
+    /// Text color on top of `Color.gradeColor` fills. Ink on the bright
+    /// yellow/lime holds, white on everything deeper; the 12+ terminal flips
+    /// with its fill (black holds in light mode → white text, chalk in dark
+    /// mode → ink).
     static func textColor(for gradeNumeric: Int) -> Color {
         switch gradeNumeric {
-        case 3...4: return Color(hex: "#3E2723") // dark brown on yellow/amber
-        default:    return .white
+        case 0...1:  return Color(hex: "#10181A")
+        case 2...11: return .white
+        default:     return Color.dynamic(light: "#FFFFFF", dark: "#10181A")
         }
     }
 }

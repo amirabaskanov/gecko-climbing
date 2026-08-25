@@ -33,6 +33,32 @@ struct SettingsView: View {
                     }
                     .buttonStyle(.plain)
                     .bouncePress()
+
+                    NavigationLink {
+                        GradeScaleSettingsView()
+                    } label: {
+                        settingsRowContent(
+                            icon: "chart.bar",
+                            title: "Grade Scale",
+                            subtitle: GradeDisplaySettings.shared.system.displayName,
+                            iconColor: .geckoPrimary
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .bouncePress()
+
+                    NavigationLink {
+                        AppearanceSettingsView()
+                    } label: {
+                        settingsRowContent(
+                            icon: "circle.lefthalf.filled",
+                            title: "Appearance",
+                            subtitle: AppearanceMode.current.displayName,
+                            iconColor: .geckoPrimary
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .bouncePress()
                 }
                 .staggeredAppear(index: 0, appeared: appeared)
 
@@ -69,6 +95,16 @@ struct SettingsView: View {
                     ) {
                         showFeedback = true
                     }
+
+                    settingsRow(
+                        icon: "sparkles",
+                        title: "Replay the Guide",
+                        subtitle: "Revisit the quick-start tour",
+                        iconColor: .geckoPrimary
+                    ) {
+                        AnalyticsService.capture(.onboardingReplayed)
+                        NotificationCenter.default.post(name: .replayOnboarding, object: nil)
+                    }
                 }
                 .staggeredAppear(index: 2, appeared: appeared)
 
@@ -97,25 +133,6 @@ struct SettingsView: View {
                     .disabled(isDeleting)
                 }
                 .staggeredAppear(index: 3, appeared: appeared)
-
-                #if DEBUG
-                // DEBUG ONLY — preview the first-run guide on demand. Placed above
-                // About so it isn't hidden under the floating tab bar. Remove this
-                // block (and the wiring in MainTabView) before shipping.
-                VStack(alignment: .leading, spacing: 12) {
-                    sectionHeader("Developer")
-
-                    settingsRow(
-                        icon: "sparkles",
-                        title: "Replay onboarding guide",
-                        subtitle: "Debug only",
-                        iconColor: .geckoPrimary
-                    ) {
-                        NotificationCenter.default.post(name: .debugReplayOnboarding, object: nil)
-                    }
-                }
-                .staggeredAppear(index: 4, appeared: appeared)
-                #endif
 
                 // MARK: - About
 
@@ -452,5 +469,189 @@ struct BlockedUsersView: View {
             }
             self.error = error
         }
+    }
+}
+
+// MARK: - Grade Scale Settings
+
+/// Picker for the viewer's grade-display system (V scale / Fontainebleau /
+/// Circuit ranges). Display-only preference: stored data stays V-scale
+/// canonical; the choice mirrors locally and syncs to the account so it
+/// follows the user across devices. Colocated with SettingsView like
+/// BlockedUsersView — no separate project-file entry needed.
+struct GradeScaleSettingsView: View {
+    @Environment(AppEnvironment.self) private var appEnv
+    @State private var error: Error?
+
+    var body: some View {
+        let settings = GradeDisplaySettings.shared
+
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("How grades appear across Gecko: your climbs, friends' posts, and stats. Your logged data doesn't change.")
+                    .font(.footnote)
+                    .fontDesign(.rounded)
+                    .foregroundStyle(Color.geckoSecondaryText)
+                    .padding(.horizontal, 4)
+
+                VStack(spacing: 0) {
+                    ForEach(Array(GradeSystem.allCases.enumerated()), id: \.element) { index, system in
+                        if index > 0 {
+                            Divider().padding(.horizontal, 16)
+                        }
+                        Button {
+                            guard system != settings.system else { return }
+                            Task {
+                                let userId = appEnv.authRepository.currentUserId
+                                if let updateError = await settings.update(
+                                    system,
+                                    userRepository: appEnv.userRepository,
+                                    userId: userId
+                                ) {
+                                    error = updateError
+                                }
+                            }
+                        } label: {
+                            HStack(spacing: 12) {
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(system.displayName)
+                                        .font(.subheadline.weight(.semibold))
+                                        .fontDesign(.rounded)
+                                        .foregroundStyle(.primary)
+                                    Text(system.subtitle)
+                                        .font(.caption)
+                                        .foregroundStyle(Color.geckoSecondaryText)
+                                    Text(system.previewText)
+                                        .font(.caption.weight(.medium))
+                                        .fontDesign(.rounded)
+                                        .foregroundStyle(Color.geckoPrimary)
+                                }
+                                Spacer()
+                                if settings.system == system {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .font(.system(size: 20))
+                                        .foregroundStyle(Color.geckoPrimary)
+                                }
+                            }
+                            .padding(16)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .cardStyle()
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+        }
+        .background(Color.geckoBackground)
+        .navigationTitle("Grade Scale")
+        .navigationBarTitleDisplayMode(.inline)
+        .errorAlert(error: $error)
+    }
+}
+
+// MARK: - Appearance Settings
+
+/// The viewer's theme: follow the system, or pin light/dark. Device-scoped —
+/// a plain UserDefaults key, no account sync. Colocated with SettingsView
+/// like the other settings sub-screens.
+enum AppearanceMode: String, CaseIterable {
+    case system, light, dark
+
+    static let defaultsKey = "appearanceMode"
+
+    static var current: AppearanceMode {
+        AppearanceMode(rawValue: UserDefaults.standard.string(forKey: defaultsKey) ?? "") ?? .system
+    }
+
+    var displayName: String {
+        switch self {
+        case .system: return "System"
+        case .light:  return "Light"
+        case .dark:   return "Dark"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .system: return "Match your device setting"
+        case .light:  return "Always light"
+        case .dark:   return "Always dark"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .system: return "circle.lefthalf.filled"
+        case .light:  return "sun.max.fill"
+        case .dark:   return "moon.fill"
+        }
+    }
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .light:  return .light
+        case .dark:   return .dark
+        }
+    }
+}
+
+struct AppearanceSettingsView: View {
+    @AppStorage(AppearanceMode.defaultsKey) private var appearanceRaw = AppearanceMode.system.rawValue
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Choose how Gecko looks. System follows your device's light and dark schedule.")
+                    .font(.footnote)
+                    .fontDesign(.rounded)
+                    .foregroundStyle(Color.geckoSecondaryText)
+                    .padding(.horizontal, 4)
+
+                VStack(spacing: 0) {
+                    ForEach(Array(AppearanceMode.allCases.enumerated()), id: \.element) { index, mode in
+                        if index > 0 {
+                            Divider().padding(.horizontal, 16)
+                        }
+                        Button {
+                            appearanceRaw = mode.rawValue
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: mode.icon)
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundStyle(Color.geckoPrimary)
+                                    .frame(width: 26)
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(mode.displayName)
+                                        .font(.subheadline.weight(.semibold))
+                                        .fontDesign(.rounded)
+                                        .foregroundStyle(.primary)
+                                    Text(mode.subtitle)
+                                        .font(.caption)
+                                        .foregroundStyle(Color.geckoSecondaryText)
+                                }
+                                Spacer()
+                                if appearanceRaw == mode.rawValue {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .font(.system(size: 20))
+                                        .foregroundStyle(Color.geckoPrimary)
+                                }
+                            }
+                            .padding(16)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .cardStyle()
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+        }
+        .background(Color.geckoBackground)
+        .navigationTitle("Appearance")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }

@@ -26,13 +26,20 @@
   --gecko-text: #132E25;
   --gecko-text-muted: #6B6B6B;
 
-  /* Grade ladder (matches iOS app) */
-  --grade-0: #4CAF50;
-  --grade-3: #FFC107;
-  --grade-5: #FF9800;
-  --grade-7: #F44336;
-  --grade-9: #9C27B0;
-  --grade-12: #212121;
+  /* Grade ladder — "Gym Tape" (matches iOS app): the vivid hold-color
+     ladder every gym climber knows, two shades per tape band. */
+  --grade-v0: #F5A800;
+  --grade-v1: #6DBE45;
+  --grade-v2: #2E9E44;
+  --grade-v3: #2F9BEA;
+  --grade-v4: #1565D8;
+  --grade-v5: #ED4B3B;
+  --grade-v6: #C81E2E;
+  --grade-v7: #9C4DD1;
+  --grade-v8: #6C2BB0;
+  --grade-v9: #E91E63;
+  --grade-v10: #AD1457;
+  --grade-v12: #141414;
 
   /* Motion */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -361,10 +368,10 @@ section {
   box-shadow: 0 14px 28px -10px rgba(0, 0, 0, 0.25);
   animation: float 6s ease-in-out infinite;
 }
-.floating-pills .pill.p1 { background: var(--grade-0); top: 8%;  left: -8%;  animation-delay: 0s; }
-.floating-pills .pill.p2 { background: var(--grade-3); top: 82%; left: -4%;  animation-delay: 1.5s; }
-.floating-pills .pill.p3 { background: var(--grade-5); top: 10%; right: -6%; animation-delay: 0.8s; }
-.floating-pills .pill.p4 { background: var(--grade-7); top: 72%; right: -8%; animation-delay: 2.2s; }
+.floating-pills .pill.p1 { background: var(--grade-v0); top: 8%;  left: -8%;  animation-delay: 0s; }
+.floating-pills .pill.p2 { background: var(--grade-v3); top: 82%; left: -4%;  animation-delay: 1.5s; }
+.floating-pills .pill.p3 { background: var(--grade-v5); top: 10%; right: -6%; animation-delay: 0.8s; }
+.floating-pills .pill.p4 { background: var(--grade-v7); top: 72%; right: -8%; animation-delay: 2.2s; }
 
 @keyframes float {
   0%, 100% { transform: translateY(0) rotate(-2deg); }
@@ -467,13 +474,19 @@ section {
   transition: transform 0.3s var(--ease-out);
 }
 .grade-pill:hover { transform: translateY(-4px) scale(1.05); }
-.grade-pill.grade-v0, .grade-pill.grade-v1, .grade-pill.grade-v2 { background: var(--grade-0); }
-.grade-pill.grade-v3, .grade-pill.grade-v4 { background: var(--grade-3); color: #3E2723; }
-.grade-pill.grade-v5, .grade-pill.grade-v6 { background: var(--grade-5); }
-.grade-pill.grade-v7, .grade-pill.grade-v8 { background: var(--grade-7); }
-.grade-pill.grade-v9, .grade-pill.grade-v10, .grade-pill.grade-v11 { background: var(--grade-9); }
+.grade-pill.grade-v0 { background: var(--grade-v0); color: #10181A; }
+.grade-pill.grade-v1 { background: var(--grade-v1); color: #10181A; }
+.grade-pill.grade-v2 { background: var(--grade-v2); }
+.grade-pill.grade-v3 { background: var(--grade-v3); }
+.grade-pill.grade-v4 { background: var(--grade-v4); }
+.grade-pill.grade-v5 { background: var(--grade-v5); }
+.grade-pill.grade-v6 { background: var(--grade-v6); }
+.grade-pill.grade-v7 { background: var(--grade-v7); }
+.grade-pill.grade-v8 { background: var(--grade-v8); }
+.grade-pill.grade-v9 { background: var(--grade-v9); }
+.grade-pill.grade-v10, .grade-pill.grade-v11 { background: var(--grade-v10); }
 .grade-pill.grade-v12, .grade-pill.grade-v13, .grade-pill.grade-v14,
-.grade-pill.grade-v15, .grade-pill.grade-v16, .grade-pill.grade-v17 { background: var(--grade-12); }
+.grade-pill.grade-v15, .grade-pill.grade-v16, .grade-pill.grade-v17 { background: var(--grade-v12); }
 
 /* ==========================================================================
    Values grid

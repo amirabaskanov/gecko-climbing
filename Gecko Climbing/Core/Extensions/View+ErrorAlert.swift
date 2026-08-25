@@ -8,10 +8,10 @@ extension String: @retroactive Identifiable {
 
 // MARK: - CardStyleModifier
 
-/// Shared card chrome that adapts shadows + border to the current color scheme.
-/// In light mode we use soft black shadows for lift; in dark mode shadows are
-/// invisible, so we lean on a subtle border + slightly stronger shadow to keep
-/// the card distinct from the background.
+/// Shared card chrome. Surface hierarchy rule: list cards get a hairline
+/// border and NO shadow (flat, editorial); the elevated card — at most one
+/// per screen (stats hero, personal-best moment) — gets the screen's only
+/// shadow and a larger radius. Radius scale 10 / 14 / 22 encodes depth.
 private struct CardStyleModifier: ViewModifier {
     let cornerRadius: CGFloat
     let elevated: Bool
@@ -20,20 +20,19 @@ private struct CardStyleModifier: ViewModifier {
     func body(content: Content) -> some View {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
         let isDark = colorScheme == .dark
-        let shadowOpacity1 = isDark ? 0.35 : (elevated ? 0.04 : 0.04)
-        let shadowOpacity2 = isDark ? 0.45 : (elevated ? 0.08 : 0.06)
-        let strokeOpacity = isDark ? 0.18 : (elevated ? 0.10 : 0.06)
-        let strokeColor = isDark ? Color.white.opacity(strokeOpacity)
-                                 : Color.geckoPrimary.opacity(strokeOpacity)
+        // Dark mode: a 6% black shadow on a near-black background is invisible,
+        // so elevated cards lift via a brighter surface + hairline instead.
+        let elevatedStroke = isDark ? Color.white.opacity(0.10) : Color.clear
 
         return content
-            .background(Color.geckoCard)
+            .background(elevated && isDark ? Color.geckoSurfaceElevated : Color.geckoCard)
             .clipShape(shape)
-            .overlay(shape.stroke(strokeColor, lineWidth: 1))
-            .shadow(color: .black.opacity(shadowOpacity1),
-                    radius: elevated ? 2 : 1, x: 0, y: 1)
-            .shadow(color: .black.opacity(shadowOpacity2),
-                    radius: elevated ? 12 : 8, x: 0, y: elevated ? 6 : 4)
+            .overlay(shape.stroke(elevated ? elevatedStroke : Color.geckoDivider, lineWidth: 1))
+            .shadow(
+                color: .black.opacity(elevated && !isDark ? 0.06 : 0),
+                radius: elevated ? 16 : 0,
+                x: 0, y: elevated ? 4 : 0
+            )
     }
 }
 
@@ -44,6 +43,78 @@ struct BounceButtonStyle: ButtonStyle {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
             .animation(.geckoSpring, value: configuration.isPressed)
+    }
+}
+
+// MARK: - User-Facing Error Copy
+
+/// Maps raw errors to copy that is safe to show users. Backend SDK messages
+/// can embed console URLs and the Firebase project id (e.g. Firestore's
+/// "The query requires an index. You can create it here: https://…/project/…")
+/// — those must never reach an alert. Domains are matched as string literals
+/// so this file stays free of Firebase imports.
+enum UserFacingError {
+    private static let firestoreDomain = "FIRFirestoreErrorDomain"
+    private static let authDomain = "FIRAuthErrorDomain"
+
+    /// Substrings that mark a message as internal. Anything matching falls
+    /// back to generic copy no matter which error produced it.
+    private static let leakyFragments = [
+        "http", "firebaseapp", "googleapis", "firestore.google", "gecko-climbing", "index"
+    ]
+
+    static func message(for error: Error) -> String {
+        let nsError = error as NSError
+
+        switch nsError.domain {
+        case firestoreDomain:
+            return firestoreMessage(code: nsError.code)
+        case authDomain:
+            return authMessage(code: nsError.code)
+        case NSURLErrorDomain:
+            return "You appear to be offline. Check your connection and try again."
+        default:
+            // Local app errors (LocalizedError types) carry curated copy —
+            // pass it through unless it smells like an internal message.
+            let candidate = error.localizedDescription
+            return isSafe(candidate) ? candidate : genericMessage
+        }
+    }
+
+    static var genericMessage: String {
+        "Something went wrong. Please try again."
+    }
+
+    private static func isSafe(_ message: String) -> Bool {
+        let lowered = message.lowercased()
+        return !leakyFragments.contains { lowered.contains($0) }
+    }
+
+    private static func firestoreMessage(code: Int) -> String {
+        // Codes mirror FirestoreErrorCode (gRPC status codes).
+        switch code {
+        case 7:  return "You don't have permission to do that."
+        case 5:  return "That content is no longer available."
+        case 4, 14: return "Couldn't reach the server. Check your connection and try again."
+        case 8:  return "We're a bit overloaded right now. Try again in a minute."
+        case 9:  return "Something's not ready on our end. Try again in a minute."
+        case 16: return "Please sign in again to continue."
+        default: return genericMessage
+        }
+    }
+
+    private static func authMessage(code: Int) -> String {
+        // Codes mirror AuthErrorCode.
+        switch code {
+        case 17004, 17009: return "That email or password doesn't look right."
+        case 17008: return "That doesn't look like a valid email address."
+        case 17011: return "No account found with that email."
+        case 17007: return "An account with that email already exists."
+        case 17026: return "Please choose a stronger password (at least 6 characters)."
+        case 17010: return "Too many attempts. Wait a moment and try again."
+        case 17020: return "You appear to be offline. Check your connection and try again."
+        default: return genericMessage
+        }
     }
 }
 
@@ -58,7 +129,7 @@ extension View {
             Button("OK") { error.wrappedValue = nil }
         } message: {
             if let error = error.wrappedValue {
-                Text(error.localizedDescription)
+                Text(alertMessage(for: error))
             }
         }
     }
@@ -75,16 +146,24 @@ extension View {
             Button("Dismiss", role: .cancel) { error.wrappedValue = nil }
         } message: {
             if let error = error.wrappedValue {
-                Text(error.localizedDescription)
+                Text(alertMessage(for: error))
             }
         }
     }
 
-    func cardStyle(cornerRadius: CGFloat = 16) -> some View {
+    private func alertMessage(for error: Error) -> String {
+        #if DEBUG
+        return UserFacingError.message(for: error) + "\n\n[debug] " + error.localizedDescription
+        #else
+        return UserFacingError.message(for: error)
+        #endif
+    }
+
+    func cardStyle(cornerRadius: CGFloat = 14) -> some View {
         modifier(CardStyleModifier(cornerRadius: cornerRadius, elevated: false))
     }
 
-    func cardStyleElevated(cornerRadius: CGFloat = 16) -> some View {
+    func cardStyleElevated(cornerRadius: CGFloat = 22) -> some View {
         modifier(CardStyleModifier(cornerRadius: cornerRadius, elevated: true))
     }
 

@@ -6,7 +6,6 @@ struct GradeBarrelView: View {
 
     @State private var scrollPosition: String?
     @State private var containerWidth: CGFloat = 0
-    @State private var showHint = false
 
     /// Responsive item width: roughly 1/3 of container, clamped to reasonable range
     private var itemWidth: CGFloat {
@@ -33,6 +32,25 @@ struct GradeBarrelView: View {
         .frame(height: viewHeight)
         .clipShape(Rectangle())
         .sensoryFeedback(.selection, trigger: selectedGrade)
+        // VoiceOver drives the barrel as a single adjustable control instead
+        // of a horizontal scroll of 18 text items.
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Grade")
+        .accessibilityValue(GradeDisplaySettings.shared.label(forStored: selectedGrade))
+        .accessibilityAdjustableAction { direction in
+            guard let idx = grades.firstIndex(of: selectedGrade) else { return }
+            switch direction {
+            case .increment:
+                guard idx < grades.count - 1 else { return }
+                selectedGrade = grades[idx + 1]
+            case .decrement:
+                guard idx > 0 else { return }
+                selectedGrade = grades[idx - 1]
+            @unknown default:
+                break
+            }
+            scrollPosition = selectedGrade
+        }
         .background {
             GeometryReader { geo in
                 Color.clear.onAppear {
@@ -52,45 +70,14 @@ struct GradeBarrelView: View {
                 selectedGrade = newValue
             }
         }
-        .onAppear {
-            // Subtle bounce hint after a short delay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                withAnimation(.easeInOut(duration: 0.5)) {
-                    showHint = true
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                    withAnimation(.easeInOut(duration: 0.5)) {
-                        showHint = false
-                    }
-                }
-            }
-        }
-        // Hint arrows on first appearance
-        .overlay(alignment: .leading) {
-            if showHint {
-                Image(systemName: "chevron.left")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(.secondary.opacity(0.4))
-                    .padding(.leading, 8)
-                    .transition(.opacity)
-            }
-        }
-        .overlay(alignment: .trailing) {
-            if showHint {
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(.secondary.opacity(0.4))
-                    .padding(.trailing, 8)
-                    .transition(.opacity)
-            }
-        }
     }
 
     private func gradeItem(_ grade: String) -> some View {
         let gradeColor = Color.gradeColor(for: grade)
         let currentItemWidth = itemWidth
 
-        return Text(grade)
+        // Input control: selection stays the canonical V-string; only the label converts.
+        return Text(GradeDisplaySettings.shared.inputLabel(forStored: grade))
             .font(.system(size: 100, weight: .black, design: .rounded))
             .foregroundStyle(gradeColor)
             .minimumScaleFactor(0.25)

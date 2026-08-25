@@ -39,7 +39,7 @@ struct ProgressChartView: View {
                     AxisMarks(values: .stride(by: 1)) { value in
                         if let numeric = value.as(Int.self), numeric >= 0 {
                             AxisValueLabel {
-                                Text(VGrade.label(for: numeric))
+                                Text(GradeDisplaySettings.shared.label(for: numeric))
                                     .font(.caption2)
                                     .foregroundStyle(Color.gradeColor(for: numeric))
                             }

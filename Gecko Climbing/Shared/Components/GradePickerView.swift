@@ -34,7 +34,8 @@ struct GradeChip: View {
 
     var body: some View {
         Button(action: onTap) {
-            Text(grade)
+            // Input control: selection stays the canonical V-string; only the label converts.
+            Text(GradeDisplaySettings.shared.inputLabel(forStored: grade))
                 .font(.system(size: 16, weight: .bold, design: .rounded))
                 .foregroundStyle(isSelected ? .white : color)
                 .padding(.horizontal, 18)
@@ -103,7 +104,7 @@ struct GradeBadge: View {
     private var onColor: Color { isCompleted ? VGrade.textColor(for: numeric) : .white }
 
     var body: some View {
-        Text(grade)
+        Text(GradeDisplaySettings.shared.label(forStored: grade))
             .font(size.font)
             .foregroundStyle(onColor)
             .padding(size.padding)

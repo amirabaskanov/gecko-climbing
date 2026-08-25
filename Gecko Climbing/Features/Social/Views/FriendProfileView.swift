@@ -38,9 +38,22 @@ struct FriendProfileView: View {
                 Divider().padding(.vertical, 16)
 
                 // Sessions
-                if vm.sessions.isEmpty {
+                if vm.sessionsUnavailable {
+                    VStack(spacing: 10) {
+                        Text("Couldn't load sessions")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.secondary)
+                        Button("Try Again") {
+                            Task { await vm.loadSessions() }
+                        }
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.geckoPrimary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 120)
+                } else if vm.sessions.isEmpty {
                     EmptyStateView(
-                        
+
                         title: "No sessions shared yet",
                         subtitle: ""
                     )
@@ -93,7 +106,7 @@ struct FriendProfileView: View {
                 }
                 .buttonStyle(.plain)
 
-                statPill(value: user.highestGrade.isEmpty ? "—" : user.highestGrade, label: "Top Grade")
+                statPill(value: user.highestGrade.isEmpty ? "—" : GradeDisplaySettings.shared.label(for: user.highestGradeNumeric), label: "Top Grade")
             }
 
             Button {
@@ -107,12 +120,13 @@ struct FriendProfileView: View {
                     .background(
                         vm.isFollowing ? AnyShapeStyle(Color.geckoInputBackground) : AnyShapeStyle(Color.geckoPrimary)
                     )
-                    .foregroundStyle(vm.isFollowing ? Color.primary : Color.white)
+                    .foregroundStyle(vm.isFollowing ? Color.primary : Color.geckoOnPrimary)
                     .overlay(
                         Capsule().stroke(Color.geckoDivider, lineWidth: vm.isFollowing ? 1 : 0)
                     )
                     .clipShape(Capsule())
             }
+            .accessibilityLabel(vm.isFollowing ? "Unfollow \(user.displayName)" : "Follow \(user.displayName)")
         }
         .padding(.top, 20)
         .padding(.horizontal, 16)

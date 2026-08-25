@@ -9,13 +9,10 @@ enum FeedConfig {
     /// Posts authored by these accounts will never appear in Discover and will
     /// be filtered from Following on top of the standard follow graph (defense
     /// in depth — even if a user manually follows a demo account, the demo's
-    /// content stays out of the feed).
-    ///
-    /// TODO: Fill in the Firebase Auth UID for `demo@trygecko.app` before launch.
-    /// Find it by signing in as the demo account and printing
-    /// `Auth.auth().currentUser?.uid`, or pull it from the Firebase console.
+    /// content stays out of the feed). Currently the `demo@trygecko.app`
+    /// App Review account.
     static let demoUserIds: Set<String> = [
-        // "<demo-uid-here>"
+        "9lo0nSmjSoQz5Mt739CKceZmJxM2"
     ]
 
     // MARK: - Discover query
@@ -49,4 +46,29 @@ enum FeedConfig {
     /// Number of most-frequented gyms to treat as the viewer's "home gyms"
     /// when no manual override is set.
     static let homeGymTopN: Int = 3
+
+    // MARK: - Suggestion scoring (SuggestionEngine)
+
+    /// Points per mutual follow ("followed by people you follow") — the
+    /// strongest signal. Capped so one hyper-connected friend circle can't
+    /// drown out every other signal.
+    static let suggestionMutualWeight: Double = 10
+    static let suggestionMutualCap: Int = 3
+
+    /// Candidate already follows the viewer but isn't followed back.
+    static let suggestionFollowsYouWeight: Double = 8
+
+    /// Candidate climbs at (posted from, or home-gym matches) one of the
+    /// viewer's home gyms.
+    static let suggestionGymWeight: Double = 5
+
+    /// Candidate's top grade within ±`gradeProximityWindow` of the viewer's.
+    static let suggestionGradePeerWeight: Double = 3
+
+    /// Candidate pool size requested from `suggestedClimbers` before scoring.
+    static let suggestionCandidatePoolLimit: Int = 30
+
+    /// Max followed users whose own following lists are fetched for the
+    /// friends-of-friends signal — bounds Firestore reads per load.
+    static let suggestionFriendFanOutLimit: Int = 15
 }

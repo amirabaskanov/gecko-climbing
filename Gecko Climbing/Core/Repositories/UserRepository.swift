@@ -10,15 +10,23 @@ protocol UserRepositoryProtocol: AnyObject {
     func isFollowing(targetUID: String) async throws -> Bool
     func fetchFollowers(uid: String) async throws -> [UserModel]
     func fetchFollowing(uid: String) async throws -> [UserModel]
+    /// The complete set of user IDs the given user follows. Unlike
+    /// `fetchFollowing(uid:)` (display list, capped at 50), this pages the
+    /// whole subcollection and is the source of truth for isFollowing checks
+    /// in search results and suggestion carousels.
+    func fetchFollowingIds(uid: String) async throws -> Set<String>
     func searchUsers(query: String) async throws -> [UserModel]
     /// Real climbers to suggest as potential follows. Excludes the current user,
     /// demo accounts, and (when possible) users already followed.
     /// Used to populate the "Climbers you might know" carousel injected into
     /// empty Following feeds and into Discover.
     func suggestedClimbers(excluding excludedUIDs: Set<String>, limit: Int) async throws -> [UserModel]
-    func reconcileFollowCounts(uid: String) async throws
     func fetchNotificationPrefs(for userId: String) async throws -> NotificationPrefs
     func updateNotificationPrefs(_ prefs: NotificationPrefs, for userId: String) async throws
+    /// The viewer's grade-system display preference, stored under
+    /// `users/{uid}.displayPrefs.gradeSystem`. Nil when the user never set one.
+    func fetchGradeSystem(for userId: String) async throws -> GradeSystem?
+    func updateGradeSystem(_ system: GradeSystem, for userId: String) async throws
     func registerFCMToken(_ token: String, for userId: String) async throws
     func updateTimeZone(_ identifier: String, for userId: String) async throws
 
@@ -125,13 +133,21 @@ final class MockUserRepository: UserRepositoryProtocol, @unchecked Sendable {
         return users.filter { followingSet.contains($0.uid) }
     }
 
+    func fetchFollowingIds(uid: String) async throws -> Set<String> {
+        return followingSet
+    }
+
     func searchUsers(query: String) async throws -> [UserModel] {
         try await Task.sleep(nanoseconds: 300_000_000)
-        guard !query.isEmpty else { return [] }
+        // Same trimming + demo filtering as the Firestore implementation so
+        // tests and previews don't lie about search behavior.
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return [] }
         return users.filter {
-            $0.displayName.localizedCaseInsensitiveContains(query) ||
-            $0.username.localizedCaseInsensitiveContains(query)
-        }.filter { $0.uid != currentUserId }
+            $0.displayName.localizedCaseInsensitiveContains(trimmed) ||
+            $0.username.localizedCaseInsensitiveContains(trimmed)
+        }
+        .filter { $0.uid != currentUserId && !FeedConfig.demoUserIds.contains($0.uid) }
     }
 
     func suggestedClimbers(excluding excludedUIDs: Set<String>, limit: Int) async throws -> [UserModel] {
@@ -145,10 +161,6 @@ final class MockUserRepository: UserRepositoryProtocol, @unchecked Sendable {
             .map { $0 }
     }
 
-    func reconcileFollowCounts(uid: String) async throws {
-        // No-op for mock
-    }
-
     private var notificationPrefsStore: [String: NotificationPrefs] = [:]
 
     func fetchNotificationPrefs(for userId: String) async throws -> NotificationPrefs {
@@ -159,6 +171,17 @@ final class MockUserRepository: UserRepositoryProtocol, @unchecked Sendable {
     func updateNotificationPrefs(_ prefs: NotificationPrefs, for userId: String) async throws {
         try await Task.sleep(nanoseconds: 100_000_000)
         notificationPrefsStore[userId] = prefs
+    }
+
+    private var gradeSystemStore: [String: GradeSystem] = [:]
+
+    func fetchGradeSystem(for userId: String) async throws -> GradeSystem? {
+        return gradeSystemStore[userId]
+    }
+
+    func updateGradeSystem(_ system: GradeSystem, for userId: String) async throws {
+        try await Task.sleep(nanoseconds: 100_000_000)
+        gradeSystemStore[userId] = system
     }
 
     func registerFCMToken(_ token: String, for userId: String) async throws {}

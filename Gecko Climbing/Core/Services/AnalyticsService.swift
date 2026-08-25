@@ -20,6 +20,12 @@ enum AnalyticsEvent: String {
     case userBlocked = "user_blocked"
     case userUnblocked = "user_unblocked"
     case accountDeleted = "account_deleted"
+    case onboardingStarted = "onboarding_started"
+    case onboardingPageViewed = "onboarding_page_viewed"
+    case onboardingCompleted = "onboarding_completed"
+    case onboardingSkipped = "onboarding_skipped"
+    case onboardingReplayed = "onboarding_replayed"
+    case onboardingLessonCompleted = "onboarding_lesson_completed"
 }
 
 enum AnalyticsService {

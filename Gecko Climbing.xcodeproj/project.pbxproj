@@ -11,20 +11,28 @@
 		155CF285E35379EEA3714D11 /* CommentsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DC52164E07007813F0BE721 /* CommentsViewModel.swift */; };
 		1A7483333D4E1395285CF84B /* FeedbackRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFCFD2EAD0DFCA6B5F175FE /* FeedbackRepository.swift */; };
 		293972122F6DD7250094ED7B /* PostHog in Frameworks */ = {isa = PBXBuildFile; productRef = 293972112F6DD7250094ED7B /* PostHog */; };
+		34A10F533AEEE585B152AB2A /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E780868851652FD92A4C115 /* OnboardingView.swift */; };
 		39656D43252B8C229F59E85F /* WeekInReviewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65A4DD6F9FD0BA0361398AAB /* WeekInReviewViewModel.swift */; };
 		3E8D04A82F6C4B6B8F700101 /* FeedConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E8D04A92F6C4B6B8F700101 /* FeedConfig.swift */; };
+		3F4EA5AB867A77C8C24E61AE /* AppTips.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38E9F82FE70A3BB985D35CF6 /* AppTips.swift */; };
+		44778BF817CA0EB03E35934E /* SuggestionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26966905F3359C3E15A9E9B2 /* SuggestionEngine.swift */; };
+		4BBA5DE813AC9BAA7ABDF014 /* SessionStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1208F383CAE0318534762B /* SessionStripView.swift */; };
 		55804C2FCF62956FC9CD0313 /* Animation+Gecko.swift in Sources */ = {isa = PBXBuildFile; fileRef = 210A18FB1D170D1A318A5D9D /* Animation+Gecko.swift */; };
 		5F742BB5AECF9030F1A5B2D2 /* AnimatedCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF087C0C87D75CC545532A78 /* AnimatedCounter.swift */; };
 		6164F35BD5F28F338841FB15 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7952659A9D0EC939FB359ED /* AnalyticsService.swift */; };
 		6E91A078FE51C92FCB413D42 /* SessionShareCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64954CF733DCF19AFCB1CCF2 /* SessionShareCard.swift */; };
 		6FBDBD0D53D63B6DE4E55E1C /* FirestoreFeedbackRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD1EBB65F03EABE1DEA6EDC /* FirestoreFeedbackRepository.swift */; };
 		777D9EBD784B52DAFAE51C2A /* SkeletonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34D56FBC16636B26129FD496 /* SkeletonView.swift */; };
+		7A1B2C3D4E5F6A7B8C9D0E1F /* WeekInReviewShareCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1E2D3C4B5A6F7E8D9C0B1A /* WeekInReviewShareCard.swift */; };
+		7C5B8CA9D9127934F3502BAF /* GeckoHoldShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002401FD3FB0914E3ACCED5B /* GeckoHoldShape.swift */; };
+		8B2C3D4E5F6A7B8C9D0E1F2A /* StatsShareCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F7A8B9C0D1E2F /* StatsShareCard.swift */; };
 		A1000001 /* GeckoClimbingApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001 /* GeckoClimbingApp.swift */; };
 		A1000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000002 /* ContentView.swift */; };
 		A1000003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000003 /* Assets.xcassets */; };
 		A1000004 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A2000005 /* GoogleService-Info.plist */; };
 		A1000010 /* GeckoClimbingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000010 /* GeckoClimbingTests.swift */; };
 		A1000020 /* GeckoClimbingUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000020 /* GeckoClimbingUITests.swift */; };
+		A5AE196EC6344A66E158966D /* GradeDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16153BEEDA8B4C90C056B2A3 /* GradeDisplay.swift */; };
 		AA000201 /* TabRoutes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000101 /* TabRoutes.swift */; };
 		AA000202 /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000102 /* AppRouter.swift */; };
 		AA000203 /* SessionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000103 /* SessionModel.swift */; };
@@ -117,11 +125,8 @@
 		DA2F207D235787713C0B17B4 /* CommentModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA9370EA6F1FE7C0E87273E7 /* CommentModel.swift */; };
 		DD00F101 /* GeckoLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD00F001 /* GeckoLogoView.swift */; };
 		F28FF15DB60F2E83E59F5DA6 /* WeekInReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14054D5E8ADD54268E971351 /* WeekInReviewView.swift */; };
-		7A1B2C3D4E5F6A7B8C9D0E1F /* WeekInReviewShareCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1E2D3C4B5A6F7E8D9C0B1A /* WeekInReviewShareCard.swift */; };
-		8B2C3D4E5F6A7B8C9D0E1F2A /* StatsShareCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F7A8B9C0D1E2F /* StatsShareCard.swift */; };
 		FCDC53FADBE63D6F59D1BE5A /* SessionInsight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F7C51D1DCBA17F7391C88F8 /* SessionInsight.swift */; };
 		FD71D963B30139FE3E88631F /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEC94383047E32B70E58063C /* FeedbackView.swift */; };
-		FFD3740A94B2E9425D9A5317 /* CommentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7780164948E9E512E7A7F80F /* CommentsView.swift */; };
 		FE000202 /* FeedRail.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE000102 /* FeedRail.swift */; };
 		FE000203 /* FeedBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE000103 /* FeedBadge.swift */; };
 		FE000204 /* FeedRanker.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE000104 /* FeedRanker.swift */; };
@@ -129,6 +134,7 @@
 		FE000206 /* FeedViewerContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE000106 /* FeedViewerContext.swift */; };
 		FE000207 /* FeedRailSwitcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE000107 /* FeedRailSwitcher.swift */; };
 		FE000208 /* SuggestedClimbersCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE000108 /* SuggestedClimbersCarousel.swift */; };
+		FFD3740A94B2E9425D9A5317 /* CommentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7780164948E9E512E7A7F80F /* CommentsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -149,14 +155,20 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		002401FD3FB0914E3ACCED5B /* GeckoHoldShape.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GeckoHoldShape.swift; sourceTree = "<group>"; };
 		0DC52164E07007813F0BE721 /* CommentsViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CommentsViewModel.swift; sourceTree = "<group>"; };
-		14054D5E8ADD54268E971351 /* WeekInReviewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeekInReviewView.swift; sourceTree = "<group>"; };
 		0F1E2D3C4B5A6F7E8D9C0B1A /* WeekInReviewShareCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeekInReviewShareCard.swift; sourceTree = "<group>"; };
+		14054D5E8ADD54268E971351 /* WeekInReviewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WeekInReviewView.swift; sourceTree = "<group>"; };
+		16153BEEDA8B4C90C056B2A3 /* GradeDisplay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GradeDisplay.swift; sourceTree = "<group>"; };
 		1A2B3C4D5E6F7A8B9C0D1E2F /* StatsShareCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StatsShareCard.swift; sourceTree = "<group>"; };
 		210A18FB1D170D1A318A5D9D /* Animation+Gecko.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Animation+Gecko.swift"; sourceTree = "<group>"; };
+		26966905F3359C3E15A9E9B2 /* SuggestionEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SuggestionEngine.swift; sourceTree = "<group>"; };
 		2BD1EBB65F03EABE1DEA6EDC /* FirestoreFeedbackRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FirestoreFeedbackRepository.swift; sourceTree = "<group>"; };
-		3E8D04A92F6C4B6B8F700101 /* FeedConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedConfig.swift; sourceTree = "<group>"; };
 		34D56FBC16636B26129FD496 /* SkeletonView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SkeletonView.swift; sourceTree = "<group>"; };
+		38E9F82FE70A3BB985D35CF6 /* AppTips.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppTips.swift; sourceTree = "<group>"; };
+		3B1208F383CAE0318534762B /* SessionStripView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionStripView.swift; sourceTree = "<group>"; };
+		3E8D04A92F6C4B6B8F700101 /* FeedConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedConfig.swift; sourceTree = "<group>"; };
+		4E780868851652FD92A4C115 /* OnboardingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		5DFCE518CEAAC010499D7267 /* ConfettiView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConfettiView.swift; sourceTree = "<group>"; };
 		5F7C51D1DCBA17F7391C88F8 /* SessionInsight.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionInsight.swift; sourceTree = "<group>"; };
 		64954CF733DCF19AFCB1CCF2 /* SessionShareCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionShareCard.swift; sourceTree = "<group>"; };
@@ -365,6 +377,7 @@
 				CA9370EA6F1FE7C0E87273E7 /* CommentModel.swift */,
 				5F7C51D1DCBA17F7391C88F8 /* SessionInsight.swift */,
 				AA000304 /* NotificationPrefs.swift */,
+				16153BEEDA8B4C90C056B2A3 /* GradeDisplay.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -410,6 +423,8 @@
 				8B01C78180CA4BDBE4B9C796 /* SessionInsightsEngine.swift */,
 				AA000302 /* NotificationService.swift */,
 				AA000303 /* DeepLinkRouter.swift */,
+				38E9F82FE70A3BB985D35CF6 /* AppTips.swift */,
+				26966905F3359C3E15A9E9B2 /* SuggestionEngine.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -435,6 +450,7 @@
 				A3000043 /* Social */,
 				A3000046 /* Stats */,
 				A3000049 /* Profile */,
+				EBBC60862BEF7439B5A88DBC /* Onboarding */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -475,25 +491,6 @@
 				FE000302 /* Services */,
 			);
 			path = Home;
-			sourceTree = "<group>";
-		};
-		FE000301 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				FE000102 /* FeedRail.swift */,
-				FE000103 /* FeedBadge.swift */,
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
-		FE000302 /* Services */ = {
-			isa = PBXGroup;
-			children = (
-				FE000104 /* FeedRanker.swift */,
-				FE000105 /* FeedEnricher.swift */,
-				FE000106 /* FeedViewerContext.swift */,
-			);
-			path = Services;
 			sourceTree = "<group>";
 		};
 		A3000035 /* Views */ = {
@@ -693,6 +690,8 @@
 				DD00F001 /* GeckoLogoView.swift */,
 				34D56FBC16636B26129FD496 /* SkeletonView.swift */,
 				64954CF733DCF19AFCB1CCF2 /* SessionShareCard.swift */,
+				002401FD3FB0914E3ACCED5B /* GeckoHoldShape.swift */,
+				3B1208F383CAE0318534762B /* SessionStripView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -731,6 +730,43 @@
 				A3000091 /* Gecko ClimbingUITests */,
 				A3000000 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		BDADA95CC100FF876DF1E0A8 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				4E780868851652FD92A4C115 /* OnboardingView.swift */,
+			);
+			name = Views;
+			path = Views;
+			sourceTree = "<group>";
+		};
+		EBBC60862BEF7439B5A88DBC /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				BDADA95CC100FF876DF1E0A8 /* Views */,
+			);
+			name = Onboarding;
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		FE000301 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				FE000102 /* FeedRail.swift */,
+				FE000103 /* FeedBadge.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		FE000302 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				FE000104 /* FeedRanker.swift */,
+				FE000105 /* FeedEnricher.swift */,
+				FE000106 /* FeedViewerContext.swift */,
+			);
+			path = Services;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -988,6 +1024,12 @@
 				FE000206 /* FeedViewerContext.swift in Sources */,
 				FE000207 /* FeedRailSwitcher.swift in Sources */,
 				FE000208 /* SuggestedClimbersCarousel.swift in Sources */,
+				34A10F533AEEE585B152AB2A /* OnboardingView.swift in Sources */,
+				3F4EA5AB867A77C8C24E61AE /* AppTips.swift in Sources */,
+				A5AE196EC6344A66E158966D /* GradeDisplay.swift in Sources */,
+				7C5B8CA9D9127934F3502BAF /* GeckoHoldShape.swift in Sources */,
+				44778BF817CA0EB03E35934E /* SuggestionEngine.swift in Sources */,
+				4BBA5DE813AC9BAA7ABDF014 /* SessionStripView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1163,13 +1205,13 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.geckoapp.geckoClimbing;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -1192,13 +1234,13 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.geckoapp.geckoClimbing;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -1210,12 +1252,12 @@
 				CURRENT_PROJECT_VERSION = 15;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.geckoapp.geckoClimbingTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Gecko Climbing.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Gecko Climbing";
 			};
 			name = Debug;
@@ -1228,12 +1270,12 @@
 				CURRENT_PROJECT_VERSION = 15;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.geckoapp.geckoClimbingTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Gecko Climbing.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Gecko Climbing";
 			};
 			name = Release;
@@ -1245,12 +1287,12 @@
 				CURRENT_PROJECT_VERSION = 15;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.geckoapp.geckoClimbingUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_TARGET_NAME = "Gecko Climbing";
 			};
 			name = Debug;
@@ -1262,12 +1304,12 @@
 				CURRENT_PROJECT_VERSION = 15;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.geckoapp.geckoClimbingUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_TARGET_NAME = "Gecko Climbing";
 			};
 			name = Release;

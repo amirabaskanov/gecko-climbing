@@ -2,12 +2,14 @@ import SwiftUI
 
 struct FollowersListView: View {
     @Environment(AppEnvironment.self) private var appEnv
+    @Environment(AuthViewModel.self) private var authViewModel
     let uid: String
     let mode: Mode
 
     enum Mode { case followers, following }
 
     @State private var users: [UserModel] = []
+    @State private var viewerFollowingIds: Set<String> = []
     @State private var isLoading = true
     @State private var error: Error?
 
@@ -18,15 +20,41 @@ struct FollowersListView: View {
         .errorAlert(error: $error)
         .task {
             do {
-                if mode == .followers {
-                    users = try await appEnv.userRepository.fetchFollowers(uid: uid)
-                } else {
-                    users = try await appEnv.userRepository.fetchFollowing(uid: uid)
-                }
+                async let listTask = mode == .followers
+                    ? appEnv.userRepository.fetchFollowers(uid: uid)
+                    : appEnv.userRepository.fetchFollowing(uid: uid)
+                // The VIEWER's follow set, so rows can offer follow-back —
+                // this list may be someone else's followers.
+                async let idsTask = appEnv.userRepository.fetchFollowingIds(uid: authViewModel.currentUserId)
+                users = try await listTask
+                viewerFollowingIds = (try? await idsTask) ?? []
             } catch {
                 self.error = error
             }
             isLoading = false
+        }
+    }
+
+    private func toggleFollow(_ user: UserModel) async {
+        let wasFollowing = viewerFollowingIds.contains(user.uid)
+        if wasFollowing {
+            viewerFollowingIds.remove(user.uid)
+        } else {
+            viewerFollowingIds.insert(user.uid)
+        }
+        do {
+            if wasFollowing {
+                try await appEnv.userRepository.unfollow(targetUID: user.uid)
+            } else {
+                try await appEnv.userRepository.follow(targetUID: user.uid)
+            }
+        } catch {
+            if wasFollowing {
+                viewerFollowingIds.insert(user.uid)
+            } else {
+                viewerFollowingIds.remove(user.uid)
+            }
+            self.error = error
         }
     }
 
@@ -51,12 +79,12 @@ struct FollowersListView: View {
                                     Text("@\(user.username)").font(.caption).foregroundStyle(.secondary)
                                 }
                                 Spacer()
-                                if !user.highestGrade.isEmpty {
+
+                                if user.uid != authViewModel.currentUserId {
+                                    followButton(user)
+                                } else if !user.highestGrade.isEmpty {
                                     GradeBadge(grade: user.highestGrade, isCompleted: true, size: .small)
                                 }
-                                Image(systemName: "chevron.right")
-                                    .font(.caption.weight(.semibold))
-                                    .foregroundStyle(.secondary.opacity(0.5))
                             }
                             .padding(.horizontal, 16)
                             .padding(.vertical, 12)
@@ -70,5 +98,28 @@ struct FollowersListView: View {
                 }
             }
         }
+    }
+
+    private func followButton(_ user: UserModel) -> some View {
+        let following = viewerFollowingIds.contains(user.uid)
+        return Button {
+            Task { await toggleFollow(user) }
+        } label: {
+            Text(following ? "Following" : "Follow")
+                .font(.caption.weight(.semibold))
+                .padding(.horizontal, 14)
+                .padding(.vertical, 7)
+                .background(
+                    following ? AnyShapeStyle(Color.geckoInputBackground) : AnyShapeStyle(Color.geckoPrimary)
+                )
+                .foregroundStyle(following ? Color.primary : Color.geckoOnPrimary)
+                .overlay(
+                    Capsule().stroke(Color.geckoDivider, lineWidth: following ? 1 : 0)
+                )
+                .clipShape(Capsule())
+        }
+        // .borderless keeps this button's hit-testing its own inside the row link.
+        .buttonStyle(.borderless)
+        .accessibilityLabel(following ? "Unfollow \(user.displayName)" : "Follow \(user.displayName)")
     }
 }

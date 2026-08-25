@@ -25,6 +25,8 @@ import SwiftUI
 struct SuggestedClimbersCarousel: View {
     let users: [UserModel]
     var followingIds: Set<String> = []
+    /// Per-uid reason labels from the suggestion engine ("Followed by Phuc").
+    var reasons: [String: String] = [:]
     var onFollow: (UserModel) -> Void = { _ in }
     var onUnfollow: (UserModel) -> Void = { _ in }
     var onTap: (UserModel) -> Void = { _ in }
@@ -33,9 +35,9 @@ struct SuggestedClimbersCarousel: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .firstTextBaseline) {
                 Text("CLIMBERS YOU MIGHT KNOW")
-                    .font(.system(size: 11, weight: .heavy, design: .rounded))
-                    .tracking(0.8)
-                    .foregroundStyle(Color.geckoSecondaryText)
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .tracking(1.4)
+                    .foregroundStyle(Color.geckoPrimary)
                 Spacer()
             }
             .padding(.horizontal, 16)
@@ -45,6 +47,7 @@ struct SuggestedClimbersCarousel: View {
                     ForEach(users, id: \.uid) { user in
                         SuggestedClimberCard(
                             user: user,
+                            reason: reasons[user.uid],
                             isFollowing: followingIds.contains(user.uid),
                             onFollow: { onFollow(user) },
                             onUnfollow: { onUnfollow(user) },
@@ -65,6 +68,7 @@ struct SuggestedClimbersCarousel: View {
 /// card optimistically updates the visual state immediately on tap.
 struct SuggestedClimberCard: View {
     let user: UserModel
+    var reason: String? = nil
     let isFollowing: Bool
     let onFollow: () -> Void
     let onUnfollow: () -> Void
@@ -128,12 +132,21 @@ struct SuggestedClimberCard: View {
                         .lineLimit(1)
                         .truncationMode(.tail)
 
+                    if let reason {
+                        Text(reason)
+                            .font(.system(size: 10, weight: .semibold, design: .rounded))
+                            .foregroundStyle(Color.geckoPrimary)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                            .padding(.top, 1)
+                    }
+
                     HStack(spacing: 6) {
                         if !user.highestGrade.isEmpty {
                             HStack(spacing: 2) {
                                 Image(systemName: "chart.bar.fill")
                                     .font(.system(size: 8, weight: .heavy))
-                                Text(user.highestGrade)
+                                Text(GradeDisplaySettings.shared.label(for: user.highestGradeNumeric))
                                     .font(.system(size: 10, weight: .heavy, design: .rounded))
                             }
                             .foregroundStyle(gradeColor)
@@ -185,7 +198,7 @@ struct SuggestedClimberCard: View {
         } label: {
             Text(localFollowing ? "Following" : "Follow")
                 .font(.system(size: 12, weight: .bold, design: .rounded))
-                .foregroundStyle(localFollowing ? Color.primary : Color.white)
+                .foregroundStyle(localFollowing ? Color.primary : Color.geckoOnPrimary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 7)
                 .background(
@@ -197,7 +210,11 @@ struct SuggestedClimberCard: View {
                         .strokeBorder(Color.geckoDivider, lineWidth: localFollowing ? 1 : 0)
                 )
         }
-        .buttonStyle(.plain)
+        // .borderless keeps this button's hit region its own — nested inside
+        // the whole-card Button, .plain can let the card steal the tap and
+        // navigate instead of following.
+        .buttonStyle(.borderless)
+        .accessibilityLabel(localFollowing ? "Unfollow \(user.displayName)" : "Follow \(user.displayName)")
         .sensoryFeedback(.selection, trigger: localFollowing)
     }
 }
