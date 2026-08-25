@@ -25,6 +25,7 @@ enum AnalyticsEvent: String {
     case onboardingCompleted = "onboarding_completed"
     case onboardingSkipped = "onboarding_skipped"
     case onboardingReplayed = "onboarding_replayed"
+    case onboardingLessonCompleted = "onboarding_lesson_completed"
 }
 
 enum AnalyticsService {
