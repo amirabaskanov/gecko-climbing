@@ -9,7 +9,7 @@ enum AppTab: Int, CaseIterable {
         case .feed:     return "Feed"
         case .sessions: return "Sessions"
         case .log:      return "Log"
-        case .social:   return "Friends"
+        case .social:   return "Crew"
         case .profile:  return "Profile"
         }
     }

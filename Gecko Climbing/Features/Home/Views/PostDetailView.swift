@@ -11,6 +11,11 @@ struct PostDetailView: View {
     @State private var post: PostModel?
     @State private var didFailToLoad = false
     @State private var showComments = false
+    @State private var showAuthor = false
+    /// One view model for both the inline list and the composer sheet, so a
+    /// comment sent from the sheet appears in the thread the moment the
+    /// sheet closes.
+    @State private var commentsVM: CommentsViewModel?
     @State private var error: Error?
 
     /// Preloaded path — the post is already in hand (e.g. tapped from the
@@ -59,85 +64,118 @@ struct PostDetailView: View {
     @ViewBuilder
     private func postContent(_ post: PostModel) -> some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 0) {
                 FeedCardView(
                     post: post,
                     currentUserId: authViewModel.currentUserId,
                     badges: badges,
                     onLike: { Task { await toggleLike(post) } },
                     onComment: { showComments = true },
-                    onUserTap: {},
+                    onUserTap: { showAuthor = true },
                     onReport: { reason in Task { await submitReport(reason, for: post) } },
-                    onBlock: { Task { await blockAuthor(of: post) } }
+                    onBlock: { Task { await blockAuthor(of: post) } },
+                    showsAllClimbs: true
                 )
-                .padding(.horizontal)
 
-                if !post.climbSequence.isEmpty {
-                    climbBreakdown(post)
-                        .padding(.horizontal)
-                }
+                commentsSection(post)
+                    .padding(.top, 20)
             }
-            .padding(.vertical)
+            .padding(.bottom, 24)
         }
-        .sheet(isPresented: $showComments) {
-            CommentsView(viewModel: CommentsViewModel(
+        .navigationDestination(isPresented: $showAuthor) {
+            FriendProfileView(uid: post.userId)
+        }
+        .task {
+            guard commentsVM == nil else { return }
+            let vm = CommentsViewModel(
                 postId: post.postId,
                 postRepository: appEnv.postRepository,
                 userRepository: appEnv.userRepository,
                 userId: authViewModel.currentUserId,
                 userDisplayName: authViewModel.currentUserDisplayName,
                 userProfileImageURL: ""
-            ))
-            .presentationDetents([.medium, .large])
-            .presentationDragIndicator(.hidden)
+            )
+            vm.onCommentCountChanged = { count in
+                self.post?.commentsCount = count
+            }
+            commentsVM = vm
+            await vm.loadComments()
+        }
+        .sheet(isPresented: $showComments) {
+            if let commentsVM {
+                CommentsView(viewModel: commentsVM)
+                    .presentationDetents([.medium, .large])
+                    .presentationDragIndicator(.hidden)
+            }
         }
     }
 
-    // MARK: - Climb breakdown
+    // MARK: - Comments (inline, read-only; the sheet owns composing)
 
-    /// Every climb of the session as chips, always expanded — the detail
-    /// screen is where the full story lives.
-    private func climbBreakdown(_ post: PostModel) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("EVERY CLIMB")
-                .font(.system(size: 11, weight: .bold, design: .rounded))
-                .tracking(1.4)
-                .foregroundStyle(Color.geckoPrimary)
+    @ViewBuilder
+    private func commentsSection(_ post: PostModel) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SocialSectionHeader(
+                title: "Comments",
+                detail: (commentsVM?.totalCount ?? post.commentsCount) > 0 ? "\(commentsVM?.totalCount ?? post.commentsCount)" : nil
+            )
 
-            FlowLayout(spacing: 6, rowSpacing: 6) {
-                ForEach(post.groupedChips()) { group in
-                    ClimbChipView(grade: group.grade, outcome: group.outcome, count: group.count)
+            if let commentsVM {
+                if commentsVM.threads.isEmpty {
+                    if commentsVM.isLoading {
+                        ProgressView()
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                    } else {
+                        Text("No comments yet. Say something about this session.")
+                            .font(.system(size: 14))
+                            .foregroundStyle(Color.geckoSecondaryText)
+                            .padding(.horizontal, 16)
+                    }
+                } else {
+                    VStack(spacing: 0) {
+                        ForEach(commentsVM.threads) { thread in
+                            CommentRowView(comment: thread.root)
+                            ForEach(thread.replies) { reply in
+                                CommentRowView(comment: reply, isReply: true)
+                            }
+                        }
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture { showComments = true }
                 }
             }
 
-            let tally = post.outcomeTally
-            HStack(spacing: 14) {
-                detailStat(value: "\(post.climbSequence.count)", label: "Climbs")
-                detailStat(value: "\(tally.sends)", label: "Sends")
-                detailStat(value: "\(tally.flashes)", label: "Flashes")
-                if let minutes = post.sessionDurationMinutes, minutes > 0 {
-                    detailStat(value: SessionChipsView.formatDuration(minutes), label: "Time")
-                }
-                Spacer(minLength: 0)
-            }
-            .padding(.top, 2)
+            composerPill
+                .padding(.horizontal, 16)
+                .padding(.top, 4)
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .cardStyle()
     }
 
-    private func detailStat(value: String, label: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(value)
-                .font(.system(size: 17, weight: .heavy, design: .rounded))
-                .monospacedDigit()
-                .foregroundStyle(.primary)
-            Text(label.uppercased())
-                .font(.system(size: 9, weight: .bold, design: .rounded))
-                .tracking(0.8)
-                .foregroundStyle(Color.geckoSecondaryText)
+    /// Looks like an input, acts like a button: opens the composer sheet with
+    /// the keyboard up. Keeps the floating tab bar and a real text field from
+    /// fighting over the bottom of the screen.
+    private var composerPill: some View {
+        Button {
+            showComments = true
+        } label: {
+            HStack(spacing: 10) {
+                Text("Add a comment")
+                    .font(.system(size: 15))
+                    .foregroundStyle(Color.geckoSecondaryText)
+                Spacer()
+                Image(systemName: "arrow.up.circle.fill")
+                    .font(.system(size: 24))
+                    .foregroundStyle(Color.geckoPrimary.opacity(0.5))
+            }
+            .padding(.leading, 16)
+            .padding(.trailing, 10)
+            .frame(height: 46)
+            .background(Capsule().fill(Color.geckoInputBackground))
+            .contentShape(Capsule())
         }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Add a comment")
     }
 
     // MARK: - Like

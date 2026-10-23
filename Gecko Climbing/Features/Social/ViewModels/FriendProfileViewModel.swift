@@ -43,6 +43,62 @@ final class FriendProfileViewModel {
         isLoading = false
     }
 
+    // MARK: - Identity (derived from loaded sessions)
+
+    /// Sends and attempts per grade across every loaded session, hardest
+    /// first. Empty until sessions arrive or when the climber has none.
+    var pyramidBars: [ClimberPyramidView.Bar] {
+        var sends: [Int: Int] = [:]
+        var attempts: [Int: Int] = [:]
+        for session in sessions {
+            for climb in session.climbs where climb.gradeNumeric >= 0 {
+                if climb.climbOutcome.isCompleted {
+                    sends[climb.gradeNumeric, default: 0] += 1
+                } else {
+                    attempts[climb.gradeNumeric, default: 0] += 1
+                }
+            }
+        }
+        return Set(sends.keys).union(attempts.keys)
+            .sorted(by: >)
+            .map { ClimberPyramidView.Bar(numeric: $0, sends: sends[$0] ?? 0, attempts: attempts[$0] ?? 0) }
+    }
+
+    /// The gym that shows up most in their sessions, display-cased.
+    var homeGym: String? {
+        var counts: [String: (count: Int, display: String)] = [:]
+        for session in sessions {
+            let display = session.gymName.trimmedGymName
+            let key = display.lowercased()
+            guard !key.isEmpty else { continue }
+            counts[key, default: (0, display)].count += 1
+        }
+        return counts.values.max { $0.count < $1.count }?.display
+    }
+
+    var lastSessionDate: Date? {
+        sessions.map(\.date).max()
+    }
+
+    /// Flashes as a share of completed climbs, as a whole percent. Nil until
+    /// there are enough sends for the number to mean something.
+    var flashRatePercent: Int? {
+        var completed = 0
+        var flashes = 0
+        for session in sessions {
+            for climb in session.climbs where climb.climbOutcome.isCompleted {
+                completed += 1
+                if climb.climbOutcome == .flash { flashes += 1 }
+            }
+        }
+        guard completed >= 5 else { return nil }
+        return Int((Double(flashes) / Double(completed) * 100).rounded())
+    }
+
+    var loadedClimbCount: Int {
+        sessions.reduce(0) { $0 + $1.climbs.count }
+    }
+
     func loadSessions() async {
         do {
             sessions = try await sessionRepository.fetchSessions(for: uid)

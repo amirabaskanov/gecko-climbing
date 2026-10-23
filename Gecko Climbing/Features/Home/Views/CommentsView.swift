@@ -110,6 +110,8 @@ struct CommentsView: View {
         .task {
             await viewModel.loadComments()
             withAnimation(.geckoSpring) { appeared = true }
+            // The sheet exists to type, so bring the keyboard up with it.
+            isInputFocused = true
         }
         .errorAlert(error: Binding(
             get: { viewModel.error },
@@ -213,12 +215,12 @@ struct CommentsView: View {
                 set: { viewModel.onTextChanged($0) }
             ), axis: .vertical)
             .textFieldStyle(.plain)
-            .font(.subheadline)
+            .font(.system(size: 15))
             .lineLimit(1...5)
             .focused($isInputFocused)
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 20))
+            .background(Color.geckoInputBackground, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
             .onSubmit {
                 Task { await viewModel.sendComment() }
             }
@@ -266,31 +268,30 @@ struct CommentRowView: View {
         HStack(alignment: .top, spacing: 10) {
             AvatarView(
                 url: comment.userProfileImageURL,
-                size: isReply ? 24 : 32,
+                size: isReply ? 26 : 36,
                 name: comment.userDisplayName
             )
 
             VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(comment.userDisplayName)
-                        .font(.caption.weight(.bold))
-                        .fontDesign(.rounded)
+                        .font(.system(size: 14, weight: .semibold))
+                        .lineLimit(1)
 
                     Text(comment.createdAt.relativeFormatted)
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color.geckoSecondaryText)
                 }
 
                 MentionText(text: comment.text, mentions: comment.mentions)
 
-                // Reply button
                 if let onReply {
                     Button {
                         onReply()
                     } label: {
                         Text("Reply")
-                            .font(.caption2.weight(.semibold))
-                            .foregroundStyle(Color.geckoPrimary)
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .foregroundStyle(Color.geckoSecondaryText)
                     }
                     .buttonStyle(.plain)
                     .padding(.top, 2)
@@ -311,7 +312,7 @@ struct CommentRowView: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(.leading, isReply ? 42 : 16)
+        .padding(.leading, isReply ? 48 : 16)
         .padding(.trailing, 16)
         .padding(.vertical, isReply ? 6 : 10)
         .confirmationDialog("Delete comment?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
@@ -330,11 +331,11 @@ struct MentionText: View {
     var body: some View {
         if mentions.isEmpty {
             Text(text)
-                .font(.subheadline)
+                .font(.system(size: 15))
                 .fixedSize(horizontal: false, vertical: true)
         } else {
             formattedText
-                .font(.subheadline)
+                .font(.system(size: 15))
                 .fixedSize(horizontal: false, vertical: true)
         }
     }

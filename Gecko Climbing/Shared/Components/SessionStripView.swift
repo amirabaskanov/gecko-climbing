@@ -33,8 +33,14 @@ struct SessionChipsView: View {
     let climbs: [PostClimb]
     let groups: [PostClimbGroup]
     var durationMinutes: Int?
+    /// The feed card renders its own headline numbers above the chips, so
+    /// it turns the inline stat line off.
+    var showsStats: Bool = true
+    /// Post detail is where the full story lives, so it starts expanded.
+    var startsExpanded: Bool = false
 
     @State private var expanded = false
+    @State private var didApplyInitialState = false
 
     /// Collapsed cap. Seven grouped chips is at most two rows in a feed card.
     private let maxGroups = 7
@@ -62,11 +68,18 @@ struct SessionChipsView: View {
                     .buttonStyle(.borderless)
                 }
             }
-            statLine
+            if showsStats {
+                statLine
+            }
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilitySummary)
         .accessibilityAction(named: "Show all climbs") { expanded = true }
+        .onAppear {
+            guard !didApplyInitialState else { return }
+            didApplyInitialState = true
+            expanded = startsExpanded
+        }
     }
 
     private var moreChip: some View {

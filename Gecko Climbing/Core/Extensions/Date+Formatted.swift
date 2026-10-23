@@ -38,3 +38,29 @@ extension Int {
         return "\(minutes)m"
     }
 }
+
+// MARK: - Crew recency
+
+extension Date {
+    /// Ultra-short recency for presence strips: "Today", "1d", "6d". Past a
+    /// week the strip doesn't show the climber at all, so there's no longer
+    /// form.
+    var crewRecency: String {
+        let days = Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: self), to: Calendar.current.startOfDay(for: Date())).day ?? 0
+        if days <= 0 { return "Today" }
+        return "\(days)d"
+    }
+
+    /// Sentence-friendly recency for crew rows: "today", "yesterday",
+    /// "3 days ago", "2 weeks ago".
+    var crewRecencySentence: String {
+        let days = Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: self), to: Calendar.current.startOfDay(for: Date())).day ?? 0
+        switch days {
+        case ..<1: return "today"
+        case 1: return "yesterday"
+        case 2...13: return "\(days) days ago"
+        case 14...59: return "\(days / 7) weeks ago"
+        default: return "\(days / 30) months ago"
+        }
+    }
+}

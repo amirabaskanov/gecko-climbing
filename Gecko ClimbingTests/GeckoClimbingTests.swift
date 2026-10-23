@@ -1725,3 +1725,83 @@ final class PostClimbSequenceTests: XCTestCase {
         XCTAssertNil(dict["sessionDurationMinutes"])
     }
 }
+
+// MARK: - Crew Activity Tests
+
+@MainActor
+final class CrewActivityTests: XCTestCase {
+
+    private func post(_ id: String, user: String, hoursAgo: Double, grade: Int, gym: String = "Benchmark") -> PostModel {
+        PostModel(
+            postId: id,
+            userId: user,
+            userDisplayName: "Climber \(user)",
+            userProfileImageURL: "",
+            sessionId: "s_\(id)",
+            gymName: gym,
+            type: "session",
+            caption: "",
+            imageURL: nil,
+            imageURLs: [],
+            likesCount: 0,
+            commentsCount: 0,
+            createdAt: Date().addingTimeInterval(-hoursAgo * 3600),
+            isLikedByCurrentUser: false,
+            topGrade: "V\(grade)",
+            topGradeNumeric: grade,
+            totalClimbs: 1,
+            gradeCounts: [:],
+            gradeSequence: [],
+            outcomeSequence: [],
+            visibility: "followers"
+        )
+    }
+
+    func testNewestPostPerAuthorWins() {
+        let posts = [
+            post("a", user: "u1", hoursAgo: 48, grade: 3),
+            post("b", user: "u1", hoursAgo: 2, grade: 6, gym: "Dogpatch"),
+            post("c", user: "u2", hoursAgo: 10, grade: 4)
+        ]
+        let activity = SocialViewModel.activity(from: posts)
+
+        XCTAssertEqual(activity.count, 2)
+        XCTAssertEqual(activity["u1"]?.topGradeNumeric, 6)
+        XCTAssertEqual(activity["u1"]?.gymName, "Dogpatch")
+        XCTAssertEqual(activity["u2"]?.topGradeNumeric, 4)
+    }
+
+    func testRecentWindowIsSevenDays() {
+        let fresh = CrewActivity(lastPostedAt: Date().addingTimeInterval(-6 * 86400), topGradeNumeric: 2, gymName: "")
+        let stale = CrewActivity(lastPostedAt: Date().addingTimeInterval(-8 * 86400), topGradeNumeric: 2, gymName: "")
+
+        XCTAssertTrue(fresh.isRecent())
+        XCTAssertFalse(stale.isRecent())
+    }
+
+    func testActiveThisWeekSortsMostRecentFirst() async {
+        let repo = MockUserRepository(currentUserId: "user1")
+        let vm = SocialViewModel(userRepository: repo, userId: "user1")
+        let alice = UserModel(uid: "alice", displayName: "Alice", username: "alice")
+        let bob = UserModel(uid: "bob", displayName: "Bob", username: "bob")
+        let quiet = UserModel(uid: "quiet", displayName: "Quiet", username: "quiet")
+        vm.following = [alice, bob, quiet]
+        vm.applyActivity(SocialViewModel.activity(from: [
+            post("a", user: "alice", hoursAgo: 30, grade: 3),
+            post("b", user: "bob", hoursAgo: 3, grade: 5),
+            post("q", user: "quiet", hoursAgo: 24 * 20, grade: 1)
+        ]))
+
+        XCTAssertEqual(vm.activeThisWeek.map(\.uid), ["bob", "alice"])
+        XCTAssertEqual(vm.crew.map(\.uid), ["bob", "alice", "quiet"])
+    }
+
+    func testCrewRecencyCopy() {
+        XCTAssertEqual(Date().crewRecency, "Today")
+        XCTAssertEqual(Date().addingTimeInterval(-2 * 86400).crewRecency, "2d")
+        XCTAssertEqual(Date().crewRecencySentence, "today")
+        XCTAssertEqual(Date().addingTimeInterval(-1 * 86400).crewRecencySentence, "yesterday")
+        XCTAssertEqual(Date().addingTimeInterval(-3 * 86400).crewRecencySentence, "3 days ago")
+        XCTAssertEqual(Date().addingTimeInterval(-21 * 86400).crewRecencySentence, "3 weeks ago")
+    }
+}
