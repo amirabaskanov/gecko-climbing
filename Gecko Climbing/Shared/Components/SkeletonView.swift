@@ -104,9 +104,8 @@ struct FeedCardSkeleton: View {
             .padding(.horizontal, 16)
             .padding(.top, 16)
 
-            // Photo block
-            SkeletonRect(height: 340, cornerRadius: 12)
-                .padding(.horizontal, 16)
+            // Photo block, edge to edge like the real card
+            SkeletonRect(height: 400, cornerRadius: 0)
 
             // Session strip + stat line
             VStack(alignment: .leading, spacing: 7) {
@@ -125,7 +124,7 @@ struct FeedCardSkeleton: View {
             .padding(.horizontal, 16)
             .padding(.bottom, 16)
         }
-        .cardStyle()
+        .overlay(alignment: .bottom) { Divider().overlay(Color.geckoDivider) }
     }
 }
 

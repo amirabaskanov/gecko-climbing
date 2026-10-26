@@ -57,12 +57,25 @@ struct AvatarView: View {
     let url: String?
     let size: CGFloat
     let name: String
+    /// Tints the initials fallback with the climber's top-grade hold color so
+    /// photo-less accounts still read as individuals instead of a wall of
+    /// identical green circles. Negative means no grade yet: brand green.
+    var gradeNumeric: Int = -1
+    /// Optional presence ring drawn outside the avatar with a small gap, the
+    /// way social apps mark "something new here". Pass `.clear` to reserve
+    /// the ring's space without drawing it, so mixed rows stay aligned.
+    var ring: Color? = nil
 
-    init(url: String?, size: CGFloat = 40, name: String = "") {
+    init(url: String?, size: CGFloat = 40, name: String = "", gradeNumeric: Int = -1, ring: Color? = nil) {
         self.url = url
         self.size = size
         self.name = name
+        self.gradeNumeric = gradeNumeric
+        self.ring = ring
     }
+
+    private var ringWidth: CGFloat { max(2, (size * 0.045).rounded()) }
+    private var ringGap: CGFloat { max(2, (size * 0.04).rounded()) }
 
     var body: some View {
         Group {
@@ -83,15 +96,24 @@ struct AvatarView: View {
         }
         .frame(width: size, height: size)
         .clipShape(Circle())
+        .padding(ring == nil ? 0 : ringGap + ringWidth)
+        .overlay {
+            if let ring {
+                Circle().strokeBorder(ring, lineWidth: ringWidth)
+            }
+        }
+        .accessibilityHidden(true)
     }
 
     private var initialsView: some View {
-        Circle()
-            .fill(Color.geckoPrimary.opacity(0.15))
+        let fill = gradeNumeric >= 0 ? Color.gradeColor(for: gradeNumeric) : Color.geckoPrimary
+        let ink = gradeNumeric >= 0 ? VGrade.textColor(for: gradeNumeric) : Color.geckoOnPrimary
+        return Circle()
+            .fill(fill)
             .overlay(
                 Text(initials)
-                    .font(.system(size: size * 0.35, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color.geckoPrimaryDark)
+                    .font(.system(size: size * 0.38, weight: .heavy, design: .rounded))
+                    .foregroundStyle(ink)
             )
     }
 

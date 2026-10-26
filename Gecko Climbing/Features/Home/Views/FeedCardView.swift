@@ -17,6 +17,8 @@ struct FeedCardView: View {
     var onReport: ((ReportModel.Reason) -> Void)?
     /// Block the post's author. Nil hides the block action.
     var onBlock: (() -> Void)?
+    /// Post detail shows every climb up front instead of the two-row cap.
+    var showsAllClimbs: Bool = false
 
     @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
     @State private var heartScale: CGFloat = 1.0
@@ -40,26 +42,22 @@ struct FeedCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header
             headerSection
                 .padding(.horizontal, 16)
-                .padding(.top, 16)
-                .padding(.bottom, badges.isEmpty ? 12 : 8)
+                .padding(.top, 14)
+                .padding(.bottom, 12)
 
-            // Contextual signal row — only renders when at least one
-            // badge fires. Sits between the user header and photos so the
-            // signal lands the moment the eye reaches the card.
+            // Contextual signal row, only when at least one badge fires.
             if !badges.isEmpty {
                 FeedBadgeRow(badges: badges)
                     .padding(.horizontal, 16)
                     .padding(.bottom, 12)
             }
 
-            // Photos (swipeable, double-tap to like with heart overlay)
+            // Photos run edge to edge, like every modern feed.
             if !photos.isEmpty {
                 photoSection
                     .overlay {
-                        // Double-tap heart animation
                         Image(systemName: "heart.fill")
                             .font(.system(size: 64))
                             .foregroundStyle(.white)
@@ -71,38 +69,37 @@ struct FeedCardView: View {
                     .padding(.bottom, 12)
             }
 
-            // Caption + sends + footer
-            VStack(alignment: .leading, spacing: 0) {
-                if !post.caption.isEmpty {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(post.caption)
-                            .font(.subheadline)
-                            .lineLimit(captionExpanded ? nil : 3)
+            if !post.caption.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(post.caption)
+                        .font(.system(size: 15))
+                        .lineLimit(captionExpanded ? nil : 3)
 
-                        if post.caption.count > 120 && !captionExpanded {
-                            Button("Show more") {
-                                withAnimation(.geckoSnappy) { captionExpanded = true }
-                            }
-                            .font(.caption.weight(.medium))
-                            .foregroundStyle(Color.geckoPrimary)
+                    if post.caption.count > 120 && !captionExpanded {
+                        Button("more") {
+                            withAnimation(.geckoSnappy) { captionExpanded = true }
                         }
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(Color.geckoSecondaryText)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 12)
                 }
-
-                if !post.climbSequence.isEmpty {
-                    sendsSection
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 12)
-                }
-
-                footerSection
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 16)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 12)
             }
+
+            if !post.climbSequence.isEmpty {
+                sessionSummary
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 14)
+            }
+
+            footerSection
+                .padding(.horizontal, 16)
+                .padding(.bottom, 14)
+
+            Divider().overlay(Color.geckoDivider)
         }
-        .cardStyle()
+        .background(Color.geckoBackground)
         .contentShape(Rectangle())
         .onTapGesture(count: 2) { doubleTapLike() }
         .onTapGesture(count: 1) { onCardTap?() }
@@ -128,26 +125,31 @@ struct FeedCardView: View {
     private var headerSection: some View {
         HStack(spacing: 10) {
             Button(action: onUserTap) {
-                AvatarView(url: post.userProfileImageURL, size: 42, name: post.userDisplayName)
+                AvatarView(
+                    url: post.userProfileImageURL,
+                    size: 44,
+                    name: post.userDisplayName,
+                    gradeNumeric: post.topGradeNumeric
+                )
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel(post.userDisplayName)
 
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 4) {
                     Text(post.userDisplayName)
-                        .font(.subheadline.weight(.semibold))
+                        .font(.system(size: 16, weight: .semibold))
+                        .lineLimit(1)
                     if post.userId == currentUserId {
-                        Text("(you)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        Text("you")
+                            .font(.system(size: 13))
+                            .foregroundStyle(Color.geckoSecondaryText)
                     }
                 }
-                HStack(spacing: 4) {
-                    Text(post.gymName)
-                    Text("·")
-                    Text(post.createdAt.relativeFormatted)
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                Text(headerMeta)
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.geckoSecondaryText)
+                    .lineLimit(1)
             }
 
             Spacer()
@@ -163,7 +165,7 @@ struct FeedCardView: View {
                 let textColor = VGrade.textColor(for: post.topGradeNumeric)
                 VStack(spacing: 2) {
                     Text(GradeDisplaySettings.shared.label(for: post.topGradeNumeric))
-                        .font(.system(size: 20, weight: .black, design: .rounded))
+                        .font(.system(size: 19, weight: .black, design: .rounded))
                         .monospacedDigit()
                         .foregroundStyle(textColor)
                     Text("TOP SEND")
@@ -171,11 +173,18 @@ struct FeedCardView: View {
                         .tracking(1.0)
                         .foregroundStyle(textColor.opacity(0.85))
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
+                .padding(.horizontal, 11)
+                .padding(.vertical, 7)
                 .background(Color.gradeColor(for: post.topGradeNumeric), in: GeckoHoldShape())
+                .accessibilityLabel("Top send \(GradeDisplaySettings.shared.label(for: post.topGradeNumeric))")
             }
         }
+    }
+
+    private var headerMeta: String {
+        let gym = post.gymName.trimmedGymName
+        let when = post.createdAt.relativeFormatted
+        return gym.isEmpty ? when : "\(gym) · \(when)"
     }
 
     // MARK: - Moderation menu (Apple Guideline 1.2)
@@ -240,52 +249,79 @@ struct FeedCardView: View {
     // MARK: - Photos
 
     private var photoSection: some View {
-        // Taller 4:5-leaning frame crops portrait shots far less than the old
-        // 280pt letterbox; a fixed height keeps carousel pages uniform.
+        // Edge to edge, 4:5-leaning. A fixed height keeps carousel pages
+        // uniform; the card's own padding never touches the photo.
         TabView(selection: $currentPhotoIndex) {
             ForEach(Array(photos.enumerated()), id: \.offset) { index, url in
                 AsyncImageView(url: url, contentMode: .fill)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 340)
+                    .frame(height: 400)
                     .clipped()
                     .tag(index)
             }
         }
         .tabViewStyle(.page(indexDisplayMode: photos.count > 1 ? .automatic : .never))
-        .frame(height: 340)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .padding(.horizontal, 16)
+        .frame(height: 400)
+        .clipped()
     }
 
+    // MARK: - Session summary
 
-    // MARK: - Sends Section
-
-    /// Max pills that fit without scrolling (~8 at 42pt each + spacing in a card)
-
-
-    private var sendsSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("CLIMBS THIS SESSION")
-                .font(.system(size: 11, weight: .bold, design: .rounded))
-                .tracking(1.4)
-                .foregroundStyle(Color.geckoPrimary)
-
-            // Grouped chips, capped at two rows; "+N more" expands in place.
-            // The expander button's own hit-testing wins over the whole-card tap.
+    /// The session at a glance: three headline numbers, then the climbs
+    /// themselves as grouped hold chips. No label above it; the chips are
+    /// self-explanatory and the numbers do the talking.
+    private var sessionSummary: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            statsRow
             SessionChipsView(
                 climbs: post.climbSequence,
                 groups: post.groupedChips(),
-                durationMinutes: post.sessionDurationMinutes
+                durationMinutes: post.sessionDurationMinutes,
+                showsStats: false,
+                startsExpanded: showsAllClimbs
             )
         }
     }
 
+    private var statsRow: some View {
+        let tally = post.outcomeTally
+        let count = post.climbSequence.count
+        return HStack(alignment: .firstTextBaseline, spacing: 24) {
+            headlineStat(value: "\(count)", label: count == 1 ? "climb" : "climbs")
+            if tally.flashes > 0 {
+                headlineStat(value: "\(tally.flashes)", label: tally.flashes == 1 ? "flash" : "flashes", icon: "bolt.fill", tint: .geckoFlashGoldDeep)
+            } else if tally.sends > 0 {
+                headlineStat(value: "\(tally.sends)", label: tally.sends == 1 ? "send" : "sends")
+            }
+            if let minutes = post.sessionDurationMinutes, minutes > 0 {
+                headlineStat(value: SessionChipsView.formatDuration(minutes), label: "on the wall")
+            }
+            Spacer(minLength: 0)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private func headlineStat(value: String, label: String, icon: String? = nil, tint: Color = .primary) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+            if let icon {
+                Image(systemName: icon)
+                    .font(.system(size: 11, weight: .black))
+                    .foregroundStyle(tint)
+            }
+            Text(value)
+                .font(.system(size: 18, weight: .heavy, design: .rounded))
+                .monospacedDigit()
+                .foregroundStyle(.primary)
+            Text(label)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(Color.geckoSecondaryText)
+        }
+    }
 
     // MARK: - Footer
 
     private var footerSection: some View {
-        HStack(spacing: 10) {
-            // Like button
+        HStack(spacing: 22) {
             Button {
                 onLike()
                 withAnimation(.geckoSpring) { heartScale = 1.3 }
@@ -293,56 +329,45 @@ struct FeedCardView: View {
                     withAnimation(.geckoSpring) { heartScale = 1.0 }
                 }
             } label: {
-                HStack(spacing: 5) {
+                HStack(spacing: 6) {
                     Image(systemName: post.isLikedByCurrentUser ? "heart.fill" : "heart")
-                        .font(.system(size: 13))
-                        .foregroundStyle(post.isLikedByCurrentUser ? .red : .secondary)
+                        .font(.system(size: 21, weight: .regular))
+                        .foregroundStyle(post.isLikedByCurrentUser ? Color.red : Color.primary)
                         .scaleEffect(heartScale)
-                    Text("\(post.likesCount)")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
+                        .contentTransition(.symbolEffect(.replace))
+                    if post.likesCount > 0 {
+                        Text("\(post.likesCount)")
+                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                            .monospacedDigit()
+                            .foregroundStyle(.primary)
+                    }
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 7)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
-                )
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .sensoryFeedback(.impact(flexibility: .soft, intensity: 0.6), trigger: post.isLikedByCurrentUser)
+            .accessibilityLabel(post.isLikedByCurrentUser ? "Unlike, \(post.likesCount) likes" : "Like, \(post.likesCount) likes")
 
-            // Comment button
             Button {
                 onComment()
             } label: {
-                HStack(spacing: 5) {
-                    Image(systemName: "bubble.left")
-                        .font(.system(size: 13))
-                        .foregroundStyle(.secondary)
-                    Text("\(post.commentsCount)")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
+                HStack(spacing: 6) {
+                    Image(systemName: "bubble.right")
+                        .font(.system(size: 20, weight: .regular))
+                        .foregroundStyle(Color.primary)
+                    if post.commentsCount > 0 {
+                        Text("\(post.commentsCount)")
+                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                            .monospacedDigit()
+                            .foregroundStyle(.primary)
+                    }
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 7)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
-                )
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Comments, \(post.commentsCount)")
 
             Spacer()
-
-            // Climb count
-            HStack(spacing: 4) {
-                Image(systemName: "figure.climbing")
-                    .font(.system(size: 11))
-                Text("\(post.totalClimbs) climbs")
-                    .font(.caption.weight(.medium))
-            }
-            .foregroundStyle(.secondary)
         }
     }
 }
@@ -362,7 +387,6 @@ struct FeedCardView: View {
         onComment: {},
         onUserTap: {}
     )
-    .padding()
     .background(Color.geckoBackground)
     .preferredColorScheme(.light)
 }
@@ -376,7 +400,6 @@ struct FeedCardView: View {
         onComment: {},
         onUserTap: {}
     )
-    .padding()
     .background(Color.geckoBackground)
     .preferredColorScheme(.dark)
 }
@@ -423,11 +446,7 @@ struct FeedBadgeChip: View {
         .padding(.vertical, 5)
         .background(
             Capsule(style: .continuous)
-                .fill(badge.tint.opacity(0.13))
-        )
-        .overlay(
-            Capsule(style: .continuous)
-                .strokeBorder(badge.tint.opacity(0.30), lineWidth: 1)
+                .fill(badge.tint.opacity(0.14))
         )
         .accessibilityElement(children: .combine)
         .accessibilityLabel(badge.label)

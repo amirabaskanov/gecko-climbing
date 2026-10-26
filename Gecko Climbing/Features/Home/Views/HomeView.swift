@@ -127,7 +127,7 @@ struct HomeView: View {
             followingEmptyState(vm)
         } else {
             ScrollView {
-                LazyVStack(spacing: 12) {
+                LazyVStack(spacing: 0) {
                     ForEach(Array(vm.followingPosts.enumerated()), id: \.element.id) { index, post in
                         FeedCardView(
                             post: post,
@@ -140,11 +140,9 @@ struct HomeView: View {
                             onReport: { reason in Task { await vm.reportPost(post, reason: reason) } },
                             onBlock: { Task { await vm.blockUser(uid: post.userId) } }
                         )
-                        .padding(.horizontal, 16)
                         .staggeredAppear(index: index, appeared: appeared)
                     }
                 }
-                .padding(.top, 12)
                 .padding(.bottom, 24)
             }
             .tabBarScrollInset()
@@ -194,9 +192,7 @@ struct HomeView: View {
                     SuggestedClimbersCarousel(
                         users: vm.suggestedClimbers,
                         followingIds: vm.followingIds,
-                        reasons: Dictionary(uniqueKeysWithValues: vm.suggestions.compactMap { s in
-                            vm.suggestionReason(for: s.user.uid).map { (s.user.uid, $0) }
-                        }),
+                        reasons: Dictionary(uniqueKeysWithValues: vm.suggestions.map { ($0.user.uid, $0.reason) }),
                         onFollow: { user in Task { await vm.follow(user) } },
                         onUnfollow: { user in Task { await vm.unfollow(user) } },
                         onTap: { user in router.push(.friendProfile(uid: user.uid)) }
@@ -228,20 +224,20 @@ struct HomeView: View {
             .refreshable { await vm.loadFeed() }
         } else {
             ScrollView {
-                LazyVStack(spacing: 12) {
+                LazyVStack(spacing: 0) {
                     if !vm.suggestedClimbers.isEmpty {
                         SuggestedClimbersCarousel(
                             users: vm.suggestedClimbers,
                             followingIds: vm.followingIds,
-                            reasons: Dictionary(uniqueKeysWithValues: vm.suggestions.compactMap { s in
-                                vm.suggestionReason(for: s.user.uid).map { (s.user.uid, $0) }
-                            }),
+                            reasons: Dictionary(uniqueKeysWithValues: vm.suggestions.map { ($0.user.uid, $0.reason) }),
                             onFollow: { user in Task { await vm.follow(user) } },
                             onUnfollow: { user in Task { await vm.unfollow(user) } },
                             onTap: { user in router.push(.friendProfile(uid: user.uid)) }
                         )
-                        .padding(.top, 12)
-                        .padding(.bottom, 4)
+                        .padding(.top, 16)
+                        .padding(.bottom, 20)
+
+                        Divider().overlay(Color.geckoDivider)
                     }
 
                     ForEach(Array(vm.discoverPosts.enumerated()), id: \.element.id) { index, post in
@@ -256,11 +252,9 @@ struct HomeView: View {
                             onReport: { reason in Task { await vm.reportPost(post, reason: reason) } },
                             onBlock: { Task { await vm.blockUser(uid: post.userId) } }
                         )
-                        .padding(.horizontal, 16)
                         .staggeredAppear(index: index, appeared: appeared)
                     }
                 }
-                .padding(.top, 4)
                 .padding(.bottom, 24)
             }
             .tabBarScrollInset()
@@ -276,13 +270,11 @@ struct HomeView: View {
 
     private var loadingState: some View {
         ScrollView {
-            LazyVStack(spacing: 12) {
+            LazyVStack(spacing: 0) {
                 ForEach(0..<3, id: \.self) { _ in
                     FeedCardSkeleton()
-                        .padding(.horizontal, 16)
                 }
             }
-            .padding(.vertical, 12)
         }
         .background(Color.geckoBackground)
     }

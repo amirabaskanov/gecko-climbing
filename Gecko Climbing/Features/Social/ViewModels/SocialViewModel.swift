@@ -1,6 +1,22 @@
 import Foundation
 import Observation
 
+/// What a followed climber did most recently, derived from the posts
+/// already in the viewer's feed (no extra reads, no new server fields).
+/// Drives the presence ring and the "climbed 2 days ago" row copy.
+struct CrewActivity: Equatable {
+    let lastPostedAt: Date
+    let topGradeNumeric: Int
+    let gymName: String
+
+    /// Presence window: a climber who posted in the last 7 days gets a ring.
+    static let recentWindow: TimeInterval = 7 * 24 * 60 * 60
+
+    func isRecent(now: Date = Date()) -> Bool {
+        now.timeIntervalSince(lastPostedAt) <= Self.recentWindow
+    }
+}
+
 @Observable @MainActor
 final class SocialViewModel {
     var searchQuery = ""
@@ -19,18 +35,72 @@ final class SocialViewModel {
     /// blocked account can't resurface via search. Refreshed with the current
     /// user fetch in `loadFollowing()`.
     private(set) var blockedIds: Set<String> = []
+    /// Latest post per followed climber, keyed by uid. Empty when no post
+    /// repository was injected (unit tests) or the feed fetch failed.
+    private(set) var activity: [String: CrewActivity] = [:]
     var error: Error?
 
     private let userRepository: any UserRepositoryProtocol
+    private let postRepository: (any PostRepositoryProtocol)?
     private let userId: String
     private var searchTask: Task<Void, Never>?
     /// Current user's profile, cached for the suggestion loader (grade +
     /// home-gym override). Nil until `loadFollowing()` succeeds fetching it.
     private var viewerUser: UserModel?
 
-    init(userRepository: any UserRepositoryProtocol, userId: String) {
+    init(userRepository: any UserRepositoryProtocol, postRepository: (any PostRepositoryProtocol)? = nil, userId: String) {
         self.userRepository = userRepository
+        self.postRepository = postRepository
         self.userId = userId
+    }
+
+    // MARK: - Derived crew views
+
+    /// Followed climbers who posted a session in the last week, most recent
+    /// first. Feeds the presence strip at the top of the Crew tab.
+    var activeThisWeek: [UserModel] {
+        following
+            .compactMap { user -> (UserModel, Date)? in
+                guard let act = activity[user.uid], act.isRecent() else { return nil }
+                return (user, act.lastPostedAt)
+            }
+            .sorted { $0.1 > $1.1 }
+            .map(\.0)
+    }
+
+    /// The full crew list, most recently active first, then alphabetical so
+    /// quiet accounts still have a stable order.
+    var crew: [UserModel] {
+        following.sorted { a, b in
+            let da = activity[a.uid]?.lastPostedAt
+            let db = activity[b.uid]?.lastPostedAt
+            switch (da, db) {
+            case let (x?, y?) where x != y: return x > y
+            case (_?, nil): return true
+            case (nil, _?): return false
+            default: return a.displayName.localizedCaseInsensitiveCompare(b.displayName) == .orderedAscending
+            }
+        }
+    }
+
+    /// Replaces the activity map directly. Lets tests (and callers that
+    /// already hold the feed) skip the post-repository round trip.
+    func applyActivity(_ activity: [String: CrewActivity]) {
+        self.activity = activity
+    }
+
+    /// Pure reducer: newest post per author wins.
+    static func activity(from posts: [PostModel]) -> [String: CrewActivity] {
+        var result: [String: CrewActivity] = [:]
+        for post in posts {
+            if let existing = result[post.userId], existing.lastPostedAt >= post.createdAt { continue }
+            result[post.userId] = CrewActivity(
+                lastPostedAt: post.createdAt,
+                topGradeNumeric: post.topGradeNumeric,
+                gymName: post.gymName
+            )
+        }
+        return result
     }
 
     func loadFollowing() async {
@@ -46,10 +116,20 @@ final class SocialViewModel {
             followingIds = ids
             viewerUser = viewer
             blockedIds = Set(viewer?.blockedUserIds ?? [])
+            async let activityTask = loadActivity()
             await loadSuggestions()
+            await activityTask
         } catch {
             self.error = error
         }
+    }
+
+    /// Best-effort: the following feed is already what Home shows, so a
+    /// failure here only hides presence rings until the next refresh.
+    func loadActivity() async {
+        guard let postRepository else { return }
+        let posts = (try? await postRepository.fetchFeed(for: userId)) ?? []
+        activity = Self.activity(from: posts)
     }
 
     /// Rebuilds the discovery suggestions from the current follow graph. No
